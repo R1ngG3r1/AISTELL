@@ -4,6 +4,10 @@ Project web berbasis **Modular Monolith** yang menggabungkan kepraktisan **Larav
 
 ---
 
+# AISTEL
+
+Landing Page - Development
+
 ## 🏗️ Stack Teknologi
 
 - **Backend Framework**: PHP 8.2+ / Laravel 11
