@@ -1,16 +1,33 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
+import FlashMessage from '@/Components/FlashMessage';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { PageProps } from '@/types';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
+// Menu navigasi per role (PRD 6.2 User Area & 6.3 Admin Area).
+// `active` memakai pola nama route, mis. 'orders.*' aktif di semua halaman pesanan.
+const userMenu = [
+    { label: 'Dashboard', route: 'dashboard', active: 'dashboard' },
+    { label: 'Pesan Layanan', route: 'services.index', active: 'services.*' },
+    { label: 'Pesanan Saya', route: 'orders.index', active: 'orders.*' },
+];
+
+const adminMenu = [
+    { label: 'Dashboard', route: 'admin.dashboard', active: 'admin.dashboard' },
+    { label: 'Kelola Pesanan', route: 'admin.orders.index', active: 'admin.orders.*' },
+    { label: 'Kelola Layanan', route: 'admin.services.index', active: 'admin.services.*' },
+    { label: 'Pengguna', route: 'users.index', active: 'users.*' },
+];
+
 export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
     const user = usePage<PageProps>().props.auth.user;
+    const menu = user.role === 'admin' ? adminMenu : userMenu;
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -28,18 +45,15 @@ export default function Authenticated({
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
-                                <NavLink
-                                    href={route('users.index')}
-                                    active={route().current('users.index')}
-                                >
-                                    User Module
-                                </NavLink>
+                                {menu.map((item) => (
+                                    <NavLink
+                                        key={item.route}
+                                        href={route(item.route)}
+                                        active={route().current(item.active)}
+                                    >
+                                        {item.label}
+                                    </NavLink>
+                                ))}
                             </div>
                         </div>
 
@@ -138,12 +152,15 @@ export default function Authenticated({
                     }
                 >
                     <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
+                        {menu.map((item) => (
+                            <ResponsiveNavLink
+                                key={item.route}
+                                href={route(item.route)}
+                                active={route().current(item.active)}
+                            >
+                                {item.label}
+                            </ResponsiveNavLink>
+                        ))}
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
@@ -180,7 +197,12 @@ export default function Authenticated({
                 </header>
             )}
 
-            <main>{children}</main>
+            <main>
+                <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+                    <FlashMessage />
+                </div>
+                {children}
+            </main>
         </div>
     );
 }

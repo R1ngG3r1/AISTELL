@@ -33,7 +33,11 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Arahkan ke dashboard sesuai role. intended() = kalau sebelumnya user
+        // mencoba membuka halaman tertentu lalu disuruh login, kembalikan ke sana.
+        $home = $request->user()->isAdmin() ? 'admin.dashboard' : 'dashboard';
+
+        return redirect()->intended(route($home, absolute: false));
     }
 
     /**

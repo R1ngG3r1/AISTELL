@@ -3,6 +3,7 @@
 use App\Modules\User\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->group(function () {
+// Daftar semua akun berisi email orang lain → khusus admin.
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
 });

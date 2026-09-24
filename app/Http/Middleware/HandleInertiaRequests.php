@@ -29,10 +29,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        // Data di sini otomatis dikirim ke SEMUA halaman React (usePage().props).
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                // Kirim kolom yang dibutuhkan FE saja. `role` dipakai FE untuk
+                // menampilkan menu User/Admin; password tidak pernah dikirim.
+                'user' => $request->user()?->only([
+                    'id', 'name', 'email', 'phone', 'role', 'email_verified_at',
+                ]),
+            ],
+            // Pesan singkat setelah aksi, contoh: redirect()->with('success', 'Pesanan dibuat').
+            // Pakai fn() supaya hanya dibaca ketika halaman benar-benar dirender.
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
             ],
         ];
     }
