@@ -1,5 +1,7 @@
 # Backend AISTEL — Panduan & Status
 
+Panduan kelola akun & database: [PANDUAN_DATABASE.md](PANDUAN_DATABASE.md).
+
 Dokumen ini menjelaskan backend AISTEL yang sudah dibangun: arsitekturnya, isi setiap file, cara
 menjalankan, dan cara mengujinya. Acuan kebutuhan: [PRD_AISTEL.md](../PRD_AISTEL.md) bagian 11–17.
 
@@ -17,7 +19,7 @@ menjalankan, dan cara mengujinya. Acuan kebutuhan: [PRD_AISTEL.md](../PRD_AISTEL
 | 7 | Admin: kelola pesanan, aturan status, dashboard | ✅ |
 | 8 | Profil + nomor telepon | ✅ |
 | 9 | Kontrak data untuk FE (tabel di bawah) | ✅ |
-| 10 | Test otomatis: 63 test, semua kriteria PRD 14 | ✅ |
+| 10 | Test otomatis: 70 test, semua kriteria PRD 14 | ✅ |
 | 11 | Deploy ke hosting | ⏳ menunggu hosting dipilih |
 
 ---
