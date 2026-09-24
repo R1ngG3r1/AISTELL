@@ -7,6 +7,7 @@ memperbarui status pesanan.
 - Kebutuhan produk: [PRD_AISTEL.md](PRD_AISTEL.md)
 - Dokumentasi backend (arsitektur, route, kontrak data untuk FE): [docs/BACKEND_ROADMAP.md](docs/BACKEND_ROADMAP.md)
 - Panduan mengelola database & akun: [docs/PANDUAN_DATABASE.md](docs/PANDUAN_DATABASE.md)
+- Design system (warna, font, komponen, animasi): [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)
 
 ---
 

@@ -1,63 +1,85 @@
+import EmptyState from '@/Components/eco/EmptyState';
+import PageHeader from '@/Components/eco/PageHeader';
+import ServiceIcon from '@/Components/eco/ServiceIcon';
 import Pagination from '@/Components/Pagination';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { formatDate, formatTime } from '@/lib/format';
+import { formatDate, formatRupiah, formatTime } from '@/lib/format';
+import { Reveal } from '@/lib/motion';
 import { Order, PageProps, Paginated } from '@/types';
+import { faCalendarDays, faChevronRight, faLocationDot, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head, Link } from '@inertiajs/react';
 
 // Props dari OrderController@index
 export default function OrdersIndex({ orders }: PageProps<{ orders: Paginated<Order> }>) {
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Pesanan Saya</h2>}
+            header={
+                <PageHeader
+                    eyebrow="Pesanan Saya"
+                    title="Riwayat pesanan"
+                    description={`${orders.total} pesanan tercatat. Klik salah satu untuk melihat detail dan statusnya.`}
+                    actions={
+                        <Link href={route('services.index')} className="btn-primary">
+                            <FontAwesomeIcon icon={faPlus} /> Pesan Baru
+                        </Link>
+                    }
+                />
+            }
         >
             <Head title="Pesanan Saya" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
-                        <table className="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
-                                <tr>
-                                    <th className="px-4 py-3">Layanan</th>
-                                    <th className="px-4 py-3">Jadwal</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {orders.data.length === 0 && (
-                                    <tr>
-                                        <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
-                                            Belum ada pesanan.{' '}
-                                            <Link href={route('services.index')} className="text-indigo-600 hover:underline">
-                                                Pesan layanan sekarang
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                )}
-                                {orders.data.map((order) => (
-                                    <tr key={order.id}>
-                                        <td className="px-4 py-3 font-medium text-gray-900">{order.service?.name}</td>
-                                        <td className="px-4 py-3 text-gray-600">
-                                            {formatDate(order.date)}, {formatTime(order.time)}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <StatusBadge order={order} />
-                                        </td>
-                                        <td className="px-4 py-3 text-right">
-                                            <Link href={route('orders.show', order.id)} className="text-indigo-600 hover:underline">
-                                                Detail
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    <Pagination meta={orders} />
+            {orders.data.length === 0 ? (
+                <div className="card">
+                    <EmptyState
+                        title="Belum ada pesanan"
+                        description="Mulai jaga lingkungan Anda dengan memesan layanan pertama."
+                        action={
+                            <Link href={route('services.index')} className="btn-primary">
+                                Lihat layanan
+                            </Link>
+                        }
+                    />
                 </div>
-            </div>
+            ) : (
+                <div className="space-y-3">
+                    {orders.data.map((order, i) => (
+                        <Reveal key={order.id} delay={i * 50}>
+                            <Link
+                                href={route('orders.show', order.id)}
+                                className="group flex flex-col gap-4 rounded-3xl bg-white/85 p-5 shadow-soft ring-1 ring-forest-900/5 transition duration-300 hover:-translate-y-0.5 hover:shadow-lift sm:flex-row sm:items-center"
+                            >
+                                <div className="flex flex-1 items-center gap-4">
+                                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-forest-900 text-leaf-400 transition group-hover:rotate-[-8deg]">
+                                        <ServiceIcon name={order.service?.name ?? ''} />
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-semibold text-forest-900/40">#{order.id}</p>
+                                        <p className="truncate font-bold">{order.service?.name}</p>
+                                        <p className="mt-0.5 flex flex-wrap gap-x-4 text-sm text-forest-900/55">
+                                            <span>
+                                                <FontAwesomeIcon icon={faCalendarDays} className="me-1.5 text-forest-400" />
+                                                {formatDate(order.date)}, {formatTime(order.time)}
+                                            </span>
+                                            <span className="hidden truncate md:inline">
+                                                <FontAwesomeIcon icon={faLocationDot} className="me-1.5 text-forest-400" />
+                                                {order.location}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between gap-4 sm:justify-end">
+                                    {order.service && <span className="text-sm font-semibold">{formatRupiah(order.service.price)}</span>}
+                                    <StatusBadge order={order} />
+                                    <FontAwesomeIcon icon={faChevronRight} className="hidden text-forest-900/25 transition group-hover:translate-x-1 sm:block" />
+                                </div>
+                            </Link>
+                        </Reveal>
+                    ))}
+                </div>
+            )}
+            <Pagination meta={orders} />
         </AuthenticatedLayout>
     );
 }

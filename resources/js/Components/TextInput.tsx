@@ -27,15 +27,5 @@ export default forwardRef(function TextInput(
         }
     }, [isFocused]);
 
-    return (
-        <input
-            {...props}
-            type={type}
-            className={
-                'rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ' +
-                className
-            }
-            ref={localRef}
-        />
-    );
+    return <input {...props} type={type} className={`input ${className}`} ref={localRef} />;
 });

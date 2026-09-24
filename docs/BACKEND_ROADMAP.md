@@ -187,39 +187,34 @@ Setiap `order` berisi `status` (mis. `"diproses"`) dan `status_label` (mis. `"Di
 
 ### Daftar halaman untuk FE
 
-Semua halaman di PRD 6 sudah ada dan tersambung ke backend. Yang ditandai **Placeholder BE**
-dibuat backend dengan tampilan sederhana (Tailwind) agar alur bisa dites. Tim FE bebas
-mendesain ulang sesuai Figma. **Aturannya:** jangan ganti nama/lokasi file, nama props, dan nama
+Semua halaman di PRD 6 sudah ada, tersambung ke backend, dan memakai desain eco-modern
+(lihat [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)). Tim FE/UI-UX bebas menyesuaikan dengan Figma. **Aturannya:** jangan ganti nama/lokasi file, nama props, dan nama
 field form. Yang diubah cukup tampilannya. Jika perlu data tambahan, minta ke BE.
 
 | Area | Halaman (PRD) | File di `resources/js/Pages/` | Status |
 | --- | --- | --- | --- |
-| Publik | Landing Page | `Welcome.tsx` | ✅ FE (Reuben). Lihat catatan ① |
-| Publik | Login | `Auth/Login.tsx` | Bawaan Breeze (Inggris), perlu redesign |
-| Publik | Register | `Auth/Register.tsx` | Bawaan Breeze (Inggris), perlu redesign. Lihat catatan ② |
-| Publik | Lupa / reset password | `Auth/ForgotPassword.tsx`, `Auth/ResetPassword.tsx` | Bawaan Breeze, opsional |
-| Semua | Halaman error 403/404/500/503 | `Error.tsx` | Placeholder BE |
-| User | Dashboard | `Dashboard.tsx` | Placeholder BE |
-| User | Pesan Layanan: pilih layanan | `Services/Index.tsx`, `Services/Show.tsx` | Placeholder BE |
-| User | Pesan Layanan: form | `Orders/Create.tsx` | Placeholder BE |
-| User | Pesanan Saya: daftar & detail | `Orders/Index.tsx`, `Orders/Show.tsx` | Placeholder BE |
-| User & Admin | Profil Saya + ubah password | `Profile/Edit.tsx` + `Profile/Partials/*` | Bawaan Breeze + field telepon, perlu redesign |
-| Admin | Dashboard Admin | `Admin/Dashboard.tsx` | Placeholder BE |
-| Admin | Kelola Pesanan: daftar & detail | `Admin/Orders/Index.tsx`, `Admin/Orders/Show.tsx` | Placeholder BE |
-| Admin | Kelola Layanan (tambah/ubah/hapus) | `Admin/Services/Index.tsx` | Placeholder BE |
-| Admin | Daftar pengguna (tambahan) | `User/Index.tsx` | Contoh bawaan scaffold |
-| Layout | Navbar setelah login (menu per role) | `Layouts/AuthenticatedLayout.tsx` | Breeze + menu role, perlu redesign |
+| Publik | Landing Page | `Welcome.tsx` | ✅ Konten Reuben, desain eco-modern + data layanan asli |
+| Publik | Login | `Auth/Login.tsx` | ✅ Desain eco-modern (Indonesia) |
+| Publik | Register | `Auth/Register.tsx` | ✅ Desain eco-modern, ada input telepon |
+| Publik | Lupa / reset password | `Auth/ForgotPassword.tsx`, `Auth/ResetPassword.tsx` | ✅ Desain eco-modern |
+| Semua | Halaman error 403/404/500/503 | `Error.tsx` | ✅ Desain eco-modern |
+| User | Dashboard | `Dashboard.tsx` | ✅ Desain eco-modern |
+| User | Pesan Layanan: pilih layanan | `Services/Index.tsx`, `Services/Show.tsx` | ✅ Desain eco-modern |
+| User | Pesan Layanan: form | `Orders/Create.tsx` | ✅ Desain eco-modern |
+| User | Pesanan Saya: daftar & detail | `Orders/Index.tsx`, `Orders/Show.tsx` | ✅ Desain eco-modern |
+| User & Admin | Profil Saya + ubah password | `Profile/Edit.tsx` + `Profile/Partials/*` | ✅ Desain eco-modern |
+| Admin | Dashboard Admin | `Admin/Dashboard.tsx` | ✅ Desain eco-modern |
+| Admin | Kelola Pesanan: daftar & detail | `Admin/Orders/Index.tsx`, `Admin/Orders/Show.tsx` | ✅ Desain eco-modern |
+| Admin | Kelola Layanan (tambah/ubah/hapus) | `Admin/Services/Index.tsx` | ✅ Desain eco-modern |
+| Admin | Daftar pengguna (tambahan) | `User/Index.tsx` | ✅ Desain eco-modern |
+| Layout | Navbar setelah login (menu per role) | `Layouts/AuthenticatedLayout.tsx` | ✅ Desain eco-modern |
 
 Komponen pembantu yang bisa dipakai ulang: `Components/StatusBadge.tsx` (warna status pesanan),
 `Components/FlashMessage.tsx` (pesan sukses/error, sudah otomatis tampil di layout),
 `Components/Pagination.tsx`, dan `lib/format.ts` (`formatRupiah`, `formatDate`, `formatTime`).
 
-Catatan untuk FE:
-1. `Welcome.tsx` masih memakai daftar layanan statis (array `services`). Backend sudah mengirim
-   layanan asli dari database sebagai props `services` (`id, name, description, price`).
-   Sebaiknya dipakai supaya layanan yang ditambah admin langsung muncul di landing page.
-   Tombol "Login" juga bisa diganti menjadi "Dashboard" jika `auth.user` terisi.
-2. Register menerima field opsional `phone` (belum ada input-nya di form).
+Catatan untuk FE: landing page (`Welcome.tsx`) sudah memakai props `services` dari database;
+jika database kosong, tampil daftar layanan contoh.
 
 ---
 
