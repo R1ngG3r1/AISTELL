@@ -1,0 +1,219 @@
+import { Leaf } from '@/Components/eco/Illustrations';
+import PageHeader from '@/Components/eco/PageHeader';
+import ServiceIcon from '@/Components/eco/ServiceIcon';
+import InputError from '@/Components/InputError';
+import InputLabel from '@/Components/InputLabel';
+import TextInput from '@/Components/TextInput';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { formatDate, formatRupiah } from '@/lib/format';
+import { Reveal } from '@/lib/motion';
+import { PageProps, Service } from '@/types';
+import { faArrowRight, faCalendarDays, faCheck, faClock, faLocationDot, faUser } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Head, useForm } from '@inertiajs/react';
+import { FormEventHandler, ReactNode } from 'react';
+
+// Props dari OrderController@create
+type Props = PageProps<{ services: Service[]; selectedServiceId: number | null }>;
+
+function Step({ n, title, children, delay = 0 }: { n: number; title: string; children: ReactNode; delay?: number }) {
+    return (
+        <Reveal delay={delay} className="card p-6 md:p-7">
+            <div className="mb-5 flex items-center gap-3">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-forest-900 font-display text-sm font-bold text-leaf-400">{n}</span>
+                <h2 className="text-lg font-bold">{title}</h2>
+            </div>
+            {children}
+        </Reveal>
+    );
+}
+
+export default function OrderCreate({ auth, services, selectedServiceId }: Props) {
+    // useForm Inertia: menyimpan isi form + error validasi dari backend (StoreOrderRequest).
+    // Nama & telepon diisi otomatis dari akun, tapi boleh diubah.
+    const { data, setData, post, processing, errors } = useForm({
+        service_id: selectedServiceId ? String(selectedServiceId) : '',
+        contact_name: auth.user.name,
+        contact_phone: auth.user.phone ?? '',
+        location: '',
+        date: '',
+        time: '',
+        notes: '',
+    });
+
+    const submit: FormEventHandler = (e) => {
+        e.preventDefault();
+        post(route('orders.store')); // → POST /orders
+    };
+
+    // Format YYYY-MM-DD sesuai zona waktu lokal (en-CA kebetulan memakai format itu).
+    const today = new Date().toLocaleDateString('en-CA');
+    const selected = services.find((s) => String(s.id) === data.service_id);
+
+    return (
+        <AuthenticatedLayout
+            header={
+                <PageHeader
+                    eyebrow="Pesan Layanan"
+                    title="Formulir pemesanan"
+                    description="Lengkapi detail di bawah. Admin akan mengonfirmasi pesanan Anda secepatnya."
+                />
+            }
+        >
+            <Head title="Pesan Layanan" />
+
+            <form onSubmit={submit} className="grid items-start gap-6 lg:grid-cols-[1fr_22rem]">
+                <div className="space-y-5">
+                    <Step n={1} title="Pilih layanan">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            {services.map((s) => {
+                                const active = data.service_id === String(s.id);
+                                return (
+                                    <button
+                                        type="button"
+                                        key={s.id}
+                                        onClick={() => setData('service_id', String(s.id))}
+                                        className={`relative flex items-center gap-3 rounded-2xl p-3.5 text-left ring-1 transition duration-300 ${
+                                            active
+                                                ? 'bg-forest-900 text-cream shadow-lift ring-forest-900'
+                                                : 'bg-white ring-forest-900/10 hover:-translate-y-0.5 hover:ring-forest-500/40'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl transition ${
+                                                active ? 'bg-leaf-400 text-forest-900' : 'bg-forest-50 text-forest-600'
+                                            }`}
+                                        >
+                                            <ServiceIcon name={s.name} />
+                                        </span>
+                                        <span className="min-w-0 flex-1">
+                                            <span className="block truncate text-sm font-bold">{s.name}</span>
+                                            <span className={`text-xs ${active ? 'text-cream/60' : 'text-forest-900/50'}`}>
+                                                {formatRupiah(s.price)}
+                                            </span>
+                                        </span>
+                                        {active && (
+                                            <span className="grid h-6 w-6 animate-scale-in place-items-center rounded-full bg-leaf-400 text-[10px] text-forest-900">
+                                                <FontAwesomeIcon icon={faCheck} />
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <InputError message={errors.service_id} className="mt-3" />
+                    </Step>
+
+                    <Step n={2} title="Data pemesan" delay={80}>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <InputLabel htmlFor="contact_name" value="Nama pemesan" />
+                                <TextInput id="contact_name" value={data.contact_name} onChange={(e) => setData('contact_name', e.target.value)} />
+                                <InputError message={errors.contact_name} className="mt-2" />
+                            </div>
+                            <div>
+                                <InputLabel htmlFor="contact_phone" value="Nomor kontak" />
+                                <TextInput
+                                    id="contact_phone"
+                                    type="tel"
+                                    placeholder="08xxxxxxxxxx"
+                                    value={data.contact_phone}
+                                    onChange={(e) => setData('contact_phone', e.target.value)}
+                                />
+                                <InputError message={errors.contact_phone} className="mt-2" />
+                            </div>
+                        </div>
+                    </Step>
+
+                    <Step n={3} title="Lokasi & jadwal" delay={160}>
+                        <div className="space-y-4">
+                            <div>
+                                <InputLabel htmlFor="location" value="Alamat lokasi layanan" />
+                                <textarea
+                                    id="location"
+                                    rows={3}
+                                    placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kota"
+                                    value={data.location}
+                                    onChange={(e) => setData('location', e.target.value)}
+                                    className="input"
+                                />
+                                <InputError message={errors.location} className="mt-2" />
+                            </div>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <InputLabel htmlFor="date" value="Tanggal" />
+                                    <TextInput id="date" type="date" min={today} value={data.date} onChange={(e) => setData('date', e.target.value)} />
+                                    <InputError message={errors.date} className="mt-2" />
+                                </div>
+                                <div>
+                                    <InputLabel htmlFor="time" value="Waktu" />
+                                    <TextInput id="time" type="time" value={data.time} onChange={(e) => setData('time', e.target.value)} />
+                                    <InputError message={errors.time} className="mt-2" />
+                                </div>
+                            </div>
+                        </div>
+                    </Step>
+
+                    <Step n={4} title="Catatan tambahan" delay={240}>
+                        <textarea
+                            id="notes"
+                            rows={3}
+                            placeholder="Opsional, mis. patokan rumah, area yang perlu perhatian khusus…"
+                            value={data.notes}
+                            onChange={(e) => setData('notes', e.target.value)}
+                            className="input"
+                        />
+                        <InputError message={errors.notes} className="mt-2" />
+                    </Step>
+                </div>
+
+                {/* Ringkasan (menempel saat scroll di layar besar) */}
+                <aside className="lg:sticky lg:top-24">
+                    <Reveal variant="right" className="relative overflow-hidden rounded-4xl bg-forest-900 p-6 text-cream shadow-lift">
+                        <Leaf className="absolute -right-10 -top-10 h-40 w-40 rotate-12 text-forest-800" />
+                        <p className="relative text-xs font-bold uppercase tracking-[0.2em] text-leaf-400">Ringkasan</p>
+
+                        {selected ? (
+                            <div key={selected.id} className="relative mt-4 flex animate-fade-up items-center gap-3">
+                                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-leaf-400 text-forest-900">
+                                    <ServiceIcon name={selected.name} />
+                                </span>
+                                <div>
+                                    <p className="font-bold">{selected.name}</p>
+                                    <p className="text-sm text-cream/60">{formatRupiah(selected.price)}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="relative mt-4 text-sm text-cream/60">Belum ada layanan dipilih.</p>
+                        )}
+
+                        <dl className="relative mt-6 space-y-3 border-t border-white/10 pt-5 text-sm">
+                            {[
+                                { icon: faUser, value: data.contact_name || '—' },
+                                { icon: faLocationDot, value: data.location || '—' },
+                                { icon: faCalendarDays, value: data.date ? formatDate(data.date) : '—' },
+                                { icon: faClock, value: data.time || '—' },
+                            ].map((row, i) => (
+                                <div key={i} className="flex gap-3">
+                                    <FontAwesomeIcon icon={row.icon} className="mt-0.5 w-4 text-leaf-400" />
+                                    <dd className="line-clamp-2 text-cream/80">{row.value}</dd>
+                                </div>
+                            ))}
+                        </dl>
+
+                        <div className="relative mt-6 flex items-baseline justify-between border-t border-white/10 pt-5">
+                            <span className="text-sm text-cream/60">Estimasi biaya</span>
+                            <span className="display text-3xl">{selected ? formatRupiah(selected.price) : '—'}</span>
+                        </div>
+
+                        <button type="submit" disabled={processing} className="btn-leaf btn-lg group relative mt-6 w-full">
+                            {processing ? 'Mengirim…' : 'Kirim Pesanan'}
+                            <FontAwesomeIcon icon={faArrowRight} className="transition-transform group-hover:translate-x-1" />
+                        </button>
+                        <p className="relative mt-3 text-center text-xs text-cream/50">Status pesanan bisa dipantau di menu Pesanan Saya.</p>
+                    </Reveal>
+                </aside>
+            </form>
+        </AuthenticatedLayout>
+    );
+}

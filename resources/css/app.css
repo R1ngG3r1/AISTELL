@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+| Design system AISTEL — Eco-modern.
+| Warna & font didefinisikan di tailwind.config.js. File ini hanya berisi
+| kelas komponen yang dipakai berulang (.btn, .card, .input, ...) dan animasi scroll.
+*/
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply bg-cream font-sans text-forest-900 antialiased;
+    }
+
+    ::selection {
+        @apply bg-leaf-300 text-forest-900;
+    }
+
+    :focus-visible {
+        @apply outline-none ring-2 ring-forest-500/50 ring-offset-2 ring-offset-cream;
+    }
+}
+
+@layer components {
+    /* ---------- Tombol ---------- */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-semibold transition duration-200 ease-out focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    }
+    .btn-primary {
+        @apply btn bg-forest-900 text-cream shadow-soft hover:-translate-y-0.5 hover:bg-forest-700 hover:shadow-lift focus-visible:ring-forest-500 active:translate-y-0;
+    }
+    .btn-leaf {
+        @apply btn bg-leaf-400 text-forest-900 shadow-soft hover:-translate-y-0.5 hover:bg-leaf-300 hover:shadow-lift focus-visible:ring-leaf-500;
+    }
+    .btn-ghost {
+        @apply btn border border-forest-900/15 bg-white/70 text-forest-900 backdrop-blur hover:border-forest-900/30 hover:bg-white focus-visible:ring-forest-500;
+    }
+    .btn-danger {
+        @apply btn bg-clay-500 text-white shadow-soft hover:-translate-y-0.5 hover:bg-clay-600 focus-visible:ring-clay-500;
+    }
+    .btn-sm {
+        @apply px-3.5 py-1.5 text-xs;
+    }
+    .btn-lg {
+        @apply px-7 py-3.5 text-base;
+    }
+
+    /* ---------- Kartu & permukaan ---------- */
+    .card {
+        @apply rounded-3xl bg-white/85 shadow-soft ring-1 ring-forest-900/5 backdrop-blur-sm;
+    }
+    .card-hover {
+        @apply transition duration-300 ease-out hover:-translate-y-1 hover:shadow-lift;
+    }
+
+    /* ---------- Form ---------- */
+    .input {
+        @apply block w-full rounded-2xl border-forest-900/10 bg-white px-4 py-3 text-sm text-forest-900 shadow-sm transition placeholder:text-forest-900/35 focus:border-forest-500 focus:ring-4 focus:ring-forest-500/15;
+    }
+    .label {
+        @apply mb-1.5 block text-sm font-semibold text-forest-900/80;
+    }
+
+    /* ---------- Tipografi ---------- */
+    .eyebrow {
+        @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-forest-500;
+    }
+    .display {
+        @apply font-display font-semibold tracking-tight;
+    }
+
+    /* ---------- Tabel ---------- */
+    .table-eco {
+        @apply min-w-full text-sm;
+    }
+    .table-eco thead th {
+        @apply whitespace-nowrap px-5 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-forest-900/50;
+    }
+    .table-eco tbody tr {
+        @apply border-t border-forest-900/5 transition-colors hover:bg-forest-50/60;
+    }
+    .table-eco tbody td {
+        @apply px-5 py-4 align-middle;
+    }
+
+    /* Tekstur "grain" halus agar latar terasa organik */
+    .grain {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+    }
+
+    /* Pola titik-titik dekoratif */
+    .dots {
+        background-image: radial-gradient(currentColor 1px, transparent 1px);
+        background-size: 18px 18px;
+    }
+}
+
+/* ---------- Reveal saat scroll (dipakai komponen <Reveal>) ---------- */
+.reveal {
+    opacity: 0;
+    transition:
+        opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1),
+        transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: opacity, transform;
+}
+.reveal[data-variant='up'] { transform: translateY(32px); }
+.reveal[data-variant='down'] { transform: translateY(-32px); }
+.reveal[data-variant='left'] { transform: translateX(-40px); }
+.reveal[data-variant='right'] { transform: translateX(40px); }
+.reveal[data-variant='scale'] { transform: scale(0.92); }
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Hormati pengguna yang mematikan animasi di sistem operasinya */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    .reveal {
+        opacity: 1;
+        transform: none !important;
+        transition: none;
+    }
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
