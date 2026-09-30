@@ -1,19 +1,26 @@
-import DangerButton from '@/Components/DangerButton';
+import ConfirmModal from '@/Components/eco/ConfirmModal';
+import EmptyState from '@/Components/eco/EmptyState';
+import PageHeader from '@/Components/eco/PageHeader';
+import ServiceIcon from '@/Components/eco/ServiceIcon';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import SecondaryButton from '@/Components/SecondaryButton';
+import Modal from '@/Components/Modal';
 import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatRupiah } from '@/lib/format';
+import { Reveal } from '@/lib/motion';
 import { PageProps, Service } from '@/types';
+import { faClipboardList, faPen, faPlus, faTrashCan, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head, router, useForm } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
 
 // Props dari AdminServiceController@index
 export default function AdminServicesIndex({ services }: PageProps<{ services: Service[] }>) {
-    // null = mode tambah, berisi layanan = mode ubah
-    const [editing, setEditing] = useState<Service | null>(null);
+    // Modal form: null = tertutup, 'new' = tambah, Service = ubah
+    const [editing, setEditing] = useState<Service | 'new' | null>(null);
+    const [deleting, setDeleting] = useState<Service | null>(null);
+    const [deleteProcessing, setDeleteProcessing] = useState(false);
 
     const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
         name: '',
@@ -21,17 +28,19 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
         price: '',
     });
 
-    const startEdit = (service: Service) => {
-        setEditing(service);
+    const openCreate = () => {
         clearErrors();
-        setData({
-            name: service.name,
-            description: service.description ?? '',
-            price: String(Number(service.price)),
-        });
+        reset();
+        setEditing('new');
     };
 
-    const cancelEdit = () => {
+    const openEdit = (service: Service) => {
+        clearErrors();
+        setData({ name: service.name, description: service.description ?? '', price: String(Number(service.price)) });
+        setEditing(service);
+    };
+
+    const close = () => {
         setEditing(null);
         clearErrors();
         reset();
@@ -39,42 +48,105 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        const options = { preserveScroll: true, onSuccess: cancelEdit };
-        if (editing) {
+        const options = { preserveScroll: true, onSuccess: close };
+        if (editing && editing !== 'new') {
             put(route('admin.services.update', editing.id), options); // PUT /admin/services/{id}
         } else {
             post(route('admin.services.store'), options); // POST /admin/services
         }
     };
 
-    const destroy = (service: Service) => {
-        if (confirm(`Hapus layanan "${service.name}"?`)) {
-            router.delete(route('admin.services.destroy', service.id), { preserveScroll: true });
-        }
+    const destroy = () => {
+        if (!deleting) return;
+        router.delete(route('admin.services.destroy', deleting.id), {
+            preserveScroll: true,
+            onStart: () => setDeleteProcessing(true),
+            onFinish: () => {
+                setDeleteProcessing(false);
+                setDeleting(null);
+            },
+        });
     };
 
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Kelola Layanan</h2>}
+            header={
+                <PageHeader
+                    eyebrow="Kelola Layanan"
+                    title="Katalog layanan"
+                    description={`${services.length} layanan tersedia untuk dipesan pengguna.`}
+                    actions={
+                        <button onClick={openCreate} className="btn-primary">
+                            <FontAwesomeIcon icon={faPlus} /> Tambah Layanan
+                        </button>
+                    }
+                />
+            }
         >
             <Head title="Kelola Layanan" />
 
-            <div className="py-6">
-                <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-3 lg:px-8">
-                    <form onSubmit={submit} className="space-y-4 rounded-lg bg-white p-6 shadow-sm lg:col-span-1">
-                        <h3 className="font-semibold text-gray-900">{editing ? 'Ubah Layanan' : 'Tambah Layanan'}</h3>
+            {services.length === 0 ? (
+                <div className="card">
+                    <EmptyState
+                        title="Belum ada layanan"
+                        description="Tambahkan layanan pertama agar pengguna bisa mulai memesan."
+                        action={
+                            <button onClick={openCreate} className="btn-primary">
+                                <FontAwesomeIcon icon={faPlus} /> Tambah Layanan
+                            </button>
+                        }
+                    />
+                </div>
+            ) : (
+                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    {services.map((service, i) => (
+                        <Reveal key={service.id} delay={(i % 3) * 90} variant="scale">
+                            <article className="group flex h-full flex-col rounded-4xl bg-white p-6 shadow-soft ring-1 ring-forest-900/5 transition duration-300 hover:-translate-y-1 hover:shadow-lift">
+                                <div className="flex items-start justify-between">
+                                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-forest-900 text-leaf-400 transition group-hover:rotate-[-8deg]">
+                                        <ServiceIcon name={service.name} />
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-50 px-2.5 py-1 text-xs font-semibold text-forest-600">
+                                        <FontAwesomeIcon icon={faClipboardList} /> {service.orders_count ?? 0} pesanan
+                                    </span>
+                                </div>
+                                <h3 className="mt-5 text-lg font-bold">{service.name}</h3>
+                                <p className="mt-1 line-clamp-2 flex-1 text-sm text-forest-900/55">{service.description || '—'}</p>
+                                <p className="display mt-4 text-2xl">{formatRupiah(service.price)}</p>
+                                <div className="mt-5 flex gap-2 border-t border-forest-900/5 pt-4">
+                                    <button onClick={() => openEdit(service)} className="btn-ghost btn-sm flex-1">
+                                        <FontAwesomeIcon icon={faPen} /> Ubah
+                                    </button>
+                                    <button
+                                        onClick={() => setDeleting(service)}
+                                        className="btn-ghost btn-sm flex-1 text-clay-600 hover:border-clay-500/40"
+                                        title={service.orders_count ? 'Layanan yang sudah dipesan tidak dapat dihapus' : undefined}
+                                    >
+                                        <FontAwesomeIcon icon={faTrashCan} /> Hapus
+                                    </button>
+                                </div>
+                            </article>
+                        </Reveal>
+                    ))}
+                </div>
+            )}
 
+            {/* Modal tambah / ubah */}
+            <Modal show={editing !== null} onClose={close} maxWidth="lg">
+                <form onSubmit={submit} className="p-7">
+                    <div className="mb-6 flex items-center justify-between">
+                        <h2 className="display text-2xl">{editing === 'new' ? 'Tambah layanan' : 'Ubah layanan'}</h2>
+                        <button type="button" onClick={close} className="grid h-9 w-9 place-items-center rounded-full hover:bg-forest-900/5" aria-label="Tutup">
+                            <FontAwesomeIcon icon={faXmark} />
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
                         <div>
-                            <InputLabel htmlFor="name" value="Nama Layanan" />
-                            <TextInput
-                                id="name"
-                                className="mt-1 block w-full"
-                                value={data.name}
-                                onChange={(e) => setData('name', e.target.value)}
-                            />
+                            <InputLabel htmlFor="name" value="Nama layanan" />
+                            <TextInput id="name" value={data.name} isFocused onChange={(e) => setData('name', e.target.value)} placeholder="mis. Cuci Karpet" />
                             <InputError message={errors.name} className="mt-2" />
                         </div>
-
                         <div>
                             <InputLabel htmlFor="description" value="Deskripsi" />
                             <textarea
@@ -82,66 +154,56 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
                                 rows={4}
                                 value={data.description}
                                 onChange={(e) => setData('description', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                className="input"
+                                placeholder="Jelaskan apa saja yang dikerjakan dalam layanan ini"
                             />
                             <InputError message={errors.description} className="mt-2" />
                         </div>
-
                         <div>
                             <InputLabel htmlFor="price" value="Harga (Rp)" />
-                            <TextInput
-                                id="price"
-                                type="number"
-                                min={0}
-                                className="mt-1 block w-full"
-                                value={data.price}
-                                onChange={(e) => setData('price', e.target.value)}
-                            />
+                            <div className="relative">
+                                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-forest-900/40">Rp</span>
+                                <TextInput
+                                    id="price"
+                                    type="number"
+                                    min={0}
+                                    className="ps-11"
+                                    value={data.price}
+                                    onChange={(e) => setData('price', e.target.value)}
+                                    placeholder="150000"
+                                />
+                            </div>
+                            {data.price && <p className="mt-1.5 text-xs text-forest-900/50">= {formatRupiah(data.price)}</p>}
                             <InputError message={errors.price} className="mt-2" />
                         </div>
-
-                        <div className="flex gap-2">
-                            <PrimaryButton disabled={processing}>{editing ? 'Simpan' : 'Tambah'}</PrimaryButton>
-                            {editing && (
-                                <SecondaryButton type="button" onClick={cancelEdit}>
-                                    Batal
-                                </SecondaryButton>
-                            )}
-                        </div>
-                    </form>
-
-                    <div className="overflow-x-auto rounded-lg bg-white shadow-sm lg:col-span-2">
-                        <table className="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
-                                <tr>
-                                    <th className="px-4 py-3">Layanan</th>
-                                    <th className="px-4 py-3">Harga</th>
-                                    <th className="px-4 py-3">Pesanan</th>
-                                    <th className="px-4 py-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {services.map((service) => (
-                                    <tr key={service.id}>
-                                        <td className="px-4 py-3">
-                                            <p className="font-medium text-gray-900">{service.name}</p>
-                                            <p className="line-clamp-2 text-xs text-gray-500">{service.description}</p>
-                                        </td>
-                                        <td className="whitespace-nowrap px-4 py-3">{formatRupiah(service.price)}</td>
-                                        <td className="px-4 py-3">{service.orders_count}</td>
-                                        <td className="whitespace-nowrap px-4 py-3 text-right">
-                                            <SecondaryButton onClick={() => startEdit(service)} className="me-2">
-                                                Ubah
-                                            </SecondaryButton>
-                                            <DangerButton onClick={() => destroy(service)}>Hapus</DangerButton>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
                     </div>
-                </div>
-            </div>
+
+                    <div className="mt-7 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                        <button type="button" onClick={close} className="btn-ghost">
+                            Batal
+                        </button>
+                        <button disabled={processing} className="btn-primary">
+                            {processing ? 'Menyimpan…' : editing === 'new' ? 'Tambah Layanan' : 'Simpan Perubahan'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            <ConfirmModal
+                show={!!deleting}
+                tone="danger"
+                icon={faTrashCan}
+                title={`Hapus "${deleting?.name}"?`}
+                message={
+                    deleting?.orders_count
+                        ? 'Layanan ini sudah memiliki pesanan, sehingga sistem akan menolak penghapusan untuk menjaga riwayat pesanan.'
+                        : 'Layanan akan dihapus permanen dari katalog.'
+                }
+                confirmText="Hapus"
+                processing={deleteProcessing}
+                onConfirm={destroy}
+                onClose={() => setDeleting(null)}
+            />
         </AuthenticatedLayout>
     );
 }

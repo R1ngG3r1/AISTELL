@@ -1,27 +1,17 @@
+import PasswordInput from '@/Components/eco/PasswordInput';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
 
-export default function UpdatePasswordForm({
-    className = '',
-}: {
-    className?: string;
-}) {
-    const passwordInput = useRef<HTMLInputElement>(null);
-    const currentPasswordInput = useRef<HTMLInputElement>(null);
+export default function UpdatePasswordForm({ className = '' }: { className?: string }) {
+    const passwordInput = useRef<{ focus: () => void }>(null);
+    const currentPasswordInput = useRef<{ focus: () => void }>(null);
 
-    const {
-        data,
-        setData,
-        errors,
-        put,
-        reset,
-        processing,
-        recentlySuccessful,
-    } = useForm({
+    const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
         current_password: '',
         password: '',
         password_confirmation: '',
@@ -50,86 +40,52 @@ export default function UpdatePasswordForm({
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Update Password
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-600">
-                    Ensure your account is using a long, random password to stay
-                    secure.
-                </p>
+                <h2 className="display text-2xl">Ubah password</h2>
+                <p className="mt-1 text-sm text-forest-900/55">Gunakan password yang panjang dan acak agar akun tetap aman.</p>
             </header>
 
-            <form onSubmit={updatePassword} className="mt-6 space-y-6">
+            <form onSubmit={updatePassword} className="mt-6 space-y-5">
                 <div>
-                    <InputLabel
-                        htmlFor="current_password"
-                        value="Current Password"
-                    />
-
-                    <TextInput
+                    <InputLabel htmlFor="current_password" value="Password saat ini" />
+                    <PasswordInput
                         id="current_password"
                         ref={currentPasswordInput}
                         value={data.current_password}
-                        onChange={(e) =>
-                            setData('current_password', e.target.value)
-                        }
-                        type="password"
-                        className="mt-1 block w-full"
+                        onChange={(e) => setData('current_password', e.target.value)}
                         autoComplete="current-password"
                     />
-
-                    <InputError
-                        message={errors.current_password}
-                        className="mt-2"
-                    />
+                    <InputError message={errors.current_password} className="mt-2" />
                 </div>
 
-                <div>
-                    <InputLabel htmlFor="password" value="New Password" />
-
-                    <TextInput
-                        id="password"
-                        ref={passwordInput}
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div>
-                    <InputLabel
-                        htmlFor="password_confirmation"
-                        value="Confirm Password"
-                    />
-
-                    <TextInput
-                        id="password_confirmation"
-                        value={data.password_confirmation}
-                        onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
-                        }
-                        type="password"
-                        className="mt-1 block w-full"
-                        autoComplete="new-password"
-                    />
-
-                    <InputError
-                        message={errors.password_confirmation}
-                        className="mt-2"
-                    />
+                <div className="grid gap-5 sm:grid-cols-2">
+                    <div>
+                        <InputLabel htmlFor="password" value="Password baru" />
+                        <PasswordInput
+                            id="password"
+                            ref={passwordInput}
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            autoComplete="new-password"
+                        />
+                        <InputError message={errors.password} className="mt-2" />
+                    </div>
+                    <div>
+                        <InputLabel htmlFor="password_confirmation" value="Ulangi password baru" />
+                        <PasswordInput
+                            id="password_confirmation"
+                            value={data.password_confirmation}
+                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            autoComplete="new-password"
+                        />
+                        <InputError message={errors.password_confirmation} className="mt-2" />
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
-
+                    <PrimaryButton disabled={processing}>{processing ? 'Menyimpan…' : 'Simpan Password'}</PrimaryButton>
                     {recentlySuccessful && (
-                        <p className="text-sm text-gray-600">
-                            Saved.
+                        <p className="animate-fade-up text-sm font-medium text-forest-600">
+                            <FontAwesomeIcon icon={faCircleCheck} className="me-1.5" /> Password diperbarui
                         </p>
                     )}
                 </div>

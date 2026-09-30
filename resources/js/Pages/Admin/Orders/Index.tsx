@@ -1,8 +1,15 @@
+import Avatar from '@/Components/eco/Avatar';
+import EmptyState from '@/Components/eco/EmptyState';
+import PageHeader from '@/Components/eco/PageHeader';
+import ServiceIcon from '@/Components/eco/ServiceIcon';
 import Pagination from '@/Components/Pagination';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatTime } from '@/lib/format';
+import { Reveal } from '@/lib/motion';
 import { Order, PageProps, Paginated, StatusOption } from '@/types';
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head, Link, router } from '@inertiajs/react';
 
 // Props dari AdminOrderController@index
@@ -13,73 +20,94 @@ type Props = PageProps<{
 }>;
 
 export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
-    // Ganti filter → muat ulang halaman dengan ?status=...
-    const filter = (status: string) =>
-        router.get(route('admin.orders.index'), status ? { status } : {}, { preserveState: true });
+    const tabs = [{ value: '', label: 'Semua' }, ...statuses];
+    const current = filters.status ?? '';
 
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Kelola Pesanan</h2>}
+            header={
+                <PageHeader
+                    eyebrow="Kelola Pesanan"
+                    title="Pesanan masuk"
+                    description={`${orders.total} pesanan${current ? ` berstatus ${statuses.find((s) => s.value === current)?.label.toLowerCase()}` : ''}.`}
+                />
+            }
         >
             <Head title="Kelola Pesanan" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="mb-4">
-                        <select
-                            value={filters.status ?? ''}
-                            onChange={(e) => filter(e.target.value)}
-                            className="rounded-md border-gray-300 text-sm shadow-sm"
+            {/* Tab filter status → ?status=... */}
+            <div className="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+                <div className="inline-flex gap-1 rounded-full bg-white/70 p-1 shadow-soft ring-1 ring-forest-900/5">
+                    {tabs.map((t) => (
+                        <button
+                            key={t.value}
+                            onClick={() =>
+                                router.get(route('admin.orders.index'), t.value ? { status: t.value } : {}, {
+                                    preserveState: true,
+                                    preserveScroll: true,
+                                })
+                            }
+                            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
+                                current === t.value ? 'bg-forest-900 text-cream shadow-soft' : 'text-forest-900/60 hover:bg-forest-900/5'
+                            }`}
                         >
-                            <option value="">Semua status</option>
-                            {statuses.map((s) => (
-                                <option key={s.value} value={s.value}>
-                                    {s.label}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            {t.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
-                    <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
-                        <table className="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+            <Reveal className="card overflow-hidden">
+                {orders.data.length === 0 ? (
+                    <EmptyState title="Tidak ada pesanan" description="Belum ada pesanan dengan status ini." />
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="table-eco">
+                            <thead>
                                 <tr>
-                                    <th className="px-4 py-3">#</th>
-                                    <th className="px-4 py-3">Pemesan</th>
-                                    <th className="px-4 py-3">Layanan</th>
-                                    <th className="px-4 py-3">Jadwal</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3"></th>
+                                    <th>#</th>
+                                    <th>Pemesan</th>
+                                    <th>Layanan</th>
+                                    <th>Jadwal</th>
+                                    <th>Status</th>
+                                    <th />
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200">
-                                {orders.data.length === 0 && (
-                                    <tr>
-                                        <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
-                                            Tidak ada pesanan.
-                                        </td>
-                                    </tr>
-                                )}
+                            <tbody>
                                 {orders.data.map((order) => (
-                                    <tr key={order.id}>
-                                        <td className="px-4 py-3 text-gray-500">{order.id}</td>
-                                        <td className="px-4 py-3">
-                                            <p className="font-medium text-gray-900">{order.contact_name}</p>
-                                            <p className="text-xs text-gray-500">akun: {order.user?.email}</p>
+                                    <tr
+                                        key={order.id}
+                                        className="group cursor-pointer"
+                                        onClick={() => router.visit(route('admin.orders.show', order.id))}
+                                    >
+                                        <td className="font-semibold text-forest-900/40">{order.id}</td>
+                                        <td>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar name={order.contact_name} />
+                                                <div className="min-w-0">
+                                                    <p className="truncate font-semibold">{order.contact_name}</p>
+                                                    <p className="truncate text-xs text-forest-900/45">{order.user?.email}</p>
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-3">{order.service?.name}</td>
-                                        <td className="px-4 py-3 text-gray-600">
+                                        <td>
+                                            <span className="flex items-center gap-2 whitespace-nowrap">
+                                                <ServiceIcon name={order.service?.name ?? ''} className="text-forest-500" />
+                                                {order.service?.name}
+                                            </span>
+                                        </td>
+                                        <td className="whitespace-nowrap text-forest-900/60">
                                             {formatDate(order.date)}, {formatTime(order.time)}
                                         </td>
-                                        <td className="px-4 py-3">
+                                        <td>
                                             <StatusBadge order={order} />
                                         </td>
-                                        <td className="px-4 py-3 text-right">
+                                        <td className="text-right">
                                             <Link
                                                 href={route('admin.orders.show', order.id)}
-                                                className="text-indigo-600 hover:underline"
+                                                className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-500 group-hover:text-forest-800"
                                             >
-                                                Kelola
+                                                Kelola <FontAwesomeIcon icon={faChevronRight} className="text-xs transition group-hover:translate-x-1" />
                                             </Link>
                                         </td>
                                     </tr>
@@ -87,9 +115,9 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                             </tbody>
                         </table>
                     </div>
-                    <Pagination meta={orders} />
-                </div>
-            </div>
+                )}
+            </Reveal>
+            <Pagination meta={orders} />
         </AuthenticatedLayout>
     );
 }
