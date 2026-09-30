@@ -63,7 +63,7 @@ export default {
             },
             fontFamily: {
                 sans: ['"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
-                display: ['Fraunces', ...defaultTheme.fontFamily.serif],
+                display: ['"Space Grotesk"', '"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
             },
             boxShadow: {
                 soft: '0 1px 2px rgba(7,45,35,.04), 0 8px 24px -8px rgba(7,45,35,.12)',

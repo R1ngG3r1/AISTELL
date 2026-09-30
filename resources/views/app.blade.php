@@ -8,9 +8,7 @@
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=fraunces:400,400i,600,600i,700|plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
-        <meta name="theme-color" content="#072d23">
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+        <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800|space-grotesk:600,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @routes
