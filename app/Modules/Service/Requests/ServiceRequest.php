@@ -3,6 +3,7 @@
 namespace App\Modules\Service\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * FormRequest = tempat aturan validasi. Laravel menjalankannya OTOMATIS sebelum
@@ -22,9 +23,17 @@ class ServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:100'],
+            // Nama layanan unik (saat mengubah, abaikan layanan itu sendiri).
+            'name' => ['required', 'string', 'max:100', Rule::unique('services', 'name')->ignore($this->route('service'))],
             'description' => ['nullable', 'string', 'max:2000'],
             'price' => ['required', 'numeric', 'min:0', 'max:9999999999'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.unique' => 'Layanan dengan nama ini sudah ada.',
         ];
     }
 

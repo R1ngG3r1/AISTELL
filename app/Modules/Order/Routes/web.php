@@ -14,7 +14,8 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     // /orders/create didefinisikan SEBELUM /orders/{order}, dan {order} dibatasi
     // angka (whereNumber), supaya kata "create" tidak dianggap sebagai id pesanan.
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
-    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    // throttle: maksimal 10 pesanan per menit per akun, mencegah spam / klik ganda beruntun.
+    Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:10,1')->name('orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->whereNumber('order')->name('orders.show');
     Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])->whereNumber('order')->name('orders.cancel');
 });

@@ -40,6 +40,8 @@ class Order extends Model
     {
         return [
             'date' => 'date:Y-m-d',
+            // Harga saat pesanan dibuat (diisi OrderService, bukan dari form).
+            'price' => 'decimal:2',
             // Kolom status otomatis diubah menjadi Enum OrderStatus saat dibaca,
             // dan kembali menjadi string saat disimpan.
             'status' => OrderStatus::class,

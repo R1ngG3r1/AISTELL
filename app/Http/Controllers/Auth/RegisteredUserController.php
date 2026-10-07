@@ -34,8 +34,14 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'phone' => 'nullable|string|max:20',
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s]{8,20}$/'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            // Checkbox "Saya menyetujui Syarat dan Ketentuan" juga dicek di backend,
+            // bukan hanya dinonaktifkannya tombol di frontend.
+            'terms' => ['accepted'],
+        ], [
+            'terms.accepted' => 'Anda harus menyetujui Syarat dan Ketentuan serta Kebijakan Privasi AISTEL.',
+            'phone.regex' => 'Nomor telepon hanya boleh berisi angka, spasi, + atau - (8–20 karakter).',
         ]);
 
         // Role tidak diisi di sini → otomatis 'user' (default kolom).

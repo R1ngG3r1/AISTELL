@@ -1,96 +1,137 @@
+import DashboardHero from '@/Components/eco/dashboard/DashboardHero';
+import IconTile from '@/Components/eco/dashboard/IconTile';
+import MiniCalendar from '@/Components/eco/dashboard/MiniCalendar';
+import Panel from '@/Components/eco/dashboard/Panel';
+import ProgressRow from '@/Components/eco/dashboard/ProgressRow';
 import EmptyState from '@/Components/eco/EmptyState';
-import { Leaf } from '@/Components/eco/Illustrations';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
-import StatCard from '@/Components/eco/StatCard';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatTime } from '@/lib/format';
-import { Parallax, Reveal } from '@/lib/motion';
-import { Order, OrderStats, PageProps } from '@/types';
+import { Reveal } from '@/lib/motion';
+import { tipOfTheDay } from '@/lib/tips';
+import { Order, OrderStats, PageProps, ScheduleDay } from '@/types';
 import {
     faArrowRight,
+    faBan,
+    faBroom,
     faCircleCheck,
     faClipboardList,
     faHourglassHalf,
-    faLightbulb,
     faPaperPlane,
+    faSeedling,
+    faUser,
+    faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head, Link } from '@inertiajs/react';
 
 // Props dari DashboardController@user
-type Props = PageProps<{ stats: OrderStats; latestOrders: Order[] }>;
+type Props = PageProps<{
+    stats: OrderStats;
+    latestOrders: Order[];
+    upcomingOrders: Order[]; // pesanan aktif dengan jadwal terdekat
+    schedule: ScheduleDay[]; // data kalender
+}>;
 
-const tips = [
-    'Pisahkan sampah organik dan anorganik sejak dari dapur agar mudah didaur ulang.',
-    'Bersihkan selokan sebelum musim hujan untuk mencegah genangan dan nyamuk.',
-    'Tanaman hias di dalam rumah membantu menyaring udara secara alami.',
-    'Gunakan cairan pembersih ramah lingkungan untuk menjaga kualitas air tanah.',
-];
+// Prop yang diperbarui otomatis setiap beberapa detik (realtime)
+const LIVE_PROPS = ['stats', 'latestOrders', 'upcomingOrders', 'schedule'];
 
 function greeting() {
     const h = new Date().getHours();
     return h < 11 ? 'Selamat pagi' : h < 15 ? 'Selamat siang' : h < 18 ? 'Selamat sore' : 'Selamat malam';
 }
 
-export default function Dashboard({ auth, stats, latestOrders }: Props) {
-    const tip = tips[new Date().getDate() % tips.length];
+export default function Dashboard({ auth, stats, latestOrders, upcomingOrders, schedule }: Props) {
     const firstName = auth.user.name.split(' ')[0];
+    const active = stats.menunggu + stats.diproses;
+    const completion = stats.total > 0 ? Math.round((stats.selesai / stats.total) * 100) : 0;
 
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout live={LIVE_PROPS}>
             <Head title="Dashboard" />
 
-            {/* Banner sambutan */}
-            <section className="relative overflow-hidden rounded-5xl bg-forest-900 p-8 text-cream shadow-lift md:p-12">
-                <Parallax speed={0.15} className="pointer-events-none absolute -right-10 -top-16 text-forest-800">
-                    <Leaf className="h-72 w-72 rotate-12" />
-                </Parallax>
-                <Parallax speed={-0.1} className="pointer-events-none absolute bottom-0 right-40 hidden text-leaf-400/20 md:block">
-                    <Leaf className="h-24 w-24 -rotate-45" />
-                </Parallax>
-                <div className="relative max-w-xl animate-fade-up">
-                    <p className="eyebrow text-leaf-400">
-                        <Leaf className="h-3.5 w-3.5" /> {greeting()}
-                    </p>
-                    <h1 className="display mt-3 text-4xl md:text-5xl">
-                        Halo, <em className="text-leaf-400">{firstName}</em>
-                    </h1>
-                    <p className="mt-3 text-cream/70">
-                        {stats.menunggu + stats.diproses > 0
-                            ? `Ada ${stats.menunggu + stats.diproses} pesanan aktif. Kami akan terus memperbarui statusnya untuk Anda.`
-                            : 'Lingkungan bersih dimulai dari satu langkah kecil. Yuk pesan layanan pertama Anda.'}
-                    </p>
-                    <div className="mt-7 flex flex-wrap gap-3">
-                        <Link href={route('services.index')} className="btn-leaf btn-lg group">
+            <DashboardHero
+                eyebrow={greeting()}
+                title={
+                    <>
+                        Halo, <span className="text-[#2ea368]">{firstName}!</span>
+                    </>
+                }
+                description={
+                    active > 0
+                        ? `Ada ${active} pesanan aktif. Kami akan terus memperbarui statusnya untuk Anda.`
+                        : 'Lingkungan bersih dimulai dari satu langkah kecil. Yuk pesan layanan untuk hunian Anda.'
+                }
+                userName={auth.user.name}
+                actions={
+                    <>
+                        <Link href={route('services.index')} className="btn-primary group">
                             Pesan Layanan
                             <FontAwesomeIcon icon={faArrowRight} className="transition-transform group-hover:translate-x-1" />
                         </Link>
-                        <Link href={route('orders.index')} className="btn btn-lg bg-white/10 text-cream ring-1 ring-white/15 hover:bg-white/20">
+                        <Link href={route('orders.index')} className="btn-ghost">
                             Pesanan Saya
                         </Link>
+                    </>
+                }
+            />
+
+            {/* Baris 1: ringkasan, progres, jadwal */}
+            <section className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                <Panel title="Ringkasan">
+                    <div className="grid grid-cols-2 gap-3">
+                        <IconTile icon={faClipboardList} label="Total Pesanan" value={stats.total} highlight />
+                        <IconTile icon={faHourglassHalf} label="Pesanan Aktif" value={active} iconClass="bg-[#fdf3d7] text-[#b7861b]" />
+                        <IconTile icon={faCircleCheck} label="Selesai" value={stats.selesai} />
+                        <IconTile icon={faSeedling} label="Tingkat Selesai" value={`${completion}%`} />
                     </div>
-                </div>
+                </Panel>
+
+                <Panel title="Progres Pesanan" action={{ label: 'Lihat semua', href: route('orders.index') }} delay={80}>
+                    <div className="space-y-2.5">
+                        <ProgressRow icon={faPaperPlane} label="Menunggu konfirmasi" value={stats.menunggu} max={stats.total} barClass="bg-[#f2c14e]" iconClass="bg-[#fdf3d7] text-[#b7861b]" />
+                        <ProgressRow icon={faHourglassHalf} label="Sedang diproses" value={stats.diproses} max={stats.total} delay={90} />
+                        <ProgressRow icon={faCircleCheck} label="Selesai" value={stats.selesai} max={stats.total} barClass="bg-[#2ea368]" delay={180} />
+                        <ProgressRow icon={faXmark} label="Ditolak" value={stats.ditolak} max={stats.total} barClass="bg-[#d9764a]" iconClass="bg-[#fbe9e1] text-[#c05f35]" delay={270} />
+                        <ProgressRow icon={faBan} label="Dibatalkan" value={stats.dibatalkan} max={stats.total} barClass="bg-[#0c2b20]/30" iconClass="bg-[#ece8da] text-[#0c2b20]/55" delay={360} />
+                    </div>
+                </Panel>
+
+                <Panel title="Jadwal Layanan" delay={160} className="md:col-span-2 xl:col-span-1">
+                    <MiniCalendar schedule={schedule} />
+                    <div className="mt-4 space-y-2">
+                        {upcomingOrders.length === 0 ? (
+                            <p className="rounded-2xl border border-[#e1e8db] bg-[#f6f8f2] px-4 py-3 text-xs text-[#4c6156]">
+                                Belum ada jadwal mendatang. Tanggal bertanda menunjukkan jadwal pesanan Anda.
+                            </p>
+                        ) : (
+                            upcomingOrders.map((o) => (
+                                <Link
+                                    key={o.id}
+                                    href={route('orders.show', o.id)}
+                                    className="flex items-center gap-3 rounded-2xl border border-[#e1e8db] bg-[#f6f8f2] px-3 py-2 text-xs transition hover:border-[#b8dcc7] hover:bg-white"
+                                >
+                                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#07271e] text-[#4de097]">
+                                        <ServiceIcon name={o.service?.name ?? ''} />
+                                    </span>
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block truncate font-bold text-[#0c2b20]">{o.service?.name}</span>
+                                        <span className="text-[#4c6156]">
+                                            {formatDate(o.date)}, {formatTime(o.time)}
+                                        </span>
+                                    </span>
+                                    <StatusBadge order={o} />
+                                </Link>
+                            ))
+                        )}
+                    </div>
+                </Panel>
             </section>
 
-            {/* Statistik */}
-            <section className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <StatCard label="Total Pesanan" value={stats.total} icon={faClipboardList} highlight />
-                <StatCard label="Menunggu" value={stats.menunggu} icon={faPaperPlane} tone="sun" delay={80} />
-                <StatCard label="Diproses" value={stats.diproses} icon={faHourglassHalf} tone="mint" delay={160} />
-                <StatCard label="Selesai" value={stats.selesai} icon={faCircleCheck} tone="leaf" delay={240} />
-            </section>
-
-            <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
-                {/* Pesanan terbaru */}
-                <Reveal className="card p-6 md:p-7">
-                    <div className="mb-4 flex items-center justify-between">
-                        <h2 className="display text-2xl">Pesanan Terbaru</h2>
-                        <Link href={route('orders.index')} className="text-sm font-semibold text-forest-500 hover:text-forest-700">
-                            Lihat semua →
-                        </Link>
-                    </div>
-
+            {/* Baris 2: pesanan terbaru & tips */}
+            <section className="mt-5 grid gap-5 xl:grid-cols-3">
+                <Panel title="Pesanan Terbaru" action={{ label: 'Lihat semua', href: route('orders.index') }} className="xl:col-span-2">
                     {latestOrders.length === 0 ? (
                         <EmptyState
                             title="Belum ada pesanan"
@@ -102,19 +143,20 @@ export default function Dashboard({ auth, stats, latestOrders }: Props) {
                             }
                         />
                     ) : (
-                        <ul className="-mx-2 space-y-1">
+                        <ul className="space-y-2">
                             {latestOrders.map((order, i) => (
                                 <Reveal as="li" key={order.id} delay={i * 60} variant="left">
                                     <Link
                                         href={route('orders.show', order.id)}
-                                        className="group flex items-center gap-4 rounded-2xl p-3 transition hover:bg-forest-50"
+                                        className="group flex items-center gap-4 rounded-2xl border border-[#e1e8db] bg-[#f6f8f2] p-3 transition hover:border-[#b8dcc7] hover:bg-white"
                                     >
-                                        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-forest-900 text-leaf-400 transition group-hover:rotate-[-8deg]">
+                                        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#07271e] text-[#4de097] transition group-hover:-rotate-6">
                                             <ServiceIcon name={order.service?.name ?? ''} />
                                         </span>
                                         <div className="min-w-0 flex-1">
-                                            <p className="truncate font-semibold">{order.service?.name}</p>
-                                            <p className="text-sm text-forest-900/50">
+                                            <p className="text-[11px] font-semibold text-[#0c2b20]/45">Pesanan #{order.id}</p>
+                                            <p className="truncate text-sm font-bold">{order.service?.name}</p>
+                                            <p className="text-xs text-[#0c2b20]/55">
                                                 {formatDate(order.date)} · {formatTime(order.time)}
                                             </p>
                                         </div>
@@ -124,19 +166,31 @@ export default function Dashboard({ auth, stats, latestOrders }: Props) {
                             ))}
                         </ul>
                     )}
-                </Reveal>
+                </Panel>
 
-                {/* Tips hijau */}
-                <Reveal variant="right" delay={120}>
-                    <div className="relative h-full overflow-hidden rounded-4xl bg-leaf-400 p-7 text-forest-900">
-                        <Leaf className="absolute -bottom-8 -right-8 h-40 w-40 rotate-12 text-leaf-500/50" />
-                        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-forest-900 text-leaf-400">
-                            <FontAwesomeIcon icon={faLightbulb} />
-                        </span>
-                        <p className="mt-5 text-xs font-bold uppercase tracking-[0.2em] text-forest-900/60">Tips hijau hari ini</p>
-                        <p className="display relative mt-2 text-xl leading-snug">{tip}</p>
+                <Panel title="Tips Hijau" delay={100}>
+                    <div className="overflow-hidden rounded-2xl">
+                        <img
+                            src="/landingpage/gambar2.png"
+                            alt="Daun semanggi di bawah langit cerah"
+                            className="h-44 w-full object-cover transition-transform duration-700 hover:scale-105"
+                        />
                     </div>
-                </Reveal>
+                    <p className="mt-4 text-sm font-semibold leading-relaxed text-[#0c2b20]">{tipOfTheDay()}</p>
+                    <p className="mt-1 text-xs text-[#0c2b20]/45">Tips berganti setiap hari 🌿</p>
+                </Panel>
+            </section>
+
+            {/* Baris 3: akses cepat */}
+            <section className="mt-5">
+                <Panel title="Akses Cepat">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        <IconTile icon={faBroom} label="Pesan Layanan" href={route('services.index')} />
+                        <IconTile icon={faClipboardList} label="Pesanan Saya" href={route('orders.index')} />
+                        <IconTile icon={faHourglassHalf} label={`${active} Pesanan Aktif`} href={route('orders.index')} iconClass="bg-[#fdf3d7] text-[#b7861b]" />
+                        <IconTile icon={faUser} label="Profil Saya" href={route('profile.edit')} />
+                    </div>
+                </Panel>
             </section>
         </AuthenticatedLayout>
     );

@@ -19,7 +19,8 @@ menjalankan, dan cara mengujinya. Acuan kebutuhan: [PRD_AISTEL.md](../PRD_AISTEL
 | 7 | Admin: kelola pesanan, aturan status, dashboard | ✅ |
 | 8 | Profil + nomor telepon | ✅ |
 | 9 | Kontrak data untuk FE (tabel di bawah) | ✅ |
-| 10 | Test otomatis: 70 test, semua kriteria PRD 14 | ✅ |
+| 10 | Test otomatis: 95 test, semua kriteria PRD 14 | ✅ |
+| 10b | Realtime (polling), foto profil, alamat utama, harga terkunci, Bahasa Indonesia | ✅ |
 | 11 | Deploy ke hosting | ⏳ menunggu hosting dipilih |
 
 ---
@@ -115,9 +116,9 @@ users 1 ── N orders N ── 1 services
 
 | Tabel | Kolom penting |
 | --- | --- |
-| `users` | name, email, **phone**, password (hash), **role** `user`/`admin` (default `user`) |
+| `users` | name, email, **phone**, **address** (alamat utama), **avatar_path** (foto profil), password (hash), **role** `user`/`admin` (default `user`) |
 | `services` | name, description, price `decimal(12,2)` |
-| `orders` | user_id (FK), service_id (FK), date, time, location, **contact_name**, **contact_phone**, notes, status |
+| `orders` | user_id (FK), service_id (FK), **price** (harga saat dipesan), date, time, location, **contact_name**, **contact_phone**, notes, status |
 
 Keputusan desain:
 - `contact_name` & `contact_phone` ditambahkan ke `orders` karena PRD 12 memintanya (pemesan
@@ -160,15 +161,22 @@ Setelah login, admin diarahkan ke `/admin/dashboard` dan user ke `/dashboard`.
 
 ## 5. Kontrak data untuk Frontend
 
-Semua halaman juga menerima props bersama: `auth.user` (`id, name, email, phone, role`) dan
-`flash.success` / `flash.error`. Tipe TypeScript-nya ada di
+Semua halaman juga menerima props bersama: `auth.user` (`id, name, email, phone, address, avatar_url, role`),
+`flash.success` / `flash.error`, `clock` (`now`, `timezone` — untuk jam realtime), dan `counters`
+(badge sidebar: `pendingOrders` untuk admin, `activeOrders` untuk user). `clock` & `counters` memakai
+`Inertia::always`, jadi selalu ikut terkirim saat polling.
+
+**Realtime:** halaman memanggil `router.reload({ only: [...] })` setiap 10 detik (lihat
+`resources/js/lib/live.ts` dan prop `live` di `AuthenticatedLayout`). Karena itu props di controller
+dibungkus `fn () => ...`, agar polling hanya menjalankan query yang diminta. Tipe TypeScript-nya ada di
 [resources/js/types/index.d.ts](../resources/js/types/index.d.ts).
 
 | Endpoint PRD 17 | Route (nama) | Halaman React | Props / body |
 | --- | --- | --- | --- |
 | – (landing) | `GET /` (`home`) | `Welcome` | `services` |
 | `POST /api/login`, `/logout` | `POST /login`, `POST /logout` | `Auth/Login` | `email, password` |
-| `GET/PUT /api/profile` | `GET/PATCH /profile` | `Profile/Edit` | `name, email, phone` |
+| `GET/PUT /api/profile` | `GET/PATCH /profile` | `Profile/Edit` | `summary` (`memberSince`, `orders`); body `name, email, phone, address` |
+| – (foto profil) | `POST/DELETE /profile/avatar`, `GET /avatars/{user}` | `Profile/Edit` | body `avatar` (JPG/PNG/WebP, maks. 2 MB; disimpan 400×400) |
 | `PUT /api/profile/password` | `PUT /password` | `Profile/Edit` | `current_password, password, password_confirmation` |
 | `GET /api/services` | `GET /services` (`services.index`) | `Services/Index` | `services[]` |
 | `GET /api/services/{id}` | `GET /services/{id}` (`services.show`) | `Services/Show` | `service` |
@@ -181,7 +189,7 @@ Semua halaman juga menerima props bersama: `auth.user` (`id, name, email, phone,
 | `GET /api/admin/orders` | `GET /admin/orders?status=` (`admin.orders.index`) | `Admin/Orders/Index` | `orders`, `filters`, `statuses` |
 | `GET /api/admin/orders/{id}` | `GET /admin/orders/{id}` (`admin.orders.show`) | `Admin/Orders/Show` | `order` (+`user`, `service`), `allowedStatuses` |
 | `PUT /api/admin/orders/{id}/status` | `PUT /admin/orders/{id}/status` (`admin.orders.status`) | – | `status` |
-| – (dashboard) | `GET /dashboard`, `GET /admin/dashboard` | `Dashboard`, `Admin/Dashboard` | `stats`, `latestOrders` |
+| – (dashboard) | `GET /dashboard`, `GET /admin/dashboard` | `Dashboard`, `Admin/Dashboard` | `stats`, `latestOrders`, `schedule`; user: `upcomingOrders`; admin: `pendingOrders` |
 
 Setiap `order` berisi `status` (mis. `"diproses"`) dan `status_label` (mis. `"Diproses"`).
 
@@ -231,8 +239,8 @@ php artisan key:generate
 # Buat tabel + data demo (HATI-HATI: menghapus semua data lokal)
 php artisan migrate:fresh --seed
 
-# Jalankan
-.\run-local.bat          # atau: php artisan serve  +  npm run dev
+# Jalankan (otomatis menjalankan migrasi baru, lalu server + Vite)
+composer dev             # atau manual: php artisan migrate  →  php artisan serve  +  npm run dev
 ```
 
 Akun demo (password `password`):
@@ -260,7 +268,8 @@ dobel) dan tidak menghapus data lain. Password admin bisa diganti lewat `ADMIN_P
 | Perintah | Kegunaan |
 | --- | --- |
 | `php artisan route:list --except-vendor` | Melihat semua route |
-| `php artisan migrate` | Menjalankan migrasi baru |
+| `php artisan migrate` | Menjalankan migrasi baru (wajib setelah `git pull` yang membawa migrasi) |
+| `php artisan migrate:status` | Mengecek migrasi yang belum dijalankan (`Pending`) |
 | `php artisan migrate:fresh --seed` | Reset database + data demo |
 | `php artisan tinker` | Mencoba query, mis. `App\Models\User::first()->orders` |
 | `php artisan test` | Menjalankan semua test |

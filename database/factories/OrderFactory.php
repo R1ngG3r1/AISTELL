@@ -31,6 +31,14 @@ class OrderFactory extends Factory
         ];
     }
 
+    /** Harga pesanan disamakan dengan harga layanannya (seperti OrderService::createFor). */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (Order $order) {
+            $order->price ??= Service::query()->find($order->service_id)?->price;
+        });
+    }
+
     /** Contoh: Order::factory()->status(OrderStatus::Diproses)->create() */
     public function status(OrderStatus $status): static
     {

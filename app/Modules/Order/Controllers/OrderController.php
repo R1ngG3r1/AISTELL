@@ -26,7 +26,8 @@ class OrderController extends Controller
     public function index(Request $request): Response
     {
         return Inertia::render('Orders/Index', [
-            'orders' => $this->orders->paginateForUser($request->user()),
+            // fn() → ikut diperbarui saat polling realtime di frontend
+            'orders' => fn () => $this->orders->paginateForUser($request->user()),
         ]);
     }
 
@@ -56,7 +57,7 @@ class OrderController extends Controller
         Gate::authorize('view', $order);
 
         return Inertia::render('Orders/Show', [
-            'order' => $order->load('service:id,name,price,description'),
+            'order' => fn () => $order->load('service:id,name,price,description'),
         ]);
     }
 

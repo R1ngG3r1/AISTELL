@@ -36,6 +36,32 @@ it('user dapat mengajukan pesanan dengan status awal menunggu', function () {
         ->and($order->status)->toBe(OrderStatus::Menunggu);
 });
 
+it('harga dikunci saat pesanan dibuat, tidak ikut berubah saat harga layanan diubah', function () {
+    $user = User::factory()->create();
+    $service = Service::factory()->create(['price' => 150000]);
+
+    $this->actingAs($user)->post('/orders', validOrderData(['service_id' => $service->id, 'price' => 1]));
+    $service->update(['price' => 200000]);
+
+    $order = Order::firstOrFail();
+    expect($order->price)->toBe('150000.00');
+
+    $this->actingAs($user)->get("/orders/{$order->id}")
+        ->assertInertia(fn (Assert $page) => $page->where('order.price', '150000.00'));
+});
+
+it('pengiriman pesanan dibatasi agar tidak bisa di-spam', function () {
+    $user = User::factory()->create();
+    $data = validOrderData();
+
+    foreach (range(1, 10) as $_) {
+        $this->actingAs($user)->post('/orders', $data)->assertRedirect();
+    }
+
+    $this->actingAs($user)->post('/orders', $data)->assertStatus(429);
+    expect(Order::count())->toBe(10);
+});
+
 it('user_id dan status dari form diabaikan', function () {
     $user = User::factory()->create();
     $other = User::factory()->create();
@@ -64,6 +90,27 @@ it('memvalidasi data pesanan', function () {
         ->assertSessionHasErrors(['service_id', 'date', 'time', 'contact_phone', 'location']);
 
     expect(Order::count())->toBe(0);
+});
+
+it('pesan validasi tampil dalam bahasa Indonesia', function () {
+    $this->actingAs(User::factory()->create())
+        ->post('/orders', validOrderData(['location' => '']))
+        ->assertSessionHasErrors(['location' => 'Lokasi layanan wajib diisi.']);
+});
+
+it('menolak jadwal hari ini yang jamnya sudah lewat', function () {
+    $this->travelTo(today()->setTime(15, 0));
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post('/orders', validOrderData(['date' => today()->toDateString(), 'time' => '08:00']))
+        ->assertSessionHasErrors(['time' => 'Waktu layanan sudah lewat. Pilih jam yang belum terlewati.']);
+
+    $this->actingAs($user)
+        ->post('/orders', validOrderData(['date' => today()->toDateString(), 'time' => '16:00']))
+        ->assertSessionHasNoErrors();
+
+    expect(Order::count())->toBe(1);
 });
 
 it('user hanya melihat pesanan miliknya sendiri', function () {

@@ -29,7 +29,8 @@ class AdminOrderController extends Controller
         $status = OrderStatus::tryFrom((string) $request->query('status'));
 
         return Inertia::render('Admin/Orders/Index', [
-            'orders' => $this->orders->paginateAll($status),
+            // fn() → ikut diperbarui saat polling realtime di frontend
+            'orders' => fn () => $this->orders->paginateAll($status),
             'filters' => ['status' => $status?->value],
             'statuses' => $this->statusOptions(OrderStatus::cases()),
         ]);
@@ -39,9 +40,9 @@ class AdminOrderController extends Controller
     public function show(Order $order): Response
     {
         return Inertia::render('Admin/Orders/Show', [
-            'order' => $this->orders->loadDetail($order),
+            'order' => fn () => $this->orders->loadDetail($order),
             // Tombol yang perlu ditampilkan FE, mis. dari Menunggu: Diproses / Ditolak / Dibatalkan.
-            'allowedStatuses' => $this->statusOptions($order->status->allowedTransitions()),
+            'allowedStatuses' => fn () => $this->statusOptions($order->status->allowedTransitions()),
         ]);
     }
 

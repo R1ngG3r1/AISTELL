@@ -1,5 +1,23 @@
-/** Lingkaran berisi inisial nama. Warna konsisten untuk nama yang sama. */
-export default function Avatar({ name, className = '' }: { name: string; className?: string }) {
+import { useState } from 'react';
+
+/**
+ * Foto profil bulat. Jika `src` kosong (atau gagal dimuat), tampil lingkaran
+ * berisi inisial nama dengan warna yang konsisten untuk nama yang sama.
+ */
+export default function Avatar({ name, src, className = '' }: { name: string; src?: string | null; className?: string }) {
+    const [failed, setFailed] = useState<string | null>(null);
+
+    if (src && failed !== src) {
+        return (
+            <img
+                src={src}
+                alt={`Foto profil ${name}`}
+                onError={() => setFailed(src)}
+                className={`h-9 w-9 shrink-0 rounded-full bg-[#eaf2e6] object-cover ${className}`}
+            />
+        );
+    }
+
     const initials = name
         .split(' ')
         .filter(Boolean)

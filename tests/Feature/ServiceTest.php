@@ -61,6 +61,21 @@ it('memvalidasi input layanan', function () {
         ->assertSessionHasErrors(['name', 'price']);
 });
 
+it('nama layanan harus unik, kecuali saat mengubah layanan itu sendiri', function () {
+    $admin = User::factory()->admin()->create();
+    $service = Service::factory()->create(['name' => 'Bersih Rumah']);
+
+    $this->actingAs($admin)
+        ->post('/admin/services', ['name' => 'Bersih Rumah', 'price' => 100000])
+        ->assertSessionHasErrors(['name' => 'Layanan dengan nama ini sudah ada.']);
+
+    $this->actingAs($admin)
+        ->put("/admin/services/{$service->id}", ['name' => 'Bersih Rumah', 'price' => 175000])
+        ->assertSessionHasNoErrors();
+
+    expect($service->fresh()->price)->toBe('175000.00');
+});
+
 it('tidak menghapus layanan yang sudah pernah dipesan', function () {
     $admin = User::factory()->admin()->create();
     $order = Order::factory()->create();

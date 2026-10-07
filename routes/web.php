@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfileAvatarController;
 use App\Http\Controllers\ProfileController;
 use App\Modules\Service\Services\ServiceCatalog;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Foto profil
+    Route::post('/profile/avatar', [ProfileAvatarController::class, 'update'])->middleware('throttle:10,1')->name('profile.avatar.update');
+    Route::delete('/profile/avatar', [ProfileAvatarController::class, 'destroy'])->name('profile.avatar.destroy');
+    Route::get('/avatars/{user}', [ProfileAvatarController::class, 'show'])->whereNumber('user')->name('avatars.show');
 });
 
 require __DIR__.'/auth.php';

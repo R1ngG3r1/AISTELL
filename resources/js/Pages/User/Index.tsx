@@ -10,7 +10,7 @@ import { faTerminal } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head } from '@inertiajs/react';
 
-type Row = Pick<User, 'id' | 'name' | 'email' | 'phone' | 'role'> & { created_at: string; orders_count: number };
+type Row = Pick<User, 'id' | 'name' | 'email' | 'phone' | 'role' | 'avatar_url'> & { created_at: string; orders_count: number };
 
 // Props dari app/Modules/User/Controllers/UserController@index
 export default function UserIndex({ users }: PageProps<{ users: Paginated<Row> }>) {
@@ -30,7 +30,31 @@ export default function UserIndex({ users }: PageProps<{ users: Paginated<Row> }
                 {users.data.length === 0 ? (
                     <EmptyState title="Belum ada pengguna" />
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                    <ul className="divide-y divide-[#e6ece1] md:hidden">
+                        {users.data.map((u) => (
+                            <li key={u.id} className="flex items-center gap-3 px-5 py-4">
+                                <Avatar name={u.name} src={u.avatar_url} className="h-10 w-10" />
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="truncate text-sm font-bold">{u.name}</p>
+                                        <span
+                                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                                                u.role === 'admin' ? 'bg-forest-900 text-leaf-400' : 'bg-forest-50 text-forest-600'
+                                            }`}
+                                        >
+                                            {u.role}
+                                        </span>
+                                    </div>
+                                    <p className="truncate text-xs text-forest-900/50">{u.email}</p>
+                                    <p className="mt-1 text-[11px] text-forest-900/50">
+                                        {u.phone || 'Tanpa telepon'} · {u.orders_count} pesanan · bergabung {formatDate(u.created_at)}
+                                    </p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="hidden overflow-x-auto md:block">
                         <table className="table-eco">
                             <thead>
                                 <tr>
@@ -46,7 +70,7 @@ export default function UserIndex({ users }: PageProps<{ users: Paginated<Row> }
                                     <tr key={u.id}>
                                         <td>
                                             <div className="flex items-center gap-3">
-                                                <Avatar name={u.name} />
+                                                <Avatar name={u.name} src={u.avatar_url} />
                                                 <div className="min-w-0">
                                                     <p className="truncate font-semibold">{u.name}</p>
                                                     <p className="truncate text-xs text-forest-900/45">{u.email}</p>
@@ -70,6 +94,7 @@ export default function UserIndex({ users }: PageProps<{ users: Paginated<Row> }
                             </tbody>
                         </table>
                     </div>
+                    </>
                 )}
             </Reveal>
             <Pagination meta={users} />

@@ -5,6 +5,7 @@ namespace App\Modules\Order\Services;
 use App\Models\User;
 use App\Modules\Order\Enums\OrderStatus;
 use App\Modules\Order\Models\Order;
+use App\Modules\Service\Models\Service;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -19,16 +20,22 @@ class OrderService
     /** Relasi yang hampir selalu ditampilkan bersama pesanan. */
     private const WITH = [
         'service:id,name,price',
-        'user:id,name,email,phone',
+        'user:id,name,email,phone,avatar_path', // avatar_path → avatar_url untuk foto pemesan
     ];
 
     /**
      * Langkah 1–3: user mengirim pesanan.
      * Dibuat lewat relasi $user->orders() → user_id otomatis = user yang login.
+     * Harga layanan saat ini dikunci ke pesanan, agar perubahan harga oleh admin
+     * di kemudian hari tidak mengubah riwayat pesanan.
      */
     public function createFor(User $user, array $data): Order
     {
-        return $user->orders()->create($data);
+        $order = $user->orders()->make($data);
+        $order->price = Service::query()->findOrFail($data['service_id'])->price;
+        $order->save();
+
+        return $order;
     }
 
     /**
@@ -116,5 +123,82 @@ class OrderService
             ->latest()
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Jadwal layanan aktif (Menunggu/Diproses) mulai hari ini, terdekat di atas.
+     *
+     * @return Collection<int, Order>
+     */
+    public function upcoming(?User $user = null, int $limit = 5): Collection
+    {
+        return Order::query()
+            ->with(self::WITH)
+            ->when($user, fn (Builder $q) => $q->whereBelongsTo($user))
+            ->whereIn('status', OrderStatus::active())
+            ->whereDate('date', '>=', today()->toDateString())
+            ->orderBy('date')
+            ->orderBy('time')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * "Perlu tindakan" admin: pesanan Menunggu, yang paling lama menunggu di atas.
+     *
+     * @return Collection<int, Order>
+     */
+    public function pending(int $limit = 5): Collection
+    {
+        return Order::query()
+            ->with(self::WITH)
+            ->where('status', OrderStatus::Menunggu)
+            ->oldest()
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Data kalender dashboard: jumlah jadwal per tanggal, dari awal bulan lalu
+     * sampai 6 bulan ke depan. Pesanan ditolak/dibatalkan tidak dihitung.
+     * Contoh hasil: [['date' => '2026-10-08', 'total' => 2], ...]
+     *
+     * @return array<int, array{date: string, total: int}>
+     */
+    public function schedule(?User $user = null): array
+    {
+        return Order::query()
+            ->when($user, fn (Builder $q) => $q->whereBelongsTo($user))
+            ->whereNotIn('status', [OrderStatus::Ditolak, OrderStatus::Dibatalkan])
+            ->whereBetween('date', [
+                today()->subMonthNoOverflow()->startOfMonth()->toDateString(),
+                today()->addMonthsNoOverflow(6)->endOfMonth()->toDateString(),
+            ])
+            ->selectRaw('date, COUNT(*) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->toBase()
+            ->get()
+            ->map(fn ($row) => [
+                // MySQL & SQLite bisa mengembalikan "2026-10-08" atau "2026-10-08 00:00:00".
+                'date' => substr((string) $row->date, 0, 10),
+                'total' => (int) $row->total,
+            ])
+            ->all();
+    }
+
+    /**
+     * Angka kecil di sidebar (badge), dikirim ke semua halaman dan ikut
+     * diperbarui setiap polling: admin → pesanan baru, user → pesanan aktif.
+     *
+     * @return array{pendingOrders?: int, activeOrders?: int}
+     */
+    public function counters(User $user): array
+    {
+        if ($user->isAdmin()) {
+            return ['pendingOrders' => Order::query()->where('status', OrderStatus::Menunggu)->count()];
+        }
+
+        return ['activeOrders' => $user->orders()->whereIn('status', OrderStatus::active())->count()];
     }
 }

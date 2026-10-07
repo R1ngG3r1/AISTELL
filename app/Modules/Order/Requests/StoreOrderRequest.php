@@ -3,6 +3,8 @@
 namespace App\Modules\Order\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
+use Illuminate\Validation\Validator;
 
 /**
  * PRD 12 — Informasi pemesanan.
@@ -27,6 +29,28 @@ class StoreOrderRequest extends FormRequest
             'date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'time' => ['required', 'date_format:H:i'],
             'notes' => ['nullable', 'string', 'max:1000'],
+        ];
+    }
+
+    /**
+     * Aturan lanjutan setelah aturan dasar lolos: jadwal tidak boleh di masa lalu.
+     * "after_or_equal:today" hanya mengecek tanggal, sehingga pesanan hari ini
+     * pukul 08:00 tetap lolos walaupun sekarang sudah pukul 15:00.
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                if ($validator->errors()->hasAny(['date', 'time'])) {
+                    return;
+                }
+
+                $schedule = Carbon::createFromFormat('Y-m-d H:i', $this->input('date').' '.$this->input('time'));
+
+                if ($schedule->isPast()) {
+                    $validator->errors()->add('time', 'Waktu layanan sudah lewat. Pilih jam yang belum terlewati.');
+                }
+            },
         ];
     }
 

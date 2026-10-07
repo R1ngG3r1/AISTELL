@@ -13,20 +13,14 @@ import {
     faSeedling,
     faCircleCheck,
     faClock,
+    faCheck,
+    faArrowsRotate,
 } from "@fortawesome/free-solid-svg-icons";
 import { Service, User } from "@/types";
-import { formatRupiah } from "@/lib/format";
 
-// Logo SVG component matching the four-leaf clover motif
-function AistelLogo({ className = "w-6 h-6", color = "#287e59" }: { className?: string; color?: string }) {
-    return (
-        <svg className={className} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
-            <circle cx="8" cy="8" r="4.8" />
-            <circle cx="16" cy="8" r="4.8" />
-            <circle cx="8" cy="16" r="4.8" />
-            <circle cx="16" cy="16" r="4.8" />
-        </svg>
-    );
+// Logo semanggi empat daun AISTEL
+function AistelLogo({ className = "logo-svg" }: { className?: string }) {
+    return <img src="/landingpage/LOGO.png" alt="" aria-hidden="true" className={className} />;
 }
 
 interface WelcomeProps {
@@ -114,22 +108,22 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
         {
             step: "01",
             title: "Pilih Layanan",
-            description: "Pilih jenis layanan kebersihan sesuai kebutuhan lingkungan Anda.",
+            description: "Pilih jenis layanan kebersihan yang sesuai kebutuhan lingkungan Anda.",
         },
         {
             step: "02",
             title: "Isi Formulir",
-            description: "Jadwalkan dan lengkapi detail lokasi serta kebutuhan secara ringkas.",
+            description: "Lengkapi detail pemesanan: lokasi, tanggal, waktu, dan catatan khusus.",
         },
         {
             step: "03",
             title: "Kirim Pesanan",
-            description: "Pesanan kami verifikasi dan tim segera berangkat ke lokasi.",
+            description: "Pesanan dikirim ke tim kami dan diproses dengan cepat.",
         },
         {
             step: "04",
             title: "Layanan Selesai",
-            description: "Tim profesional kami menyelesaikan pembersihan sesuai standar mutu tinggi.",
+            description: "Tim profesional kami menyelesaikan pekerjaan dan dapat dipantau statusnya.",
         },
     ];
 
@@ -189,7 +183,7 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                 <header className="navbar-container">
                     <nav className="navbar" aria-label="Main Navigation">
                         <a href="#beranda" className="logo" id="nav-logo">
-                            <AistelLogo className="logo-svg" color="#287e59" />
+                            <AistelLogo className="logo-svg" />
                             <span className="logo-text">AISTEL</span>
                         </a>
 
@@ -256,7 +250,7 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                     <div className="hero-container">
                         <div className="hero-text-content">
                             <div className="hero-badge" id="hero-badge">
-                                # AWARNESS INITIATIVE FOR SUSTAINABLE ENVIRONTMENT & LIVING
+                                # AWARENESS INITIATIVE FOR SUSTAINABLE ENVIRONMENT & LIVING
                             </div>
 
                             <h1 className="hero-title">
@@ -287,7 +281,7 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
 
                         <div className="hero-image-wrapper">
                             <img
-                                src="/landingpage/kucing.png"
+                                src="/landingpage/gambar1.png"
                                 alt="AISTEL - Clean Space Better Living"
                                 className="hero-image"
                             />
@@ -332,12 +326,48 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                 </div>
             </section>
 
+            {/* Keunggulan Section */}
+            <section className="keunggulan-section" id="keunggulan">
+                <div className="keunggulan-container">
+                    <div className="keunggulan-image-wrapper">
+                        <img
+                            src="/landingpage/gambar2.png"
+                            alt="AISTEL - Keunggulan Platform"
+                            className="keunggulan-image"
+                        />
+                    </div>
+
+                    <div className="keunggulan-head">
+                        <span className="section-label-dark">KEUNGGULAN KAMI</span>
+                        <h2 className="keunggulan-heading">
+                            Semua yang Anda butuhkan
+                            <br />
+                            dalam satu platform
+                        </h2>
+                    </div>
+
+                    <div className="keunggulan-grid">
+                        {keunggulan.map((item, index) => (
+                            <div key={index} className="keunggulan-card">
+                                <div className="keunggulan-icon-wrap">
+                                    <FontAwesomeIcon icon={item.icon} />
+                                </div>
+                                <div className="keunggulan-card-text">
+                                    <h3 className="keunggulan-card-title">{item.title}</h3>
+                                    <p className="keunggulan-card-desc">{item.description}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* Solusi Kebersihan (Services) */}
             <section className="services-section" id="layanan">
                 <div className="services-container">
                     <div className="section-header-centered">
-                        <span className="section-label-dark">LAYANAN KAMI</span>
-                        <h2 className="section-heading-light">
+                        <span className="section-label-light">LAYANAN KAMI</span>
+                        <h2 className="section-heading-dark">
                             Solusi Kebersihan untuk
                             <br />
                             Setiap Kebutuhan Anda
@@ -351,29 +381,21 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
 
                     <div className="services-grid">
                         {displayServices.map((item) => (
-                            <div key={item.id} className="service-card">
+                            <Link
+                                key={item.id}
+                                href={
+                                    auth?.user
+                                        ? (auth.user.role === 'admin' ? route('admin.services.index') : route('orders.create', { service: item.id }))
+                                        : route('login')
+                                }
+                                className="service-card"
+                            >
                                 <div className="service-icon-box">
                                     <FontAwesomeIcon icon={getServiceIcon(item.name)} />
                                 </div>
                                 <h3 className="service-title">{item.name}</h3>
                                 <p className="service-description">{item.description}</p>
-                                {item.price && (
-                                    <div className="service-price-tag">
-                                        <span className="price-label">Mulai dari</span>
-                                        <span className="price-amount">{formatRupiah(item.price)}</span>
-                                    </div>
-                                )}
-                                <Link
-                                    href={
-                                        auth?.user
-                                            ? (auth.user.role === 'admin' ? route('admin.services.index') : route('orders.create', { service: item.id }))
-                                            : route('login')
-                                    }
-                                    className="service-order-btn"
-                                >
-                                    {auth?.user?.role === 'admin' ? "Kelola Layanan" : "Pesan Sekarang →"}
-                                </Link>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
@@ -383,14 +405,14 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
             <section className="cara-kerja-section" id="cara-kerja">
                 <div className="cara-kerja-container">
                     <div className="section-header-centered">
-                        <span className="section-label-light">CARA KERJA</span>
-                        <h2 className="section-heading-dark">
+                        <span className="section-label-dark">CARA KERJA</span>
+                        <h2 className="section-heading-light">
                             Empat langkah mudah menuju
                             <br />
                             lingkungan bersih
                         </h2>
                         <p className="cara-kerja-subtitle">
-                            Proses yang praktis dan transparan dari pemesanan
+                            Proses yang sederhana dan transparan dari pemesanan
                             <br />
                             hingga layanan selesai.
                         </p>
@@ -402,46 +424,12 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                                 <div className="cara-kerja-step-badge">
                                     {item.step}
                                 </div>
-                                <h3 className="cara-kerja-step-title">{item.title}</h3>
-                                <p className="cara-kerja-step-desc">{item.description}</p>
+                                <div className="cara-kerja-step-text">
+                                    <h3 className="cara-kerja-step-title">{item.title}</h3>
+                                    <p className="cara-kerja-step-desc">{item.description}</p>
+                                </div>
                             </div>
                         ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Keunggulan Section */}
-            <section className="keunggulan-section" id="keunggulan">
-                <div className="keunggulan-container">
-                    <div className="keunggulan-image-wrapper">
-                        <img
-                            src="/landingpage/kucing.png"
-                            alt="AISTEL - Keunggulan Platform"
-                            className="keunggulan-image"
-                        />
-                    </div>
-
-                    <div className="keunggulan-content">
-                        <span className="section-label-dark">KEUNGGULAN KAMI</span>
-                        <h2 className="keunggulan-heading">
-                            Semua yang Anda butuhkan
-                            <br />
-                            dalam satu platform
-                        </h2>
-
-                        <div className="keunggulan-grid">
-                            {keunggulan.map((item, index) => (
-                                <div key={index} className="keunggulan-card">
-                                    <div className="keunggulan-icon-wrap">
-                                        <FontAwesomeIcon icon={item.icon} />
-                                    </div>
-                                    <div className="keunggulan-card-text">
-                                        <h3 className="keunggulan-card-title">{item.title}</h3>
-                                        <p className="keunggulan-card-desc">{item.description}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 </div>
             </section>
@@ -478,7 +466,7 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                             {/* Order 1: Selesai */}
                             <div className="order-status-card">
                                 <div className="order-icon-badge order-icon-selesai">
-                                    <FontAwesomeIcon icon={faCircleCheck} />
+                                    <FontAwesomeIcon icon={faCheck} />
                                 </div>
                                 <div className="order-details">
                                     <span className="order-number">Pesanan #497</span>
@@ -492,7 +480,7 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                             {/* Order 2: Diproses */}
                             <div className="order-status-card">
                                 <div className="order-icon-badge order-icon-diproses">
-                                    <FontAwesomeIcon icon={faRecycle} />
+                                    <FontAwesomeIcon icon={faArrowsRotate} />
                                 </div>
                                 <div className="order-details">
                                     <span className="order-number">Pesanan #498</span>
@@ -521,46 +509,12 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="cta-section" id="mulai">
-                <div className="cta-container">
-                    <h2 className="cta-title">
-                        Mulai Perjalanan
-                        <br />
-                        <span className="italic-text cta-highlight">Hidup Lebih Bersih</span>
-                    </h2>
-
-                    <p className="cta-description">
-                        Bergabunglah dengan ratusan keluarga yang sudah merasakan
-                        <br />
-                        manfaat AISTEL. Pesan layanan pertama Anda hari ini.
-                    </p>
-
-                    <div className="cta-buttons">
-                        <Link
-                            href={
-                                auth?.user
-                                    ? (auth.user.role === 'admin' ? route('admin.dashboard') : route('orders.create'))
-                                    : route('register')
-                            }
-                            className="cta-btn-primary"
-                            id="cta-register-btn"
-                        >
-                            {auth?.user ? (auth.user.role === 'admin' ? "Buka Dashboard Admin" : "Pesan Layanan Sekarang") : "Daftar Gratis Sekarang"}
-                        </Link>
-                        <a href="#layanan" className="cta-btn-secondary" id="cta-layanan-btn">
-                            Lihat Layanan
-                        </a>
-                    </div>
-                </div>
-            </section>
-
             {/* Footer */}
             <footer className="footer-section" id="kontak">
                 <div className="footer-top-container">
                     <div className="footer-brand-col">
                         <div className="footer-logo">
-                            <AistelLogo className="footer-logo-svg" color="#35a873" />
+                            <AistelLogo className="footer-logo-svg" />
                             <span className="footer-logo-text">AISTEL</span>
                         </div>
                         <p className="footer-brand-desc">

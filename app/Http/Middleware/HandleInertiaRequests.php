@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Modules\Order\Services\OrderService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -36,7 +38,7 @@ class HandleInertiaRequests extends Middleware
                 // Kirim kolom yang dibutuhkan FE saja. `role` dipakai FE untuk
                 // menampilkan menu User/Admin; password tidak pernah dikirim.
                 'user' => $request->user()?->only([
-                    'id', 'name', 'email', 'phone', 'role', 'email_verified_at',
+                    'id', 'name', 'email', 'phone', 'address', 'avatar_url', 'role', 'email_verified_at',
                 ]),
             ],
             // Pesan singkat setelah aksi, contoh: redirect()->with('success', 'Pesanan dibuat').
@@ -45,6 +47,19 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+
+            // Jam server (WIB) untuk jam realtime di dashboard. Frontend menghitung
+            // selisih jam perangkat vs server, lalu berdetak sendiri tiap detik.
+            // Inertia::always → tetap dikirim saat polling/partial reload.
+            'clock' => Inertia::always(fn () => [
+                'now' => now()->toIso8601String(),
+                'timezone' => config('app.timezone'),
+            ]),
+
+            // Badge di sidebar: pesanan baru (admin) / pesanan aktif (user).
+            'counters' => Inertia::always(fn () => $request->user()
+                ? app(OrderService::class)->counters($request->user())
+                : null),
         ];
     }
 }

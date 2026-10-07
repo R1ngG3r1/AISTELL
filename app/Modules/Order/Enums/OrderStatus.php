@@ -55,6 +55,16 @@ enum OrderStatus: string
         return in_array($next, $this->allowedTransitions(), true);
     }
 
+    /**
+     * Status yang masih berjalan (belum berstatus akhir).
+     *
+     * @return array<int, self>
+     */
+    public static function active(): array
+    {
+        return [self::Menunggu, self::Diproses];
+    }
+
     /** Semua nilai string, dipakai untuk aturan validasi. */
     public static function values(): array
     {

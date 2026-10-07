@@ -30,12 +30,12 @@ function Step({ n, title, children, delay = 0 }: { n: number; title: string; chi
 
 export default function OrderCreate({ auth, services, selectedServiceId }: Props) {
     // useForm Inertia: menyimpan isi form + error validasi dari backend (StoreOrderRequest).
-    // Nama & telepon diisi otomatis dari akun, tapi boleh diubah.
+    // Nama, telepon, dan alamat diisi otomatis dari akun, tapi boleh diubah.
     const { data, setData, post, processing, errors } = useForm({
         service_id: selectedServiceId ? String(selectedServiceId) : '',
         contact_name: auth.user.name,
         contact_phone: auth.user.phone ?? '',
-        location: '',
+        location: auth.user.address ?? '', // diisi dari alamat utama di Profil Saya
         date: '',
         time: '',
         notes: '',
@@ -168,7 +168,7 @@ export default function OrderCreate({ auth, services, selectedServiceId }: Props
                 </div>
 
                 {/* Ringkasan (menempel saat scroll di layar besar) */}
-                <aside className="lg:sticky lg:top-24">
+                <aside className="lg:sticky lg:top-8">
                     <Reveal variant="right" className="relative overflow-hidden rounded-4xl bg-forest-900 p-6 text-cream shadow-lift">
                         <Leaf className="absolute -right-10 -top-10 h-40 w-40 rotate-12 text-forest-800" />
                         <p className="relative text-xs font-bold uppercase tracking-[0.2em] text-leaf-400">Ringkasan</p>

@@ -1,6 +1,5 @@
 import { useState, useEffect, FormEventHandler } from "react";
 import { Head, Link, useForm } from "@inertiajs/react";
-import AuthScene from "@/Components/Auth/AuthScene";
 
 interface AuthLayoutUnifiedProps {
     initialMode: "login" | "register";
@@ -8,116 +7,36 @@ interface AuthLayoutUnifiedProps {
     canResetPassword?: boolean;
 }
 
-// Botanical Pointed Leaf Badge on the left of input fields
-// Authentic High-Definition Botanical Leaf Badges with 3D Embossed Golden Seals
-function LeafBadge({ type }: { type: "user" | "lock" | "mail" | "shield" }) {
-    const badgeMap = {
-        user: "/assets/auth/leaf_user_final.png",
-        lock: "/assets/auth/leaf_lock_final.png",
-        mail: "/assets/auth/leaf_mail_final.png",
-        shield: "/assets/auth/leaf_shield_final.png",
-    };
+/*
+ * Tampilan per perangkat (sesuai rancangan Figma):
+ * - Desktop (lg+)    : layout terbelah, ilustrasi di satu sisi dengan lengkungan organik.
+ * - Tablet & mobile  : ilustrasi memenuhi layar, form berada di atas panel transparan.
+ *   Login memakai lanskap terang (teks gelap), register memakai dedaunan gelap (teks putih).
+ */
 
+function Spinner() {
     return (
-        <div className="absolute -left-3 sm:-left-3.5 md:-left-4 top-1/2 -translate-y-1/2 z-30 flex items-center justify-center pointer-events-none filter drop-shadow-[0_3px_5px_rgba(10,30,10,0.65)]">
-            <img
-                src={badgeMap[type]}
-                alt={`${type} emblem`}
-                className="w-8 h-10 sm:w-9 sm:h-11 md:w-10 md:h-12 object-contain transform -rotate-12 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-6"
-            />
-        </div>
-    );
-}
-
-// Sculpted Wooden Twig Frame that curls above the input pill
-function TwigFrame() {
-    return (
-        <svg
-            className="pointer-events-none absolute -top-1.5 left-4 right-1 h-3.5 z-20 overflow-visible"
-            preserveAspectRatio="none"
-            viewBox="0 0 200 12"
-            fill="none"
-        >
-            {/* Main curving twig branch */}
-            <path
-                d="M 0 10 Q 50 1.5 110 4.5 Q 165 7.5 198 10"
-                stroke="#6d431f"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-            />
-            {/* Top bark highlight */}
-            <path
-                d="M 1 9.5 Q 50 1 110 4 Q 165 7 197 9.5"
-                stroke="#a67746"
-                strokeWidth="1"
-                strokeLinecap="round"
-                opacity="0.75"
-            />
-            {/* Small offshoot twigs */}
-            <path d="M 75 3.5 Q 85 -0.5 95 0.5" stroke="#5a3415" strokeWidth="1.4" strokeLinecap="round" />
-            <path d="M 160 6.5 Q 170 2 178 3" stroke="#5a3415" strokeWidth="1.3" strokeLinecap="round" />
+        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
     );
 }
 
-// Authentic Plump 3D Foliage Leaf Button ("Masuk >" / "Daftar >") with Realistic Vine & Embossed Gold Type
-function LeafButton({
-    text,
-    processing,
-    onClick,
-    type = "submit",
-}: {
-    text: string;
-    processing?: boolean;
-    onClick?: () => void;
-    type?: "submit" | "button";
-}) {
-    return (
-        <button
-            type={type}
-            disabled={processing}
-            onClick={onClick}
-            className="group relative w-full max-w-[210px] sm:max-w-[235px] md:max-w-[255px] mx-auto aspect-[1128/422] block transition-all duration-300 hover:scale-105 active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed focus:outline-none"
-        >
-            {/* Ultra High-Resolution Botanical Leaf Asset with Left Vine Stem */}
-            <img
-                src="/assets/auth/leaf_button_perfect.png"
-                alt="Leaf Action"
-                className="absolute inset-0 w-full h-full object-contain filter drop-shadow-[0_4px_8px_rgba(10,35,10,0.65)] group-hover:brightness-105 transition-all duration-300 pointer-events-none select-none"
-            />
+// Kelas bersama untuk form register (putih di atas dedaunan, gelap di desktop)
+const registerLabel =
+    "block text-xs sm:text-sm font-bold text-white lg:text-[#18231f] mb-1.5 ml-2";
+const registerInput =
+    "w-full h-11 sm:h-12 px-5 rounded-full border text-sm sm:text-base font-normal transition-all shadow-sm focus:outline-none focus:ring-2 " +
+    "bg-white/10 border-white/60 text-white placeholder-white/60 focus:ring-white/40 focus:border-white " +
+    "sm:bg-white sm:border-white sm:text-[#18231f] " +
+    "lg:border-[#7ba794] lg:focus:ring-[#3b9270]/40 lg:focus:border-[#2e7d5b]";
+const registerError = "mt-1 ml-3 text-[11px] font-semibold text-rose-200 lg:text-rose-700";
 
-            {/* Embossed Golden Text Placed Dead Center on the Leaf Blade (Centered at 64% horizontally, 49% vertically) */}
-            <div
-                className="absolute z-10 flex items-center justify-center pointer-events-none"
-                style={{
-                    left: "64%",
-                    top: "49%",
-                    transform: "translate(-50%, -50%)",
-                    width: "max-content",
-                }}
-            >
-                <span
-                    className="font-black text-sm sm:text-base md:text-lg tracking-wider text-[#fff4ad] flex items-center justify-center gap-1.5 transition-colors group-hover:text-white select-none"
-                    style={{
-                        textShadow: "0 2px 4px rgba(5,25,5,0.95), 0 1px 2px rgba(0,0,0,0.85), 0 -1px 0 rgba(255,255,180,0.6)",
-                    }}
-                >
-                    {processing ? (
-                        <svg className="animate-spin h-5 w-5 text-[#fff4ad]" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    ) : (
-                        <>
-                            <span>{text}</span>
-                            <span className="text-sm font-black transition-transform group-hover:translate-x-1">&gt;</span>
-                        </>
-                    )}
-                </span>
-            </div>
-        </button>
-    );
-}
+// Kelas bersama untuk input login
+const loginInput =
+    "w-full h-12 sm:h-[50px] rounded-full border text-[#18231f] text-sm sm:text-base font-normal placeholder-[#4d6357] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3b9270]/40 focus:border-[#2e7d5b] " +
+    "bg-white/70 border-white/80 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:placeholder-[#647f72]";
 
 export default function AuthLayoutUnified({
     initialMode,
@@ -125,17 +44,13 @@ export default function AuthLayoutUnified({
     canResetPassword = true,
 }: AuthLayoutUnifiedProps) {
     const [mode, setMode] = useState<"login" | "register">(initialMode);
-    const [burstTrigger, setBurstTrigger] = useState(0);
     const [showLoginPassword, setShowLoginPassword] = useState(false);
-    const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
 
     // Login Form State
     const loginForm = useForm({
         email: "",
         password: "",
-        remember: false as boolean,
+        remember: true as boolean,
     });
 
     // Register Form State
@@ -144,19 +59,19 @@ export default function AuthLayoutUnified({
         email: "",
         password: "",
         password_confirmation: "",
+        terms: false as boolean, // dicek juga di backend (RegisteredUserController)
     });
 
-    // Handle Switcher Click
+    // Smooth Switch Mode Handler
     const handleSwitchMode = (targetMode: "login" | "register") => {
         if (targetMode === mode) return;
         setMode(targetMode);
-        setBurstTrigger((prev) => prev + 1);
-
         const newUrl = targetMode === "login" ? "/login" : "/register";
         window.history.pushState(null, "", newUrl);
+        window.scrollTo({ top: 0 });
     };
 
-    // Keep mode synced with initialMode or browser popstate
+    // Keep mode synced with initialMode or browser back/forward buttons
     useEffect(() => {
         const handlePopState = () => {
             const path = window.location.pathname;
@@ -165,14 +80,12 @@ export default function AuthLayoutUnified({
             } else {
                 setMode("login");
             }
-            setBurstTrigger((prev) => prev + 1);
         };
 
         window.addEventListener("popstate", handlePopState);
         return () => window.removeEventListener("popstate", handlePopState);
     }, []);
 
-    // Submit Handlers
     const submitLogin: FormEventHandler = (e) => {
         e.preventDefault();
         loginForm.post(route("login"), {
@@ -187,409 +100,460 @@ export default function AuthLayoutUnified({
         });
     };
 
+    const isLogin = mode === "login";
+
     return (
-        <AuthScene mode={mode} burstTrigger={burstTrigger}>
-            <Head title={mode === "login" ? "Masuk ke AISTELL" : "Daftar Akun AISTELL"} />
+        <div className="relative min-h-screen lg:h-screen w-full bg-[#f5f7f2] flex flex-col lg:flex-row overflow-x-hidden lg:overflow-hidden font-sans text-[#18231f]">
+            <Head title={isLogin ? "Welcome Back - AISTEL" : "Selamat Datang - AISTEL"} />
 
-            {/* TOP BAR: Floating Logo & Back Button Overlay */}
-            <header className="absolute top-0 left-0 right-0 px-6 py-3 sm:px-10 sm:py-4 flex items-center justify-between z-40 pointer-events-none">
+            {/* ========================================================
+                TABLET & MOBILE: FULL-SCREEN BACKGROUND WITH CROSSFADE
+                ======================================================== */}
+            <div className="lg:hidden fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
+                <img
+                    src="/login/gambar1.jpeg"
+                    alt=""
+                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${
+                        isLogin ? "opacity-100" : "opacity-0"
+                    }`}
+                    style={{ objectPosition: "50% 20%" }}
+                />
+                <img
+                    src="/login/gambar2.jpeg"
+                    alt=""
+                    className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-in-out ${
+                        !isLogin ? "opacity-100" : "opacity-0"
+                    }`}
+                />
+                {/* Overlay agar teks tetap terbaca */}
+                <div
+                    className={`absolute inset-0 transition-colors duration-700 ${
+                        isLogin ? "bg-white/10" : "bg-[#06241a]/45"
+                    }`}
+                />
+            </div>
+
+            {/* ========================================================
+                DESKTOP BACKGROUND LAYERS WITH CINEMATIC CROSSFADE
+                ======================================================== */}
+            {/* 1. LOGIN BACKGROUND LAYER: Landscape illustration on left */}
+            <div
+                className={`hidden lg:block absolute inset-0 w-full h-full pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isLogin ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-[1.02]"
+                }`}
+                aria-hidden="true"
+            >
+                <div className="absolute inset-y-0 left-0 w-[48%] xl:w-[47%] h-full overflow-hidden">
+                    <img
+                        src="/login/gambar1.jpeg"
+                        alt=""
+                        className="w-full h-full"
+                        style={{ objectFit: "cover", objectPosition: "50% 5%" }}
+                    />
+                </div>
+                <svg
+                    viewBox="0 0 1000 1000"
+                    preserveAspectRatio="none"
+                    className="absolute inset-0 w-full h-full"
+                >
+                    <path
+                        d="M 1000 0 L 1000 1000 L 415 1000 C 390 940, 365 840, 370 680 C 375 520, 465 380, 465 280 C 465 180, 440 60, 415 0 Z"
+                        fill="#f5f7f2"
+                    />
+                </svg>
+            </div>
+
+            {/* 2. REGISTER BACKGROUND LAYER: Lush foliage on right */}
+            <div
+                className={`hidden lg:block absolute inset-0 w-full h-full pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    !isLogin ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-[1.02]"
+                }`}
+                aria-hidden="true"
+            >
+                <div className="absolute inset-y-0 right-0 w-[52%] xl:w-[50%] h-full overflow-hidden">
+                    <img
+                        src="/login/gambar2.jpeg"
+                        alt=""
+                        className="w-full h-full object-cover object-center"
+                    />
+                </div>
+                <svg
+                    viewBox="0 0 1000 1000"
+                    preserveAspectRatio="none"
+                    className="absolute inset-0 w-full h-full"
+                >
+                    <path
+                        d="M 0 0 L 0 1000 L 580 1000 C 560 920, 525 800, 530 720 C 535 640, 595 560, 595 480 C 595 400, 525 320, 535 200 C 545 100, 620 40, 690 0 Z"
+                        fill="#f5f7f2"
+                    />
+                </svg>
+            </div>
+
+            {/* ========================================================
+                BRAND (AISTEL LOGO) — ALL DEVICES
+                ======================================================== */}
+            <header className="absolute top-5 left-5 sm:top-7 sm:left-8 lg:left-10 xl:top-9 xl:left-14 z-30 flex items-center">
                 <Link
                     href="/"
-                    className="group flex items-center gap-2.5 transition-transform duration-200 hover:scale-105 pointer-events-auto"
+                    className="inline-flex items-center gap-2 sm:gap-2.5 group transition-transform duration-200 hover:scale-105 focus:outline-none"
                 >
-                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-black/40 backdrop-blur-md border border-white/20 shadow-lg group-hover:border-emerald-400/50 transition-colors">
-                        <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="#4de097" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="8" cy="8" r="4.8" />
-                            <circle cx="16" cy="8" r="4.8" />
-                            <circle cx="8" cy="16" r="4.8" />
-                            <circle cx="16" cy="16" r="4.8" />
-                        </svg>
-                    </div>
-                    <span className="text-lg sm:text-xl font-extrabold tracking-tight text-white drop-shadow-md">
-                        AISTEL<span className="text-[#4de097]">L</span>
+                    <img
+                        src="/landingpage/LOGO.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="w-6 h-6 sm:w-7 sm:h-7 object-contain group-hover:rotate-6 transition-transform"
+                    />
+                    <span
+                        className={`text-lg sm:text-2xl font-black tracking-tight transition-colors duration-500 ${
+                            isLogin ? "text-[#18231f]" : "text-white lg:text-[#18231f]"
+                        }`}
+                    >
+                        AISTEL
                     </span>
-                </Link>
-
-                <Link
-                    href="/"
-                    className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-semibold text-white/90 hover:text-white transition-all duration-200 shadow-lg pointer-events-auto"
-                >
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    <span>Beranda</span>
                 </Link>
             </header>
 
-            {/* MAIN AREA: THE ENTIRE TREE CARD SPANS 100% OF THE VIEWPORT HEIGHT ("FULL DARI ATAS KE BAWAH MENTOK") */}
-            <main className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden z-30">
-                
-                {/* Status Alert if passed */}
-                {status && (
-                    <div className="absolute top-16 z-50 w-full max-w-md rounded-2xl border border-emerald-400/40 bg-emerald-950/90 px-4 py-1.5 text-center text-xs sm:text-sm font-medium text-emerald-200 backdrop-blur-md shadow-xl animate-fade-in">
-                        {status}
+            {/* ========================================================
+                LEFT COLUMN: REGISTER FORM
+                Desktop: positioned on left half, smoothly fades & slides in
+                Tablet/Mobile: displayed when mode is 'register'
+                ======================================================== */}
+            <div
+                className={`relative w-full ${
+                    isLogin ? "lg:w-[44%] xl:w-[43%]" : "lg:w-[54%] xl:w-[55%]"
+                } flex-shrink-0 min-h-screen lg:h-screen flex items-center justify-center lg:justify-start px-5 sm:px-10 lg:pr-0 lg:pl-14 xl:pl-20 pt-24 pb-10 sm:py-28 lg:py-0 z-20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    !isLogin
+                        ? "opacity-100 translate-y-0 scale-100 pointer-events-auto block"
+                        : "lg:opacity-0 lg:translate-y-4 lg:scale-[0.98] lg:pointer-events-none hidden lg:block lg:invisible"
+                }`}
+                aria-hidden={isLogin}
+            >
+                <div className="w-full max-w-[440px] sm:max-w-[560px] lg:max-w-[460px] xl:max-w-[480px] flex flex-col justify-center my-auto rounded-3xl bg-[#06241a]/30 border border-white/15 backdrop-blur-[3px] p-6 sm:p-10 lg:bg-transparent lg:border-0 lg:backdrop-blur-none lg:p-0 lg:rounded-none">
+
+                    {status && (
+                        <div className="mb-5 rounded-2xl bg-[#c5ddd1]/80 border border-[#3b9270]/50 px-4 py-2 text-center text-xs sm:text-sm font-semibold text-[#18231f] shadow-sm">
+                            {status}
+                        </div>
+                    )}
+
+                    {/* Header */}
+                    <div className="text-center lg:text-left mb-6 sm:mb-8">
+                        <h1 className="text-3xl sm:text-5xl lg:text-[44px] font-black tracking-tight leading-tight text-white lg:text-[#18231f] drop-shadow-sm lg:drop-shadow-none">
+                            <span className="sm:hidden">Welcome to AISTEL</span>
+                            <span className="hidden sm:inline">Selamat Datang!</span>
+                        </h1>
+                        <p className="mt-2 text-xs sm:text-sm text-white/85 lg:text-[#4d6357] font-normal leading-relaxed">
+                            Mulai langkah mewujudkan hunian asri dan{" "}
+                            <span className="italic font-medium text-[#9fe0bf] lg:text-[#38916d]">
+                                lingkungan bersih
+                            </span>
+                            &nbsp;bersama AISTEL
+                        </p>
                     </div>
-                )}
 
-                {/* THE COMPLETE TREE HERO CARD - STABLE, IMMUTABLE (NO HOVER TILT CUTOFF), FULL HEIGHT 100vh MENTOK */}
-                <div
-                    className="relative h-screen w-auto max-w-[100vw] aspect-[565/442] flex items-center justify-center select-none flex-shrink-0"
-                >
-                    {/* The Full Tree Illustration (No artificial drop shadow, blends 100% naturally into pohon.jpg) */}
-                    <img
-                        src="/assets/auth/login_2x.png"
-                        alt="AISTELL Nature Portal"
-                        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                    />
-
-                    {/* ========================================================
-                        FORM OVERLAY POSITIONED PRECISELY ON THE WOODEN BOARD
-                        Coordinates on login.png:
-                        Left: 56.5% - Right: 91.5%
-                        Top: 8% - Bottom: 8.5%
-                        ======================================================== */}
-                    <div
-                        className="absolute top-[8%] bottom-[8.5%] left-[56.5%] right-[8%] z-20 flex flex-col justify-center gap-4 sm:gap-5 md:gap-6 py-2 px-2 sm:px-4 text-center"
-                    >
-                        
-                        {/* 1. HIGH-CONTRAST DEEP CARVED WOOD TITLE & SUBTITLE */}
-                        <div className="space-y-1">
-                            <h1
-                                className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight font-display leading-[1.08] text-[#241103]"
-                                style={{
-                                    textShadow: "0 1px 0 rgba(255, 255, 255, 0.85), 0 -1px 1px rgba(0, 0, 0, 0.45)",
-                                }}
-                            >
-                                {mode === "login" ? (
-                                    <>
-                                        Selamat Datang <br />
-                                        <span className="text-[#180a01]">Kembali</span>
-                                    </>
-                                ) : (
-                                    <>
-                                        Mulai Langkah <br />
-                                        <span className="text-[#180a01]">Hijau</span>
-                                    </>
+                    <form onSubmit={submitRegister} className="space-y-4">
+                        {/* Row 1: Name & Email Address */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                            <div>
+                                <label htmlFor="register-name" className={registerLabel}>
+                                    Name
+                                </label>
+                                <input
+                                    id="register-name"
+                                    type="text"
+                                    name="name"
+                                    value={registerForm.data.name}
+                                    autoComplete="name"
+                                    required
+                                    onChange={(e) => registerForm.setData("name", e.target.value)}
+                                    className={registerInput}
+                                />
+                                {registerForm.errors.name && (
+                                    <p className={registerError}>{registerForm.errors.name}</p>
                                 )}
-                            </h1>
-                            <p
-                                className="text-xs sm:text-sm md:text-base font-bold tracking-tight text-[#2d1607]"
-                                style={{
-                                    textShadow: "0 1px 0 rgba(255, 255, 255, 0.75)",
-                                }}
+                            </div>
+
+                            <div>
+                                <label htmlFor="register-email" className={registerLabel}>
+                                    Email Address
+                                </label>
+                                <input
+                                    id="register-email"
+                                    type="email"
+                                    name="email"
+                                    value={registerForm.data.email}
+                                    autoComplete="email"
+                                    required
+                                    onChange={(e) => registerForm.setData("email", e.target.value)}
+                                    className={registerInput}
+                                />
+                                {registerForm.errors.email && (
+                                    <p className={registerError}>{registerForm.errors.email}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Row 2: Password & Confirm Password */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                            <div>
+                                <label htmlFor="register-password" className={registerLabel}>
+                                    Password
+                                </label>
+                                <input
+                                    id="register-password"
+                                    type="password"
+                                    name="password"
+                                    value={registerForm.data.password}
+                                    autoComplete="new-password"
+                                    required
+                                    onChange={(e) => registerForm.setData("password", e.target.value)}
+                                    className={registerInput}
+                                />
+                                {registerForm.errors.password && (
+                                    <p className={registerError}>{registerForm.errors.password}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label htmlFor="register-confirm-password" className={registerLabel}>
+                                    Confirm Password
+                                </label>
+                                <input
+                                    id="register-confirm-password"
+                                    type="password"
+                                    name="password_confirmation"
+                                    value={registerForm.data.password_confirmation}
+                                    autoComplete="new-password"
+                                    required
+                                    onChange={(e) => registerForm.setData("password_confirmation", e.target.value)}
+                                    className={registerInput}
+                                />
+                                {registerForm.errors.password_confirmation && (
+                                    <p className={registerError}>{registerForm.errors.password_confirmation}</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Terms & Conditions Checkbox */}
+                        <div className="flex items-start gap-2.5 pt-1">
+                            <input
+                                id="terms-checkbox"
+                                type="checkbox"
+                                checked={registerForm.data.terms}
+                                onChange={(e) => registerForm.setData("terms", e.target.checked)}
+                                className="mt-0.5 h-4 w-4 rounded-[5px] border border-white/70 bg-white/20 lg:border-[#7ba794] lg:bg-[#c5ddd1] text-[#3b9270] focus:ring-[#3b9270]/40 cursor-pointer"
+                            />
+                            <label
+                                htmlFor="terms-checkbox"
+                                className="text-xs text-white/90 lg:text-[#18231f] leading-snug cursor-pointer select-none"
                             >
-                                {mode === "login"
-                                    ? "Masuk ke portal Anda untuk tetap terhubung."
-                                    : "Daftar akun baru untuk merawat alam."}
+                                Saya menyetujui{" "}
+                                <span className="font-bold">Syarat dan Ketentuan</span> serta{" "}
+                                <span className="font-bold">Kebijakan Privasi</span> AISTEL.
+                            </label>
+                        </div>
+                        {registerForm.errors.terms && (
+                            <p className={registerError}>{registerForm.errors.terms}</p>
+                        )}
+
+                        {/* Sign Up Button */}
+                        <div className="pt-2">
+                            <button
+                                type="submit"
+                                disabled={registerForm.processing || !registerForm.data.terms}
+                                className="w-full h-11 sm:h-12 rounded-full border text-sm sm:text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-white/15 border-white/60 text-white hover:bg-white/25 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:text-[#18231f] lg:hover:bg-[#b6d4c5]"
+                            >
+                                {registerForm.processing ? (
+                                    <span className="flex items-center gap-2">
+                                        <Spinner />
+                                        <span>Signing Up...</span>
+                                    </span>
+                                ) : (
+                                    "Sign Up"
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Footer link */}
+                        <div className="pt-5 text-center">
+                            <p className="text-xs sm:text-sm text-white lg:text-[#18231f]">
+                                Already have an account?{" "}
+                                <button
+                                    type="button"
+                                    onClick={() => handleSwitchMode("login")}
+                                    className="font-bold text-[#9fe0bf] lg:text-[#38916d] hover:underline focus:outline-none transition-colors"
+                                >
+                                    Login
+                                </button>
                             </p>
                         </div>
+                    </form>
 
-                        {/* 2. FORM FIELDS & SUBMIT BUTTON (Centered with harmonious spacing) */}
-                        <div className="w-full">
-                            {mode === "login" ? (
-                                <form onSubmit={submitLogin} className="space-y-3 sm:space-y-3.5">
-                                    {/* Username / Email Field */}
-                                    <div className="relative group flex items-center">
-                                        <LeafBadge type="user" />
-                                        <TwigFrame />
-                                        <div className="flex-1 relative pl-5 sm:pl-6">
-                                            <input
-                                                id="login-email"
-                                                type="email"
-                                                name="email"
-                                                value={loginForm.data.email}
-                                                autoComplete="username"
-                                                required
-                                                placeholder="Username atau Email"
-                                                onChange={(e) => loginForm.setData("email", e.target.value)}
-                                                className="w-full pl-8 sm:pl-9 pr-4 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-bold rounded-full border border-[#75441a]/60 text-[#1e0c02] placeholder-[#46280e]/75 focus:outline-none focus:ring-2 focus:ring-[#855424]/50 focus:bg-[rgba(255,238,208,0.72)] transition-all duration-200"
-                                                style={{
-                                                    background: "linear-gradient(180deg, rgba(235, 205, 160, 0.48) 0%, rgba(255, 235, 200, 0.6) 42%, rgba(230, 195, 150, 0.52) 100%)",
-                                                    backdropFilter: "blur(1.5px)",
-                                                    boxShadow: "inset 0 3px 5px rgba(45, 20, 5, 0.6), inset 0 1px 2px rgba(30, 10, 0, 0.5), inset 0 -1.5px 2px rgba(255, 255, 255, 0.45), 0 1.5px 2px rgba(255, 255, 255, 0.25)",
-                                                }}
-                                            />
-                                            {/* Inner user icon beside placeholder */}
-                                            <span className="absolute left-7 sm:left-8 top-1/2 -translate-y-1/2 text-[#5a3415] pointer-events-none text-sm">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                </svg>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    {loginForm.errors.email && (
-                                        <p className="text-xs text-rose-800 font-bold -mt-1 text-left pl-8">{loginForm.errors.email}</p>
-                                    )}
-
-                                    {/* Password Field */}
-                                    <div className="relative group flex items-center">
-                                        <LeafBadge type="lock" />
-                                        <TwigFrame />
-                                        <div className="flex-1 relative pl-5 sm:pl-6">
-                                            <input
-                                                id="login-password"
-                                                type={showLoginPassword ? "text" : "password"}
-                                                name="password"
-                                                value={loginForm.data.password}
-                                                autoComplete="current-password"
-                                                required
-                                                placeholder="Kata Sandi"
-                                                onChange={(e) => loginForm.setData("password", e.target.value)}
-                                                className="w-full pl-8 sm:pl-9 pr-9 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-bold rounded-full border border-[#75441a]/60 text-[#1e0c02] placeholder-[#46280e]/75 focus:outline-none focus:ring-2 focus:ring-[#855424]/50 focus:bg-[rgba(255,238,208,0.72)] transition-all duration-200"
-                                                style={{
-                                                    background: "linear-gradient(180deg, rgba(235, 205, 160, 0.48) 0%, rgba(255, 235, 200, 0.6) 42%, rgba(230, 195, 150, 0.52) 100%)",
-                                                    backdropFilter: "blur(1.5px)",
-                                                    boxShadow: "inset 0 3px 5px rgba(45, 20, 5, 0.6), inset 0 1px 2px rgba(30, 10, 0, 0.5), inset 0 -1.5px 2px rgba(255, 255, 255, 0.45), 0 1.5px 2px rgba(255, 255, 255, 0.25)",
-                                                }}
-                                            />
-                                            {/* Inner lock icon beside placeholder */}
-                                            <span className="absolute left-7 sm:left-8 top-1/2 -translate-y-1/2 text-[#5a3415] pointer-events-none text-sm">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                                </svg>
-                                            </span>
-                                            {/* Eye Toggle */}
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowLoginPassword(!showLoginPassword)}
-                                                className="absolute inset-y-0 right-3 flex items-center text-[#5c3c1e] hover:text-[#1a0a02]"
-                                            >
-                                                {showLoginPassword ? (
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                                                    </svg>
-                                                ) : (
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {loginForm.errors.password && (
-                                        <p className="text-xs text-rose-800 font-bold -mt-1 text-left pl-8">{loginForm.errors.password}</p>
-                                    )}
-
-                                    {/* Lupa Kata Sandi Link (Right-aligned under password input) */}
-                                    <div className="flex items-center justify-end pr-1 pt-0.5">
-                                        {canResetPassword && (
-                                            <Link
-                                                href={route("password.request")}
-                                                className="text-xs sm:text-sm font-extrabold text-[#241103] hover:text-[#145e26] hover:underline transition-colors"
-                                                style={{ textShadow: "0 1px 0 rgba(255,255,255,0.85)" }}
-                                            >
-                                                Lupa Kata Sandi?
-                                            </Link>
-                                        )}
-                                    </div>
-
-                                    {/* 3. REALISTIC GREEN LEAF BUTTON "Masuk >" */}
-                                    <div className="pt-2 sm:pt-3">
-                                        <LeafButton text="Masuk" processing={loginForm.processing} />
-                                    </div>
-                                </form>
-                            ) : (
-                                <form onSubmit={submitRegister} className="space-y-2 sm:space-y-2.5">
-                                    {/* Name Field */}
-                                    <div className="relative group flex items-center">
-                                        <LeafBadge type="user" />
-                                        <TwigFrame />
-                                        <div className="flex-1 relative pl-5 sm:pl-6">
-                                            <input
-                                                id="register-name"
-                                                type="text"
-                                                name="name"
-                                                value={registerForm.data.name}
-                                                autoComplete="name"
-                                                required
-                                                placeholder="Nama Lengkap"
-                                                onChange={(e) => registerForm.setData("name", e.target.value)}
-                                                className="w-full pl-7 sm:pl-8 pr-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-full border border-[#75441a]/60 text-[#1e0c02] placeholder-[#46280e]/75 focus:outline-none focus:ring-2 focus:ring-[#855424]/50 focus:bg-[rgba(255,238,208,0.72)] transition-all duration-200"
-                                                style={{
-                                                    background: "linear-gradient(180deg, rgba(235, 205, 160, 0.48) 0%, rgba(255, 235, 200, 0.6) 42%, rgba(230, 195, 150, 0.52) 100%)",
-                                                    backdropFilter: "blur(1.5px)",
-                                                    boxShadow: "inset 0 3px 5px rgba(45, 20, 5, 0.6), inset 0 1px 2px rgba(30, 10, 0, 0.5), inset 0 -1.5px 2px rgba(255, 255, 255, 0.45), 0 1.5px 2px rgba(255, 255, 255, 0.25)",
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                    {registerForm.errors.name && (
-                                        <p className="text-xs text-rose-800 font-bold -mt-1 text-left pl-8">{registerForm.errors.name}</p>
-                                    )}
-
-                                    {/* Email Field */}
-                                    <div className="relative group flex items-center">
-                                        <LeafBadge type="mail" />
-                                        <TwigFrame />
-                                        <div className="flex-1 relative pl-5 sm:pl-6">
-                                            <input
-                                                id="register-email"
-                                                type="email"
-                                                name="email"
-                                                value={registerForm.data.email}
-                                                autoComplete="username"
-                                                required
-                                                placeholder="Alamat Email"
-                                                onChange={(e) => registerForm.setData("email", e.target.value)}
-                                                className="w-full pl-7 sm:pl-8 pr-3 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-full border border-[#75441a]/60 text-[#1e0c02] placeholder-[#46280e]/75 focus:outline-none focus:ring-2 focus:ring-[#855424]/50 focus:bg-[rgba(255,238,208,0.72)] transition-all duration-200"
-                                                style={{
-                                                    background: "linear-gradient(180deg, rgba(235, 205, 160, 0.48) 0%, rgba(255, 235, 200, 0.6) 42%, rgba(230, 195, 150, 0.52) 100%)",
-                                                    backdropFilter: "blur(1.5px)",
-                                                    boxShadow: "inset 0 3px 5px rgba(45, 20, 5, 0.6), inset 0 1px 2px rgba(30, 10, 0, 0.5), inset 0 -1.5px 2px rgba(255, 255, 255, 0.45), 0 1.5px 2px rgba(255, 255, 255, 0.25)",
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                    {registerForm.errors.email && (
-                                        <p className="text-xs text-rose-800 font-bold -mt-1 text-left pl-8">{registerForm.errors.email}</p>
-                                    )}
-
-                                    {/* Password Field */}
-                                    <div className="relative group flex items-center">
-                                        <LeafBadge type="lock" />
-                                        <TwigFrame />
-                                        <div className="flex-1 relative pl-5 sm:pl-6">
-                                            <input
-                                                id="register-password"
-                                                type={showRegisterPassword ? "text" : "password"}
-                                                name="password"
-                                                value={registerForm.data.password}
-                                                autoComplete="new-password"
-                                                required
-                                                placeholder="Kata Sandi (min 8)"
-                                                onChange={(e) => registerForm.setData("password", e.target.value)}
-                                                className="w-full pl-7 sm:pl-8 pr-8 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-full border border-[#75441a]/60 text-[#1e0c02] placeholder-[#46280e]/75 focus:outline-none focus:ring-2 focus:ring-[#855424]/50 focus:bg-[rgba(255,238,208,0.72)] transition-all duration-200"
-                                                style={{
-                                                    background: "linear-gradient(180deg, rgba(235, 205, 160, 0.48) 0%, rgba(255, 235, 200, 0.6) 42%, rgba(230, 195, 150, 0.52) 100%)",
-                                                    backdropFilter: "blur(1.5px)",
-                                                    boxShadow: "inset 0 3px 5px rgba(45, 20, 5, 0.6), inset 0 1px 2px rgba(30, 10, 0, 0.5), inset 0 -1.5px 2px rgba(255, 255, 255, 0.45), 0 1.5px 2px rgba(255, 255, 255, 0.25)",
-                                                }}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                                                className="absolute inset-y-0 right-2 flex items-center text-[#5c3c1e] hover:text-[#1a0a02]"
-                                            >
-                                                {showRegisterPassword ? (
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                                                    </svg>
-                                                ) : (
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {registerForm.errors.password && (
-                                        <p className="text-xs text-rose-800 font-bold -mt-1 text-left pl-8">{registerForm.errors.password}</p>
-                                    )}
-
-                                    {/* Password Confirmation Field */}
-                                    <div className="relative group flex items-center">
-                                        <LeafBadge type="shield" />
-                                        <TwigFrame />
-                                        <div className="flex-1 relative pl-5 sm:pl-6">
-                                            <input
-                                                id="register-password-confirmation"
-                                                type={showConfirmPassword ? "text" : "password"}
-                                                name="password_confirmation"
-                                                value={registerForm.data.password_confirmation}
-                                                autoComplete="new-password"
-                                                required
-                                                placeholder="Ulangi Kata Sandi"
-                                                onChange={(e) => registerForm.setData("password_confirmation", e.target.value)}
-                                                className="w-full pl-7 sm:pl-8 pr-8 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-full border border-[#75441a]/60 text-[#1e0c02] placeholder-[#46280e]/75 focus:outline-none focus:ring-2 focus:ring-[#855424]/50 focus:bg-[rgba(255,238,208,0.72)] transition-all duration-200"
-                                                style={{
-                                                    background: "linear-gradient(180deg, rgba(235, 205, 160, 0.48) 0%, rgba(255, 235, 200, 0.6) 42%, rgba(230, 195, 150, 0.52) 100%)",
-                                                    backdropFilter: "blur(1.5px)",
-                                                    boxShadow: "inset 0 3px 5px rgba(45, 20, 5, 0.6), inset 0 1px 2px rgba(30, 10, 0, 0.5), inset 0 -1.5px 2px rgba(255, 255, 255, 0.45), 0 1.5px 2px rgba(255, 255, 255, 0.25)",
-                                                }}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                className="absolute inset-y-0 right-2 flex items-center text-[#5c3c1e] hover:text-[#1a0a02]"
-                                            >
-                                                {showConfirmPassword ? (
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                                                    </svg>
-                                                ) : (
-                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {registerForm.errors.password_confirmation && (
-                                        <p className="text-xs text-rose-800 font-bold -mt-1 text-left pl-8">{registerForm.errors.password_confirmation}</p>
-                                    )}
-
-                                    {/* 3. REALISTIC GREEN LEAF BUTTON "Daftar >" */}
-                                    <div className="pt-2 sm:pt-3">
-                                        <LeafButton text="Daftar" processing={registerForm.processing} />
-                                    </div>
-                                </form>
-                            )}
-                        </div>
-
-                        {/* 3. HIGH-CONTRAST FOOTER GOLDEN CARVED LINKS */}
-                        <div>
-                            {mode === "login" ? (
-                                <p
-                                    className="text-xs sm:text-sm md:text-base font-bold tracking-tight text-[#241103]"
-                                    style={{
-                                        textShadow: "0 1px 0 rgba(255, 255, 255, 0.85)",
-                                    }}
-                                >
-                                    Belum punya akun?{" "}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleSwitchMode("register")}
-                                        className="font-black text-[#0f5420] underline decoration-[#0f5420]/70 decoration-2 underline-offset-2 hover:text-[#062c0e] hover:decoration-[#062c0e] transition-colors"
-                                        style={{
-                                            textShadow: "0 1px 0 rgba(255, 255, 255, 0.9)",
-                                        }}
-                                    >
-                                        Daftar di sini.
-                                    </button>
-                                </p>
-                            ) : (
-                                <p
-                                    className="text-xs sm:text-sm md:text-base font-bold tracking-tight text-[#241103]"
-                                    style={{
-                                        textShadow: "0 1px 0 rgba(255, 255, 255, 0.85)",
-                                    }}
-                                >
-                                    Sudah memiliki akun?{" "}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleSwitchMode("login")}
-                                        className="font-black text-[#0f5420] underline decoration-[#0f5420]/70 decoration-2 underline-offset-2 hover:text-[#062c0e] hover:decoration-[#062c0e] transition-colors"
-                                        style={{
-                                            textShadow: "0 1px 0 rgba(255, 255, 255, 0.9)",
-                                        }}
-                                    >
-                                        Masuk di sini.
-                                    </button>
-                                </p>
-                            )}
-                        </div>
-
-                    </div>
                 </div>
-            </main>
+            </div>
 
-            {/* FOOTER: Floating copyright overlay at bottom */}
-            <footer className="absolute bottom-0 left-0 right-0 py-2 text-center text-[11px] sm:text-xs text-white/60 z-40 pointer-events-none">
-                &copy; {new Date().getFullYear()} AISTELL. Solusi Layanan & Pemeliharaan Lingkungan Hidup.
-            </footer>
-        </AuthScene>
+            {/* ========================================================
+                RIGHT COLUMN: LOGIN FORM
+                Desktop: positioned on right half, smoothly fades & slides in
+                Tablet/Mobile: displayed when mode is 'login'
+                ======================================================== */}
+            <div
+                className={`relative w-full ${
+                    isLogin ? "lg:w-[56%] xl:w-[57%]" : "lg:w-[46%] xl:w-[45%]"
+                } flex-shrink-0 min-h-screen lg:h-screen flex items-center justify-center px-5 sm:px-10 lg:px-8 xl:px-14 pt-24 pb-10 sm:py-28 lg:py-0 z-20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isLogin
+                        ? "opacity-100 translate-y-0 scale-100 pointer-events-auto block"
+                        : "lg:opacity-0 lg:translate-y-4 lg:scale-[0.98] lg:pointer-events-none hidden lg:block lg:invisible"
+                }`}
+                aria-hidden={!isLogin}
+            >
+                <div className="w-full max-w-[400px] sm:max-w-[480px] lg:max-w-[420px] flex flex-col justify-center my-auto rounded-3xl bg-white/35 border border-white/50 backdrop-blur-md shadow-xl shadow-[#06241a]/10 p-6 sm:p-10 lg:bg-transparent lg:border-0 lg:backdrop-blur-none lg:shadow-none lg:p-0 lg:rounded-none">
+
+                    {status && (
+                        <div className="mb-6 rounded-2xl bg-[#c5ddd1]/80 border border-[#3b9270]/50 px-4 py-2.5 text-center text-xs sm:text-sm font-semibold text-[#18231f] shadow-sm">
+                            {status}
+                        </div>
+                    )}
+
+                    {/* Header */}
+                    <div className="text-center lg:text-left mb-6 sm:mb-8">
+                        <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-[#18231f]">
+                            <span className="sm:hidden">
+                                Hello,
+                                <br />
+                                Welcome Back!
+                            </span>
+                            <span className="hidden sm:inline">Welcome Back!</span>
+                        </h1>
+                        <p className="mt-2.5 text-xs sm:text-sm text-[#2f4a3d] lg:text-[#4d6357] font-normal leading-relaxed">
+                            Mewujudkan lingkungan asri dan{" "}
+                            <span className="italic font-medium text-[#2e7d5b] lg:text-[#38916d]">
+                                lingkungan bersih
+                            </span>
+                            &nbsp;bersama AISTEL
+                        </p>
+                    </div>
+
+                    <form onSubmit={submitLogin} className="space-y-4">
+                        {/* Username / Email Field */}
+                        <div>
+                            <label
+                                htmlFor="login-username"
+                                className="block sm:sr-only text-xs font-bold text-[#18231f] mb-1.5 ml-2"
+                            >
+                                Username
+                            </label>
+                            <input
+                                id="login-username"
+                                type="text"
+                                name="email"
+                                value={loginForm.data.email}
+                                autoComplete="username"
+                                required
+                                placeholder="Username atau email"
+                                onChange={(e) => loginForm.setData("email", e.target.value)}
+                                className={`${loginInput} px-6`}
+                            />
+                            {loginForm.errors.email && (
+                                <p className="mt-1.5 ml-4 text-xs font-semibold text-rose-700">
+                                    {loginForm.errors.email}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Password Field */}
+                        <div>
+                            <label
+                                htmlFor="login-password"
+                                className="block sm:sr-only text-xs font-bold text-[#18231f] mb-1.5 ml-2"
+                            >
+                                Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="login-password"
+                                    type={showLoginPassword ? "text" : "password"}
+                                    name="password"
+                                    value={loginForm.data.password}
+                                    autoComplete="current-password"
+                                    required
+                                    placeholder="Password"
+                                    onChange={(e) => loginForm.setData("password", e.target.value)}
+                                    className={`${loginInput} pl-6 pr-12`}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[#355345] hover:text-[#18231f] p-1.5 transition-colors focus:outline-none"
+                                    tabIndex={-1}
+                                    aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                                >
+                                    {showLoginPassword ? (
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    )}
+                                </button>
+                            </div>
+                            {loginForm.errors.password && (
+                                <p className="mt-1.5 ml-4 text-xs font-semibold text-rose-700">
+                                    {loginForm.errors.password}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Forgot Password */}
+                        {canResetPassword && (
+                            <div className="flex justify-end pt-0.5">
+                                <Link
+                                    href={route("password.request")}
+                                    className="text-xs sm:text-sm text-[#2f4a3d] lg:text-[#5d7c6e] hover:text-[#18231f] transition-colors"
+                                >
+                                    Forgot password?
+                                </Link>
+                            </div>
+                        )}
+
+                        {/* Login Button: hijau tua di mobile, putih di tablet & desktop */}
+                        <div className="pt-3">
+                            <button
+                                type="submit"
+                                disabled={loginForm.processing}
+                                className="w-full h-12 sm:h-[50px] rounded-full border-[1.5px] text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-[#14432f] border-[#14432f] text-white hover:bg-[#1c5a40] sm:bg-white sm:border-[#3b9270] sm:text-[#18231f] sm:hover:bg-[#f1f8f4]"
+                            >
+                                {loginForm.processing ? (
+                                    <span className="flex items-center gap-2">
+                                        <Spinner />
+                                        <span>Logging in...</span>
+                                    </span>
+                                ) : (
+                                    "Login"
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Footer link */}
+                        <div className="pt-6 sm:pt-8 text-center">
+                            <p className="text-xs sm:text-sm text-[#18231f]">
+                                Not a member?{" "}
+                                <button
+                                    type="button"
+                                    onClick={() => handleSwitchMode("register")}
+                                    className="font-extrabold text-[#113d29] hover:underline focus:outline-none transition-colors"
+                                >
+                                    Register now!
+                                </button>
+                            </p>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
     );
 }

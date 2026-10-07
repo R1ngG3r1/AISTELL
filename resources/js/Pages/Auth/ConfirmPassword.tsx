@@ -1,8 +1,5 @@
 import PasswordInput from '@/Components/eco/PasswordInput';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import GuestLayout from '@/Layouts/GuestLayout';
+import GuestLayout, { authButton, authError, authInput, authLabel } from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
@@ -19,25 +16,31 @@ export default function ConfirmPassword() {
     };
 
     return (
-        <GuestLayout title="Konfirmasi password" subtitle="Ini area aman. Masukkan password Anda untuk melanjutkan.">
-            <Head title="Konfirmasi Password" />
+        <GuestLayout title="Konfirmasi Password" subtitle="Ini area aman. Masukkan password Anda untuk melanjutkan.">
+            <Head title="Konfirmasi Password - AISTEL" />
 
-            <form onSubmit={submit} className="space-y-5">
+            <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <InputLabel htmlFor="password" value="Password" />
+                    <label htmlFor="password" className={`${authLabel} sm:sr-only`}>
+                        Password
+                    </label>
                     <PasswordInput
                         id="password"
                         name="password"
                         value={data.password}
+                        placeholder="Password"
                         isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
+                        className={authInput}
                     />
-                    <InputError message={errors.password} className="mt-2" />
+                    {errors.password && <p className={authError}>{errors.password}</p>}
                 </div>
 
-                <PrimaryButton className="btn-lg w-full" disabled={processing}>
-                    Konfirmasi
-                </PrimaryButton>
+                <div className="pt-3">
+                    <button type="submit" disabled={processing} className={authButton}>
+                        Konfirmasi
+                    </button>
+                </div>
             </form>
         </GuestLayout>
     );

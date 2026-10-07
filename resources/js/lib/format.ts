@@ -1,3 +1,5 @@
+import { Order } from '@/types';
+
 export function formatRupiah(value: string | number): string {
     return new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -19,3 +21,11 @@ export function formatTime(value: string): string {
     return value.slice(0, 5);
 }
 
+
+/**
+ * Harga pesanan: harga yang dikunci saat pesanan dibuat (order.price).
+ * Fallback ke harga layanan untuk data lama yang belum memiliki kolom price.
+ */
+export function orderPrice(order: Pick<Order, 'price' | 'service'>): string | null {
+    return order.price ?? order.service?.price ?? null;
+}

@@ -5,7 +5,7 @@ import ServiceIcon from '@/Components/eco/ServiceIcon';
 import InputError from '@/Components/InputError';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { formatDate, formatRupiah, formatTime } from '@/lib/format';
+import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
 import { Order, OrderStatus, PageProps, StatusOption } from '@/types';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -68,7 +68,7 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
     ];
 
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout live={['order', 'allowedStatuses']}>
             <Head title={`Pesanan #${order.id}`} />
 
             <Link href={route('admin.orders.index')} className="btn-ghost btn-sm mb-6">
@@ -87,7 +87,7 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                                     <p className="text-sm font-semibold text-forest-900/40">Pesanan #{order.id}</p>
                                     <h1 className="display text-3xl">{order.service?.name}</h1>
                                     <p className="text-sm text-forest-900/50">
-                                        {order.service && formatRupiah(order.service.price)} · dipesan {formatDate(order.created_at)}
+                                        {orderPrice(order) && formatRupiah(orderPrice(order)!)} · dipesan {formatDate(order.created_at)}
                                     </p>
                                 </div>
                             </div>
@@ -118,7 +118,7 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                     </Reveal>
                 </div>
 
-                <aside className="space-y-4 lg:sticky lg:top-24">
+                <aside className="space-y-4 lg:sticky lg:top-8">
                     {/* Aksi status */}
                     <Reveal variant="right" className="relative overflow-hidden rounded-4xl bg-forest-900 p-6 text-cream shadow-lift">
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-leaf-400">Tindakan</p>
@@ -150,7 +150,7 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                     <Reveal variant="right" delay={100} className="card p-6">
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-forest-900/40">Akun pemesan</p>
                         <div className="mt-4 flex items-center gap-3">
-                            <Avatar name={order.user?.name ?? '?'} className="h-11 w-11 text-sm" />
+                            <Avatar name={order.user?.name ?? '?'} src={order.user?.avatar_url} className="h-11 w-11 text-sm" />
                             <div className="min-w-0">
                                 <p className="truncate font-bold">{order.user?.name}</p>
                                 <p className="truncate text-sm text-forest-900/50">

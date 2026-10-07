@@ -4,7 +4,7 @@ import OrderTimeline from '@/Components/eco/OrderTimeline';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { formatDate, formatRupiah, formatTime } from '@/lib/format';
+import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
 import { Order, PageProps } from '@/types';
 import {
@@ -54,7 +54,7 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
     ];
 
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout live={['order']}>
             <Head title={`Pesanan #${order.id}`} />
 
             <Link href={route('orders.index')} className="btn-ghost btn-sm mb-6">
@@ -99,7 +99,7 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                     </Reveal>
                 </div>
 
-                <aside className="space-y-4 lg:sticky lg:top-24">
+                <aside className="space-y-4 lg:sticky lg:top-8">
                     <Reveal variant="right" className="relative overflow-hidden rounded-4xl bg-forest-900 p-6 text-cream shadow-lift">
                         <Leaf className="absolute -bottom-8 -right-8 h-36 w-36 rotate-12 text-forest-800" />
                         <span className="relative grid h-12 w-12 place-items-center rounded-2xl bg-leaf-400 text-forest-900">
@@ -111,7 +111,7 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                         )}
                         <div className="relative mt-5 flex items-baseline justify-between border-t border-white/10 pt-4">
                             <span className="text-sm text-cream/60">Biaya</span>
-                            <span className="display text-3xl">{order.service ? formatRupiah(order.service.price) : '—'}</span>
+                            <span className="display text-3xl">{orderPrice(order) ? formatRupiah(orderPrice(order)!) : '—'}</span>
                         </div>
                     </Reveal>
 

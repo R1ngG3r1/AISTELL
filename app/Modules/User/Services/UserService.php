@@ -13,7 +13,7 @@ class UserService
     public function getPaginatedUsers(int $perPage = 10): LengthAwarePaginator
     {
         return User::query()
-            ->select(['id', 'name', 'email', 'phone', 'role', 'created_at'])
+            ->select(['id', 'name', 'email', 'phone', 'role', 'avatar_path', 'created_at'])
             ->withCount('orders')
             ->latest()
             ->paginate($perPage);

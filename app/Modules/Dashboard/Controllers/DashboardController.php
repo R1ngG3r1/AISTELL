@@ -11,6 +11,9 @@ use Inertia\Response;
 
 /**
  * PRD 6.2 & 6.3 — Dashboard User dan Dashboard Admin.
+ *
+ * Setiap prop dibungkus fn() supaya polling realtime dari frontend
+ * (router.reload({ only: [...] })) hanya menjalankan query yang diminta.
  */
 class DashboardController extends Controller
 {
@@ -26,9 +29,13 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        $user = $request->user();
+
         return Inertia::render('Dashboard', [
-            'stats' => $this->orders->statusCounts($request->user()),
-            'latestOrders' => $this->orders->latest($request->user()),
+            'stats' => fn () => $this->orders->statusCounts($user),
+            'latestOrders' => fn () => $this->orders->latest($user),
+            'upcomingOrders' => fn () => $this->orders->upcoming($user, 3),
+            'schedule' => fn () => $this->orders->schedule($user),
         ]);
     }
 
@@ -36,8 +43,10 @@ class DashboardController extends Controller
     public function admin(): Response
     {
         return Inertia::render('Admin/Dashboard', [
-            'stats' => $this->orders->statusCounts(),
-            'latestOrders' => $this->orders->latest(limit: 10),
+            'stats' => fn () => $this->orders->statusCounts(),
+            'latestOrders' => fn () => $this->orders->latest(limit: 8),
+            'pendingOrders' => fn () => $this->orders->pending(4),
+            'schedule' => fn () => $this->orders->schedule(),
         ]);
     }
 }

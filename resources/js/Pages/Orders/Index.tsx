@@ -4,7 +4,7 @@ import ServiceIcon from '@/Components/eco/ServiceIcon';
 import Pagination from '@/Components/Pagination';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { formatDate, formatRupiah, formatTime } from '@/lib/format';
+import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
 import { Order, PageProps, Paginated } from '@/types';
 import { faCalendarDays, faChevronRight, faLocationDot, faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -14,7 +14,7 @@ import { Head, Link } from '@inertiajs/react';
 // Props dari OrderController@index
 export default function OrdersIndex({ orders }: PageProps<{ orders: Paginated<Order> }>) {
     return (
-        <AuthenticatedLayout
+        <AuthenticatedLayout live={['orders']}
             header={
                 <PageHeader
                     eyebrow="Pesanan Saya"
@@ -70,7 +70,7 @@ export default function OrdersIndex({ orders }: PageProps<{ orders: Paginated<Or
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between gap-4 sm:justify-end">
-                                    {order.service && <span className="text-sm font-semibold">{formatRupiah(order.service.price)}</span>}
+                                    {orderPrice(order) && <span className="text-sm font-semibold">{formatRupiah(orderPrice(order)!)}</span>}
                                     <StatusBadge order={order} />
                                     <FontAwesomeIcon icon={faChevronRight} className="hidden text-forest-900/25 transition group-hover:translate-x-1 sm:block" />
                                 </div>

@@ -1,10 +1,7 @@
 import PasswordInput from '@/Components/eco/PasswordInput';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import GuestLayout, { authButton, authError, authInput, authLabel } from '@/Layouts/GuestLayout';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
 export default function ResetPassword({ token, email }: { token: string; email: string }) {
@@ -23,12 +20,14 @@ export default function ResetPassword({ token, email }: { token: string; email: 
     };
 
     return (
-        <GuestLayout title="Buat password baru" subtitle="Gunakan password yang kuat dan belum pernah Anda pakai.">
-            <Head title="Reset Password" />
+        <GuestLayout title="Buat Password Baru" subtitle="Gunakan password yang kuat dan belum pernah Anda pakai.">
+            <Head title="Reset Password - AISTEL" />
 
-            <form onSubmit={submit} className="space-y-5">
+            <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <label htmlFor="email" className={authLabel}>
+                        Email
+                    </label>
                     <TextInput
                         id="email"
                         type="email"
@@ -36,12 +35,15 @@ export default function ResetPassword({ token, email }: { token: string; email: 
                         value={data.email}
                         autoComplete="username"
                         onChange={(e) => setData('email', e.target.value)}
+                        className={authInput}
                     />
-                    <InputError message={errors.email} className="mt-2" />
+                    {errors.email && <p className={authError}>{errors.email}</p>}
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password" value="Password baru" />
+                    <label htmlFor="password" className={authLabel}>
+                        Password baru
+                    </label>
                     <PasswordInput
                         id="password"
                         name="password"
@@ -49,25 +51,39 @@ export default function ResetPassword({ token, email }: { token: string; email: 
                         autoComplete="new-password"
                         isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
+                        className={authInput}
                     />
-                    <InputError message={errors.password} className="mt-2" />
+                    {errors.password && <p className={authError}>{errors.password}</p>}
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password_confirmation" value="Ulangi password baru" />
+                    <label htmlFor="password_confirmation" className={authLabel}>
+                        Ulangi password baru
+                    </label>
                     <PasswordInput
                         id="password_confirmation"
                         name="password_confirmation"
                         value={data.password_confirmation}
                         autoComplete="new-password"
                         onChange={(e) => setData('password_confirmation', e.target.value)}
+                        className={authInput}
                     />
-                    <InputError message={errors.password_confirmation} className="mt-2" />
+                    {errors.password_confirmation && <p className={authError}>{errors.password_confirmation}</p>}
                 </div>
 
-                <PrimaryButton className="btn-lg w-full" disabled={processing}>
-                    Simpan Password
-                </PrimaryButton>
+                <div className="pt-3">
+                    <button type="submit" disabled={processing} className={authButton}>
+                        {processing ? 'Menyimpan...' : 'Simpan Password'}
+                    </button>
+                </div>
+
+                <div className="pt-6 text-center sm:pt-8">
+                    <p className="text-xs text-[#18231f] sm:text-sm">
+                        <Link href={route('login')} className="font-extrabold text-[#113d29] hover:underline">
+                            Kembali ke Login
+                        </Link>
+                    </p>
+                </div>
             </form>
         </GuestLayout>
     );

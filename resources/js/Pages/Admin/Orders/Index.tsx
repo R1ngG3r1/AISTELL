@@ -1,5 +1,6 @@
 import Avatar from '@/Components/eco/Avatar';
 import EmptyState from '@/Components/eco/EmptyState';
+import OrderCardList from '@/Components/eco/OrderCardList';
 import PageHeader from '@/Components/eco/PageHeader';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import Pagination from '@/Components/Pagination';
@@ -24,7 +25,7 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
     const current = filters.status ?? '';
 
     return (
-        <AuthenticatedLayout
+        <AuthenticatedLayout live={['orders']}
             header={
                 <PageHeader
                     eyebrow="Kelola Pesanan"
@@ -61,7 +62,9 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                 {orders.data.length === 0 ? (
                     <EmptyState title="Tidak ada pesanan" description="Belum ada pesanan dengan status ini." />
                 ) : (
-                    <div className="overflow-x-auto">
+                    <>
+                    <OrderCardList orders={orders.data} className="md:hidden" />
+                    <div className="hidden overflow-x-auto md:block">
                         <table className="table-eco">
                             <thead>
                                 <tr>
@@ -83,7 +86,7 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                                         <td className="font-semibold text-forest-900/40">{order.id}</td>
                                         <td>
                                             <div className="flex items-center gap-3">
-                                                <Avatar name={order.contact_name} />
+                                                <Avatar name={order.contact_name} src={order.user?.avatar_url} />
                                                 <div className="min-w-0">
                                                     <p className="truncate font-semibold">{order.contact_name}</p>
                                                     <p className="truncate text-xs text-forest-900/45">{order.user?.email}</p>
@@ -115,6 +118,7 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                             </tbody>
                         </table>
                     </div>
+                    </>
                 )}
             </Reveal>
             <Pagination meta={orders} />

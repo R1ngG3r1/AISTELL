@@ -1,8 +1,5 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
+import GuestLayout, { authButton, authError, authInput, authLabel, authStatus } from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
@@ -18,39 +15,53 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
     return (
         <GuestLayout
-            title="Lupa password?"
-            subtitle="Tidak masalah. Masukkan email Anda dan kami akan mengirim tautan untuk membuat password baru."
+            title="Lupa Password?"
+            subtitle={
+                <>
+                    Tidak masalah. Masukkan email Anda dan kami akan mengirim{' '}
+                    <span className="font-medium italic text-[#2e7d5b] lg:text-[#38916d]">tautan reset password</span>.
+                </>
+            }
         >
-            <Head title="Lupa Password" />
+            <Head title="Lupa Password - AISTEL" />
 
-            {status && <div className="mb-5 rounded-2xl bg-leaf-100 p-3 text-sm font-medium text-forest-700">{status}</div>}
+            {status && <div className={authStatus}>{status}</div>}
 
-            <form onSubmit={submit} className="space-y-5">
+            <form onSubmit={submit} className="space-y-4">
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <label htmlFor="email" className={`${authLabel} sm:sr-only`}>
+                        Email
+                    </label>
                     <TextInput
                         id="email"
                         type="email"
                         name="email"
                         value={data.email}
-                        placeholder="nama@email.com"
+                        autoComplete="email"
+                        required
+                        placeholder="Email address"
                         isFocused={true}
                         onChange={(e) => setData('email', e.target.value)}
+                        className={authInput}
                     />
-                    <InputError message={errors.email} className="mt-2" />
+                    {errors.email && <p className={authError}>{errors.email}</p>}
                 </div>
 
-                <PrimaryButton className="btn-lg w-full" disabled={processing}>
-                    Kirim Tautan Reset
-                </PrimaryButton>
-            </form>
+                <div className="pt-3">
+                    <button type="submit" disabled={processing} className={authButton}>
+                        {processing ? 'Mengirim...' : 'Kirim Tautan Reset'}
+                    </button>
+                </div>
 
-            <p className="mt-6 text-center text-sm text-forest-900/60">
-                Ingat password?{' '}
-                <Link href={route('login')} className="font-semibold text-forest-600 hover:text-forest-800">
-                    Kembali masuk
-                </Link>
-            </p>
+                <div className="pt-6 text-center sm:pt-8">
+                    <p className="text-xs text-[#18231f] sm:text-sm">
+                        Ingat password?{' '}
+                        <Link href={route('login')} className="font-extrabold text-[#113d29] hover:underline">
+                            Kembali ke Login
+                        </Link>
+                    </p>
+                </div>
+            </form>
         </GuestLayout>
     );
 }
