@@ -83,8 +83,9 @@ export default function Dashboard({ auth, stats, latestOrders, upcomingOrders, s
                 <div className="flex flex-col gap-5 xl:col-span-2">
                     <Panel title="Ringkasan Pesanan" action={{ label: 'Lihat semua', href: route('orders.index') }}>
                         <div className="grid gap-5 md:grid-cols-[15rem_1fr]">
-                            <div className="grid gap-3 sm:grid-cols-3 md:grid-cols-1">
-                                <IconTile icon={faClipboardList} label="Total Pesanan" value={stats.total} highlight horizontal />
+                            {/* HP: Total selebar kartu + 2 petak; tablet kecil: 3 sejajar; md+: bertumpuk di kolom kiri */}
+                            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-1">
+                                <IconTile icon={faClipboardList} label="Total Pesanan" value={stats.total} highlight horizontal className="col-span-2 sm:col-span-1" />
                                 <IconTile icon={faHourglassHalf} label="Pesanan Aktif" value={active} iconClass="bg-[#fdf3d7] text-[#b7861b]" horizontal />
                                 <IconTile icon={faCircleCheck} label="Selesai" value={stats.selesai} horizontal />
                             </div>
