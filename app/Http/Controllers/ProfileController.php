@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Modules\Address\Services\AddressService;
 use App\Modules\Order\Services\OrderService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -17,13 +18,15 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request, OrderService $orders): Response
+    public function edit(Request $request, OrderService $orders, AddressService $addresses): Response
     {
         $user = $request->user();
 
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $user instanceof MustVerifyEmail,
             'status' => session('status'),
+            // Buku alamat (khusus user; admin tidak memesan layanan).
+            'addresses' => $user->isAdmin() ? [] : $addresses->listFor($user),
             // Ringkasan akun di kartu profil. Admin melihat seluruh pesanan, user hanya miliknya.
             'summary' => [
                 'memberSince' => $user->created_at?->toDateString(),

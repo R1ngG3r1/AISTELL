@@ -23,7 +23,6 @@ export default function UpdateProfileInformation({
         name: user.name,
         email: user.email,
         phone: user.phone ?? '',
-        address: user.address ?? '',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -35,7 +34,7 @@ export default function UpdateProfileInformation({
         <section className={className}>
             <header>
                 <h2 className="display text-2xl">Informasi profil</h2>
-                <p className="mt-1 text-sm text-forest-900/55">Perbarui nama, email, nomor telepon, dan alamat utama akun Anda.</p>
+                <p className="mt-1 text-sm text-forest-900/55">Perbarui nama, email, dan nomor telepon akun Anda.</p>
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-5">
@@ -70,21 +69,6 @@ export default function UpdateProfileInformation({
                         />
                         <InputError className="mt-2" message={errors.phone} />
                     </div>
-                </div>
-
-                <div>
-                    <InputLabel htmlFor="address" value="Alamat utama" />
-                    <textarea
-                        id="address"
-                        rows={3}
-                        value={data.address}
-                        placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kota"
-                        onChange={(e) => setData('address', e.target.value)}
-                        autoComplete="street-address"
-                        className="input"
-                    />
-                    <p className="mt-1.5 text-xs text-forest-900/50">Otomatis terisi sebagai lokasi layanan saat Anda memesan (tetap bisa diubah).</p>
-                    <InputError className="mt-2" message={errors.address} />
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (

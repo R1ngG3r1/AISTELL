@@ -37,15 +37,60 @@ test('username login is refused when the name is used by more than one account',
     $this->assertGuest();
 });
 
-test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+test('akun terdaftar dengan password salah mendapat pesan password salah', function () {
+    $user = User::factory()->create(['name' => 'budi']);
 
-    $this->post('/login', [
-        'email' => $user->email,
-        'password' => 'wrong-password',
-    ])->assertSessionHasErrors(['email' => 'Username/email atau password yang Anda masukkan salah.']);
+    // Lewat email maupun username
+    foreach ([$user->email, 'budi'] as $login) {
+        $this->post('/login', ['email' => $login, 'password' => 'wrong-password'])
+            ->assertSessionHasErrors(['password' => 'Password yang Anda masukkan salah. Silakan coba lagi.'])
+            ->assertSessionDoesntHaveErrors(['account']);
+    }
 
     $this->assertGuest();
+});
+
+test('email atau username yang belum terdaftar mendapat pesan akun belum terdaftar', function () {
+    User::factory()->create(['email' => 'ada@aistel.test', 'name' => 'budi']);
+
+    foreach (['tidakada@aistel.test', 'siapa'] as $login) {
+        $this->post('/login', ['email' => $login, 'password' => 'password'])
+            ->assertSessionHasErrors(['account' => 'Akun belum terdaftar. Silakan buat akun terlebih dahulu.'])
+            ->assertSessionDoesntHaveErrors(['password']);
+    }
+
+    $this->assertGuest();
+});
+
+test('email login tidak membedakan huruf besar kecil', function () {
+    $user = User::factory()->create(['email' => 'budi@aistel.test']);
+
+    $this->post('/login', ['email' => 'BUDI@Aistel.test', 'password' => 'password']);
+
+    $this->assertAuthenticatedAs($user);
+});
+
+test('peringatan sisa percobaan muncul lalu login dikunci sementara', function () {
+    $user = User::factory()->create();
+    $wrong = fn () => $this->post('/login', ['email' => $user->email, 'password' => 'salah']);
+
+    $wrong()->assertSessionHasErrors(['password' => trans('auth.password')]); // sisa 4: belum diperingatkan
+    $wrong();
+    $wrong();
+    $wrong()->assertSessionHasErrors(['password' => trans('auth.password').' '.trans('auth.attempts_left', ['count' => 1])]);
+    $wrong(); // percobaan ke-5
+
+    // Dikunci: password benar pun ditolak sementara
+    $this->post('/login', ['email' => $user->email, 'password' => 'password'])->assertSessionHasErrors('login');
+    $this->assertGuest();
+});
+
+test('percobaan pada akun yang belum terdaftar juga dibatasi', function () {
+    foreach (range(1, 5) as $_) {
+        $this->post('/login', ['email' => 'acak@aistel.test', 'password' => 'x'])->assertSessionHasErrors('account');
+    }
+
+    $this->post('/login', ['email' => 'acak@aistel.test', 'password' => 'x'])->assertSessionHasErrors('login');
 });
 
 test('admin is not sent back to a user-only page after login', function () {

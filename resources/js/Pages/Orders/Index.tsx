@@ -2,6 +2,7 @@ import EmptyState from '@/Components/eco/EmptyState';
 import PageHeader from '@/Components/eco/PageHeader';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import Pagination from '@/Components/Pagination';
+import { PaymentBadge } from '@/Components/eco/Payment';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
@@ -71,7 +72,10 @@ export default function OrdersIndex({ orders }: PageProps<{ orders: Paginated<Or
                                 </div>
                                 <div className="flex items-center justify-between gap-4 sm:justify-end">
                                     {orderPrice(order) && <span className="text-sm font-semibold">{formatRupiah(orderPrice(order)!)}</span>}
-                                    <StatusBadge order={order} />
+                                    <div className="flex flex-col items-end gap-1.5">
+                                        <StatusBadge order={order} />
+                                        {(order.payment || order.status === 'menunggu' || order.status === 'diproses') && <PaymentBadge payment={order.payment} />}
+                                    </div>
                                     <FontAwesomeIcon icon={faChevronRight} className="hidden text-forest-900/25 transition group-hover:translate-x-1 sm:block" />
                                 </div>
                             </Link>

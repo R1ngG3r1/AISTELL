@@ -59,11 +59,7 @@ export default function DashboardHero({
                     <div className="rounded-2xl border border-white/70 bg-[#fbfcf8]/90 px-4 py-3 text-[13px] font-semibold text-[#0c2b20] shadow-soft backdrop-blur">
                         <p className="flex items-center gap-2.5">
                             <FontAwesomeIcon icon={faCalendarDays} className="w-3.5 text-[#287e59]" />
-                            {now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone })}
-                        </p>
-                        <p className="mt-1.5 flex items-center gap-2.5 capitalize">
-                            <FontAwesomeIcon icon={faLeaf} className="w-3.5 text-[#287e59]" />
-                            {now.toLocaleDateString('id-ID', { weekday: 'long', timeZone })}
+                            {now.toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', timeZone })}
                         </p>
                         <p className="mt-1.5 flex items-center gap-2.5 tabular-nums" aria-live="off">
                             <FontAwesomeIcon icon={faClock} className="w-3.5 text-[#287e59]" />

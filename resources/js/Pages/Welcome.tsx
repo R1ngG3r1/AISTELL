@@ -394,7 +394,9 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                                     <FontAwesomeIcon icon={getServiceIcon(item.name)} />
                                 </div>
                                 <h3 className="service-title">{item.name}</h3>
-                                <p className="service-description">{item.description}</p>
+                                <p className="service-description line-clamp-3" title={item.description || undefined}>
+                                    {item.description}
+                                </p>
                             </Link>
                         ))}
                     </div>

@@ -3,6 +3,7 @@
 namespace App\Modules\Order\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Address\Services\AddressService;
 use App\Modules\Order\Models\Order;
 use App\Modules\Order\Requests\StoreOrderRequest;
 use App\Modules\Order\Services\OrderService;
@@ -32,10 +33,12 @@ class OrderController extends Controller
     }
 
     // GET /orders/create?service=3  (service opsional: layanan yang sudah dipilih)
-    public function create(Request $request, ServiceCatalog $catalog): Response
+    public function create(Request $request, ServiceCatalog $catalog, AddressService $addresses): Response
     {
         return Inertia::render('Orders/Create', [
             'services' => $catalog->all(),
+            // Buku alamat: alamat utama di urutan pertama → otomatis terpilih di formulir.
+            'addresses' => $addresses->listFor($request->user()),
             'selectedServiceId' => $request->integer('service') ?: null,
         ]);
     }
@@ -45,9 +48,10 @@ class OrderController extends Controller
     {
         $order = $this->orders->createFor($request->user(), $request->validated());
 
+        // Langsung ke halaman pembayaran, seperti checkout di e-commerce.
         return redirect()
-            ->route('orders.show', $order)
-            ->with('success', 'Pesanan berhasil dikirim dan menunggu konfirmasi admin.');
+            ->route('orders.payment', $order)
+            ->with('success', 'Pesanan berhasil dibuat. Silakan pilih metode pembayaran.');
     }
 
     // GET /orders/{order}
@@ -57,7 +61,7 @@ class OrderController extends Controller
         Gate::authorize('view', $order);
 
         return Inertia::render('Orders/Show', [
-            'order' => fn () => $order->load('service:id,name,price,description'),
+            'order' => fn () => $order->load(['service:id,name,price,description', 'payment']),
         ]);
     }
 

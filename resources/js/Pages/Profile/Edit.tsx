@@ -2,11 +2,12 @@ import PageHeader from '@/Components/eco/PageHeader';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
-import { OrderStats, PageProps } from '@/types';
+import { Address, OrderStats, PageProps } from '@/types';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { faCalendarCheck, faCircleCheck, faClipboardList, faEnvelope, faHourglassHalf, faLocationDot, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head } from '@inertiajs/react';
+import AddressBook from './Partials/AddressBook';
 import AvatarUploader from './Partials/AvatarUploader';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
@@ -17,6 +18,7 @@ type Props = PageProps<{
     mustVerifyEmail: boolean;
     status?: string;
     summary: { memberSince: string | null; orders: OrderStats };
+    addresses: Address[]; // buku alamat, alamat utama di urutan pertama (kosong untuk admin)
 }>;
 
 function Stat({ icon, label, value }: { icon: IconDefinition; label: string; value: number }) {
@@ -29,15 +31,18 @@ function Stat({ icon, label, value }: { icon: IconDefinition; label: string; val
     );
 }
 
-export default function Edit({ auth, mustVerifyEmail, status, summary }: Props) {
+export default function Edit({ auth, mustVerifyEmail, status, summary, addresses }: Props) {
     const user = auth.user;
     const isAdmin = user.role === 'admin';
     const active = summary.orders.menunggu + summary.orders.diproses;
 
+    const primary = addresses.find((a) => a.is_primary);
+
     const contacts = [
         { icon: faEnvelope, value: user.email },
         { icon: faPhone, value: user.phone || 'Nomor telepon belum diisi' },
-        { icon: faLocationDot, value: user.address || 'Alamat utama belum diisi' },
+        // Admin tidak memesan layanan, jadi tidak punya buku alamat.
+        ...(isAdmin ? [] : [{ icon: faLocationDot, value: primary?.address || 'Alamat utama belum diisi' }]),
     ];
 
     return (
@@ -46,7 +51,7 @@ export default function Edit({ auth, mustVerifyEmail, status, summary }: Props) 
                 <PageHeader
                     eyebrow="Profil Saya"
                     title="Pengaturan akun"
-                    description="Kelola foto profil, data diri, alamat utama, dan keamanan akun Anda."
+                    description="Kelola foto profil, data diri, alamat, dan keamanan akun Anda."
                 />
             }
         >
@@ -69,7 +74,7 @@ export default function Edit({ auth, mustVerifyEmail, status, summary }: Props) 
                             <span className="mt-2 inline-flex rounded-full bg-[#4de097] px-3 py-0.5 text-[10.5px] font-bold uppercase tracking-wider text-[#07271e]">
                                 {isAdmin ? 'Admin' : 'User'}
                             </span>
-                            {summary.memberSince && (
+                            {!isAdmin && summary.memberSince && (
                                 <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-white/60">
                                     <FontAwesomeIcon icon={faCalendarCheck} /> Bergabung sejak {formatDate(summary.memberSince)}
                                 </p>
@@ -100,6 +105,12 @@ export default function Edit({ auth, mustVerifyEmail, status, summary }: Props) 
                     <Reveal className="card p-6 md:p-8">
                         <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} className="max-w-2xl" />
                     </Reveal>
+
+                    {!isAdmin && (
+                        <Reveal delay={40} className="card p-6 md:p-8">
+                            <AddressBook addresses={addresses} />
+                        </Reveal>
+                    )}
 
                     <Reveal delay={80} className="card p-6 md:p-8">
                         <UpdatePasswordForm className="max-w-2xl" />

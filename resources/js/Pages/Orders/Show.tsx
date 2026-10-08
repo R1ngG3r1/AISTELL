@@ -1,9 +1,12 @@
 import ConfirmModal from '@/Components/eco/ConfirmModal';
+import { MethodLogo, PaymentBadge } from '@/Components/eco/Payment';
 import { Leaf } from '@/Components/eco/Illustrations';
 import OrderTimeline from '@/Components/eco/OrderTimeline';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import StatusBadge from '@/Components/StatusBadge';
+import { GoogleMapsLink, MapPreview } from '@/Components/eco/map';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { toLatLng } from '@/lib/geo';
 import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
 import { Order, PageProps } from '@/types';
@@ -12,6 +15,7 @@ import {
     faBan,
     faCalendarDays,
     faClock,
+    faCreditCard,
     faLocationDot,
     faNoteSticky,
     faPhone,
@@ -43,6 +47,8 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                 setConfirming(false);
             },
         });
+
+    const point = toLatLng(order); // titik peta lokasi (null untuk pesanan tanpa titik)
 
     const details = [
         { icon: faUser, label: 'Nama pemesan', value: order.contact_name },
@@ -96,6 +102,12 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                                 </div>
                             ))}
                         </dl>
+                        {point && (
+                            <div className="mt-6">
+                                <MapPreview point={point} />
+                                <GoogleMapsLink point={point} className="mt-3" />
+                            </div>
+                        )}
                     </Reveal>
                 </div>
 
@@ -115,6 +127,33 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                         </div>
                     </Reveal>
 
+                    {/* Pembayaran (dummy) */}
+                    {(order.payment || order.status === 'menunggu' || order.status === 'diproses') && (
+                        <Reveal variant="right" delay={60} className="card p-5">
+                            <div className="flex items-center justify-between gap-3">
+                                <p className="text-xs font-bold uppercase tracking-[0.2em] text-forest-900/40">Pembayaran</p>
+                                <PaymentBadge payment={order.payment?.status === 'dibatalkan' ? null : order.payment} />
+                            </div>
+                            {order.payment && order.payment.status !== 'dibatalkan' && (
+                                <div className="mt-3 flex items-center gap-3">
+                                    <MethodLogo method={order.payment.method} />
+                                    <div className="min-w-0 text-sm">
+                                        <p className="truncate font-semibold">{order.payment.method_label}</p>
+                                        <p className="text-xs text-forest-900/50">{formatRupiah(order.payment.amount)}</p>
+                                    </div>
+                                </div>
+                            )}
+                            <Link href={route('orders.payment', order.id)} className={`${order.payment?.status === 'lunas' ? 'btn-ghost' : 'btn-primary'} mt-4 w-full`}>
+                                <FontAwesomeIcon icon={faCreditCard} />
+                                {order.payment?.status === 'lunas' || order.payment?.status === 'dikembalikan'
+                                    ? 'Lihat bukti pembayaran'
+                                    : order.payment?.status === 'menunggu'
+                                      ? 'Lihat cara bayar'
+                                      : 'Bayar sekarang'}
+                            </Link>
+                        </Reveal>
+                    )}
+
                     {/* Sama dengan aturan OrderPolicy::cancel di backend */}
                     {order.status === 'menunggu' && (
                         <Reveal variant="right" delay={100}>
@@ -131,7 +170,11 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                 tone="danger"
                 icon={faBan}
                 title="Batalkan pesanan?"
-                message="Pesanan yang dibatalkan tidak dapat diaktifkan kembali. Anda bisa membuat pesanan baru kapan saja."
+                message={
+                    order.payment?.status === 'lunas'
+                        ? 'Pesanan ini sudah dibayar. Dana akan dikembalikan ke metode pembayaran asal (simulasi).'
+                        : 'Pesanan yang dibatalkan tidak dapat diaktifkan kembali. Anda bisa membuat pesanan baru kapan saja.'
+                }
                 confirmText="Ya, batalkan"
                 processing={processing}
                 onConfirm={cancel}

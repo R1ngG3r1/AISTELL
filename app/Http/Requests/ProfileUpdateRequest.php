@@ -27,15 +27,6 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s]{8,20}$/'],
-            // Alamat utama → otomatis mengisi lokasi di formulir pemesanan.
-            'address' => ['nullable', 'string', 'max:1000'],
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'address' => 'alamat',
         ];
     }
 

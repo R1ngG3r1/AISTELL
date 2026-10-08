@@ -1,4 +1,5 @@
 import { Leaf } from '@/Components/eco/Illustrations';
+import { LocationPicker } from '@/Components/eco/map';
 import PageHeader from '@/Components/eco/PageHeader';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import InputError from '@/Components/InputError';
@@ -7,14 +8,18 @@ import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatRupiah } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
-import { PageProps, Service } from '@/types';
-import { faArrowRight, faCalendarDays, faCheck, faClock, faLocationDot, faUser } from '@fortawesome/free-solid-svg-icons';
+import { toLatLng } from '@/lib/geo';
+import { Address, PageProps, Service } from '@/types';
+import { faArrowRight, faCalendarDays, faCheck, faClock, faLocationDot, faMapPin, faPlus, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler, ReactNode } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { FormEventHandler, ReactNode, useState } from 'react';
 
 // Props dari OrderController@create
-type Props = PageProps<{ services: Service[]; selectedServiceId: number | null }>;
+type Props = PageProps<{ services: Service[]; selectedServiceId: number | null; addresses: Address[] }>;
+
+/** Teks lokasi pesanan dari alamat tersimpan: alamat lengkap + detail (no. rumah/patokan). */
+const locationText = (a: Address) => (a.detail ? `${a.address}\n${a.detail}` : a.address);
 
 function Step({ n, title, children, delay = 0 }: { n: number; title: string; children: ReactNode; delay?: number }) {
     return (
@@ -28,14 +33,21 @@ function Step({ n, title, children, delay = 0 }: { n: number; title: string; chi
     );
 }
 
-export default function OrderCreate({ auth, services, selectedServiceId }: Props) {
+export default function OrderCreate({ auth, services, selectedServiceId, addresses }: Props) {
+    // Alamat utama selalu di urutan pertama (AddressService::listFor) → terpilih otomatis.
+    const primary = addresses.find((a) => a.is_primary) ?? null;
+    // Alamat tersimpan yang sedang dipakai; null = lokasi lain (dipilih manual di peta).
+    const [addressId, setAddressId] = useState<number | null>(primary?.id ?? null);
+
     // useForm Inertia: menyimpan isi form + error validasi dari backend (StoreOrderRequest).
     // Nama, telepon, dan alamat diisi otomatis dari akun, tapi boleh diubah.
     const { data, setData, post, processing, errors } = useForm({
         service_id: selectedServiceId ? String(selectedServiceId) : '',
         contact_name: auth.user.name,
         contact_phone: auth.user.phone ?? '',
-        location: auth.user.address ?? '', // diisi dari alamat utama di Profil Saya
+        location: primary ? locationText(primary) : '', // diisi dari alamat utama di Profil Saya
+        latitude: primary?.latitude ?? (null as number | null),
+        longitude: primary?.longitude ?? (null as number | null),
         date: '',
         time: '',
         notes: '',
@@ -49,6 +61,17 @@ export default function OrderCreate({ auth, services, selectedServiceId }: Props
     // Format YYYY-MM-DD sesuai zona waktu lokal (en-CA kebetulan memakai format itu).
     const today = new Date().toLocaleDateString('en-CA');
     const selected = services.find((s) => String(s.id) === data.service_id);
+    const point = toLatLng(data);
+
+    const chooseAddress = (a: Address | null) => {
+        setAddressId(a?.id ?? null);
+        setData((d) => ({
+            ...d,
+            location: a ? locationText(a) : '',
+            latitude: a?.latitude ?? null,
+            longitude: a?.longitude ?? null,
+        }));
+    };
 
     return (
         <AuthenticatedLayout
@@ -128,11 +151,84 @@ export default function OrderCreate({ auth, services, selectedServiceId }: Props
                     <Step n={3} title="Lokasi & jadwal" delay={160}>
                         <div className="space-y-4">
                             <div>
+                                <InputLabel value="Pilih alamat" />
+                                {addresses.length > 0 ? (
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        {addresses.map((a) => {
+                                            const active = addressId === a.id;
+                                            return (
+                                                <button
+                                                    type="button"
+                                                    key={a.id}
+                                                    onClick={() => chooseAddress(a)}
+                                                    className={`flex gap-3 rounded-2xl p-3.5 text-left ring-1 transition duration-300 ${
+                                                        active ? 'bg-forest-50 ring-2 ring-forest-500' : 'bg-white ring-forest-900/10 hover:ring-forest-500/40'
+                                                    }`}
+                                                >
+                                                    <FontAwesomeIcon icon={faLocationDot} className={`mt-0.5 ${active ? 'text-forest-600' : 'text-forest-900/30'}`} />
+                                                    <span className="min-w-0 flex-1">
+                                                        <span className="flex items-center gap-2">
+                                                            <span className="truncate text-sm font-bold">{a.label}</span>
+                                                            {a.is_primary && (
+                                                                <span className="rounded-full bg-forest-900 px-2 py-px text-[10px] font-bold uppercase tracking-wider text-leaf-400">
+                                                                    Utama
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                        <span className="mt-0.5 line-clamp-2 text-xs text-forest-900/55">{a.address}</span>
+                                                    </span>
+                                                    {active && <FontAwesomeIcon icon={faCheck} className="mt-0.5 text-forest-600" />}
+                                                </button>
+                                            );
+                                        })}
+                                        <button
+                                            type="button"
+                                            onClick={() => chooseAddress(null)}
+                                            className={`flex items-center gap-3 rounded-2xl border-2 border-dashed p-3.5 text-left text-sm font-semibold transition ${
+                                                addressId === null
+                                                    ? 'border-forest-500 bg-forest-50 text-forest-700'
+                                                    : 'border-forest-900/15 text-forest-900/60 hover:border-forest-500/50'
+                                            }`}
+                                        >
+                                            <FontAwesomeIcon icon={faMapPin} /> Lokasi lain (pilih di peta)
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="rounded-2xl bg-forest-50 p-4 text-sm text-forest-700">
+                                        Belum ada alamat tersimpan. Pilih lokasi di peta di bawah, atau{' '}
+                                        <Link href={route('profile.edit')} className="font-semibold underline">
+                                            simpan alamat di Profil Saya
+                                        </Link>{' '}
+                                        agar otomatis terisi di pesanan berikutnya.
+                                    </p>
+                                )}
+                                {addresses.length > 0 && (
+                                    <Link href={route('profile.edit')} className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-forest-600 hover:underline">
+                                        <FontAwesomeIcon icon={faPlus} /> Kelola alamat di Profil Saya
+                                    </Link>
+                                )}
+                            </div>
+
+                            <div>
+                                <InputLabel value="Titik lokasi di peta" />
+                                <LocationPicker
+                                    value={point}
+                                    onChange={(p) => {
+                                        // Titik digeser → bukan lagi alamat tersimpan apa adanya.
+                                        setAddressId(null);
+                                        setData((d) => ({ ...d, latitude: p.lat, longitude: p.lng }));
+                                    }}
+                                    onAddress={(text) => setData('location', text)}
+                                />
+                                <InputError message={errors.latitude || errors.longitude} className="mt-2" />
+                            </div>
+
+                            <div>
                                 <InputLabel htmlFor="location" value="Alamat lokasi layanan" />
                                 <textarea
                                     id="location"
                                     rows={3}
-                                    placeholder="Nama jalan, nomor rumah, RT/RW, kelurahan, kota"
+                                    placeholder="Terisi otomatis dari alamat / titik peta. Lengkapi nomor rumah, RT/RW, atau patokan bila perlu"
                                     value={data.location}
                                     onChange={(e) => setData('location', e.target.value)}
                                     className="input"
@@ -207,7 +303,7 @@ export default function OrderCreate({ auth, services, selectedServiceId }: Props
                         </div>
 
                         <button type="submit" disabled={processing} className="btn-leaf btn-lg group relative mt-6 w-full">
-                            {processing ? 'Mengirim…' : 'Kirim Pesanan'}
+                            {processing ? 'Mengirim…' : 'Lanjut ke Pembayaran'}
                             <FontAwesomeIcon icon={faArrowRight} className="transition-transform group-hover:translate-x-1" />
                         </button>
                         <p className="relative mt-3 text-center text-xs text-cream/50">Status pesanan bisa dipantau di menu Pesanan Saya.</p>

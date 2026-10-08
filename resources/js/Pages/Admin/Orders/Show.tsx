@@ -1,10 +1,12 @@
-import Avatar from '@/Components/eco/Avatar';
 import ConfirmModal from '@/Components/eco/ConfirmModal';
+import { MethodLogo, PaymentBadge } from '@/Components/eco/Payment';
 import OrderTimeline from '@/Components/eco/OrderTimeline';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import InputError from '@/Components/InputError';
 import StatusBadge from '@/Components/StatusBadge';
+import { GoogleMapsLink, MapPreview } from '@/Components/eco/map';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { toLatLng } from '@/lib/geo';
 import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
 import { Order, OrderStatus, PageProps, StatusOption } from '@/types';
@@ -58,9 +60,13 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
         });
     };
 
+    const point = toLatLng(order); // titik peta lokasi (null untuk pesanan tanpa titik)
+
     const details = [
         { icon: faUser, label: 'Nama pemesan', value: order.contact_name },
         { icon: faPhone, label: 'Nomor kontak', value: order.contact_phone },
+        // Email akun yang memesan (pesanan tidak menyimpan email tersendiri)
+        { icon: faEnvelope, label: 'Email pemesan', value: order.user?.email ?? '—', wide: true },
         { icon: faCalendarDays, label: 'Tanggal', value: formatDate(order.date) },
         { icon: faClock, label: 'Waktu', value: formatTime(order.time) },
         { icon: faLocationDot, label: 'Lokasi', value: order.location, wide: true },
@@ -115,6 +121,12 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                                 </div>
                             ))}
                         </dl>
+                        {point && (
+                            <div className="mt-6">
+                                <MapPreview point={point} />
+                                <GoogleMapsLink point={point} className="mt-3" />
+                            </div>
+                        )}
                     </Reveal>
                 </div>
 
@@ -146,23 +158,40 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                         <InputError message={errors.status} className="mt-3 text-clay-100" />
                     </Reveal>
 
-                    {/* Akun pemesan */}
-                    <Reveal variant="right" delay={100} className="card p-6">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-forest-900/40">Akun pemesan</p>
-                        <div className="mt-4 flex items-center gap-3">
-                            <Avatar name={order.user?.name ?? '?'} src={order.user?.avatar_url} className="h-11 w-11 text-sm" />
-                            <div className="min-w-0">
-                                <p className="truncate font-bold">{order.user?.name}</p>
-                                <p className="truncate text-sm text-forest-900/50">
-                                    <FontAwesomeIcon icon={faEnvelope} className="me-1.5" />
-                                    {order.user?.email}
-                                </p>
-                                <p className="text-sm text-forest-900/50">
-                                    <FontAwesomeIcon icon={faPhone} className="me-1.5" />
-                                    {order.user?.phone ?? '—'}
-                                </p>
-                            </div>
+                    {/* Pembayaran (dummy) */}
+                    <Reveal variant="right" delay={60} className="card p-6">
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-forest-900/40">Pembayaran</p>
+                            <PaymentBadge payment={order.payment} />
                         </div>
+                        {order.payment ? (
+                            <>
+                                <div className="mt-4 flex items-center gap-3">
+                                    <MethodLogo method={order.payment.method} />
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-bold">{order.payment.method_label}</p>
+                                        <p className="truncate text-xs text-forest-900/50">{order.payment.reference}</p>
+                                    </div>
+                                </div>
+                                <dl className="mt-4 space-y-1.5 border-t border-forest-900/5 pt-4 text-sm">
+                                    <div className="flex justify-between gap-3">
+                                        <dt className="text-forest-900/50">Total</dt>
+                                        <dd className="font-semibold">{formatRupiah(order.payment.amount)}</dd>
+                                    </div>
+                                    {order.payment.paid_at && (
+                                        <div className="flex justify-between gap-3">
+                                            <dt className="text-forest-900/50">Dibayar</dt>
+                                            <dd>{new Date(order.payment.paid_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</dd>
+                                        </div>
+                                    )}
+                                </dl>
+                                {order.payment.method_group === 'cod' && order.payment.status === 'menunggu' && (
+                                    <p className="mt-3 text-xs text-forest-900/55">Tunai ditagih petugas di lokasi; otomatis lunas saat pesanan ditandai Selesai.</p>
+                                )}
+                            </>
+                        ) : (
+                            <p className="mt-3 text-sm text-forest-900/55">Pemesan belum memilih metode pembayaran.</p>
+                        )}
                     </Reveal>
                 </aside>
             </div>
@@ -172,7 +201,13 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                 tone={target ? actions[target.value].tone : 'primary'}
                 icon={target ? actions[target.value].icon : undefined}
                 title={`Ubah status menjadi "${target?.label}"?`}
-                message="Pemesan akan melihat status terbaru di halaman pesanannya."
+                message={
+                    target && order.payment?.status !== 'lunas' && order.payment?.method_group !== 'cod' && target.value === 'diproses'
+                        ? 'Perhatian: pesanan ini BELUM dibayar. Pemesan akan melihat status terbaru di halaman pesanannya.'
+                        : target && order.payment?.status === 'lunas' && (target.value === 'ditolak' || target.value === 'dibatalkan')
+                          ? 'Pesanan sudah dibayar - dana akan dikembalikan ke pemesan (simulasi).'
+                          : 'Pemesan akan melihat status terbaru di halaman pesanannya.'
+                }
                 confirmText={target ? actions[target.value].text : ''}
                 processing={processing}
                 onConfirm={changeStatus}

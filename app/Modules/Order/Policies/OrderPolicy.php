@@ -23,6 +23,13 @@ class OrderPolicy
         return $user->isAdmin() || $order->user_id === $user->id;
     }
 
+    /** Membayar: hanya pemilik, dan pesanan masih berjalan (belum selesai/ditolak/batal). */
+    public function pay(User $user, Order $order): bool
+    {
+        return $order->user_id === $user->id
+            && in_array($order->status, OrderStatus::active(), true);
+    }
+
     /** User hanya bisa membatalkan pesanannya sendiri yang belum diproses admin. */
     public function cancel(User $user, Order $order): bool
     {

@@ -1,4 +1,5 @@
 import { PropsWithChildren, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function Modal({
     children,
@@ -8,7 +9,7 @@ export default function Modal({
     onClose = () => {},
 }: PropsWithChildren<{
     show: boolean;
-    maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+    maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl';
     closeable?: boolean;
     onClose: CallableFunction;
 }>) {
@@ -40,17 +41,25 @@ export default function Modal({
         lg: 'sm:max-w-lg',
         xl: 'sm:max-w-xl',
         '2xl': 'sm:max-w-2xl',
+        '4xl': 'sm:max-w-4xl',
     }[maxWidth];
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6 sm:px-0" role="dialog" aria-modal="true">
-            <div className="fixed inset-0 animate-[fade-up_.2s_ease-out_both] bg-forest-950/50 backdrop-blur-sm" onClick={close} />
+    // Wadah luar yang di-scroll, lalu wadah dalam min-h-full untuk memusatkan panel.
+    // (Jika panel dipusatkan langsung di wadah scroll, bagian atas panel yang lebih
+    // tinggi dari layar akan terpotong dan tidak bisa di-scroll.)
+    // createPortal → modal dirender langsung di <body>. Tanpa ini, modal di dalam elemen
+    // ber-transform (mis. animasi <Reveal>) ikut "terkurung" di kartu tersebut, karena
+    // position: fixed menjadi relatif terhadap elemen ber-transform, bukan layar.
+    return createPortal(
+        <div className="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true">
+            <div className="fixed inset-0 animate-[fade-up_.2s_ease-out_both] bg-forest-950/50 backdrop-blur-sm" />
 
-            <div
-                className={`relative w-full animate-scale-in overflow-hidden rounded-4xl bg-cream shadow-lift ring-1 ring-forest-900/10 sm:mx-auto ${maxWidthClass}`}
-            >
-                {children}
+            <div className="relative flex min-h-full items-center justify-center p-4 sm:p-6" onClick={(e) => e.target === e.currentTarget && close()}>
+                <div className={`relative w-full animate-scale-in overflow-hidden rounded-4xl bg-cream shadow-lift ring-1 ring-forest-900/10 ${maxWidthClass}`}>
+                    {children}
+                </div>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 }

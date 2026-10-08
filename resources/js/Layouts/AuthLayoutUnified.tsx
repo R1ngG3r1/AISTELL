@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEventHandler } from "react";
+import { useState, useEffect, useRef, FormEventHandler } from "react";
 import { Head, Link, useForm } from "@inertiajs/react";
 
 interface AuthLayoutUnifiedProps {
@@ -37,6 +37,8 @@ const registerError = "mt-1 ml-3 text-[11px] font-semibold text-rose-200 lg:text
 const loginInput =
     "w-full h-12 sm:h-[50px] rounded-full border text-[#18231f] text-sm sm:text-base font-normal placeholder-[#4d6357] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3b9270]/40 focus:border-[#2e7d5b] " +
     "bg-white/70 border-white/80 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:placeholder-[#647f72]";
+// Tambahan saat input login bermasalah (ditaruh setelah loginInput agar menimpa warna border)
+const loginInputError = " !border-rose-500 ring-2 ring-rose-500/25";
 
 export default function AuthLayoutUnified({
     initialMode,
@@ -52,6 +54,23 @@ export default function AuthLayoutUnified({
         password: "",
         remember: true as boolean,
     });
+
+    // Kunci error tambahan dari LoginRequest::authenticate():
+    //   account → akun belum terdaftar, password → password salah, login → terlalu banyak percobaan
+    const loginErrors = loginForm.errors as typeof loginForm.errors & { account?: string; login?: string };
+    const loginPasswordRef = useRef<HTMLInputElement>(null);
+
+    // Hitung mundur saat login dikunci sementara (angka detik diambil dari pesan backend).
+    const [lockSeconds, setLockSeconds] = useState(0);
+    useEffect(() => {
+        const match = loginErrors.login?.match(/(\d+)\s*detik/);
+        setLockSeconds(match ? Number(match[1]) : 0);
+    }, [loginErrors.login]);
+    useEffect(() => {
+        if (lockSeconds <= 0) return;
+        const id = window.setTimeout(() => setLockSeconds((s) => s - 1), 1000);
+        return () => window.clearTimeout(id);
+    }, [lockSeconds]);
 
     // Register Form State
     const registerForm = useForm({
@@ -90,7 +109,19 @@ export default function AuthLayoutUnified({
         e.preventDefault();
         loginForm.post(route("login"), {
             onFinish: () => loginForm.reset("password"),
+            // Password salah → langsung fokus ke kolom password untuk mencoba lagi.
+            onError: (errors) => {
+                if (errors.password) window.setTimeout(() => loginPasswordRef.current?.focus(), 0);
+            },
         });
+    };
+
+    // Akun belum terdaftar → pindah ke form daftar dengan email/nama yang sudah diketik.
+    const registerFromLogin = () => {
+        const typed = loginForm.data.email.trim();
+        registerForm.setData((d) => (typed.includes("@") ? { ...d, email: typed } : { ...d, name: typed }));
+        loginForm.clearErrors();
+        handleSwitchMode("register");
     };
 
     const submitRegister: FormEventHandler = (e) => {
@@ -435,6 +466,22 @@ export default function AuthLayoutUnified({
                     </div>
 
                     <form onSubmit={submitLogin} className="space-y-4">
+                        {loginErrors.login && lockSeconds > 0 && (
+                            <div role="alert" className="flex items-start gap-3 rounded-2xl border border-rose-300 bg-rose-50/90 px-4 py-3 text-xs sm:text-sm text-rose-800 shadow-sm">
+                                <svg className="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                <span>
+                                    <span className="block font-bold">Login dikunci sementara</span>
+                                    Terlalu banyak percobaan gagal. Coba lagi dalam{" "}
+                                    <span className="font-bold tabular-nums">
+                                        {Math.floor(lockSeconds / 60)}:{String(lockSeconds % 60).padStart(2, "0")}
+                                    </span>
+                                    .
+                                </span>
+                            </div>
+                        )}
+
                         {/* Username / Email Field */}
                         <div>
                             <label
@@ -451,13 +498,29 @@ export default function AuthLayoutUnified({
                                 autoComplete="username"
                                 required
                                 placeholder="Username atau email"
-                                onChange={(e) => loginForm.setData("email", e.target.value)}
-                                className={`${loginInput} px-6`}
+                                onChange={(e) => {
+                                    loginForm.setData("email", e.target.value);
+                                    if (loginErrors.account || loginErrors.email) loginForm.clearErrors();
+                                }}
+                                aria-invalid={!!(loginErrors.account || loginErrors.email)}
+                                className={`${loginInput} px-6${loginErrors.account || loginErrors.email ? loginInputError : ""}`}
                             />
-                            {loginForm.errors.email && (
+                            {loginErrors.email && (
                                 <p className="mt-1.5 ml-4 text-xs font-semibold text-rose-700">
-                                    {loginForm.errors.email}
+                                    {loginErrors.email}
                                 </p>
+                            )}
+                            {loginErrors.account && (
+                                <div role="alert" className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-2.5">
+                                    <p className="text-xs font-semibold text-rose-700">{loginErrors.account}</p>
+                                    <button
+                                        type="button"
+                                        onClick={registerFromLogin}
+                                        className="rounded-full bg-[#14432f] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#1c5a40]"
+                                    >
+                                        Buat akun
+                                    </button>
+                                </div>
                             )}
                         </div>
 
@@ -471,6 +534,7 @@ export default function AuthLayoutUnified({
                             </label>
                             <div className="relative">
                                 <input
+                                    ref={loginPasswordRef}
                                     id="login-password"
                                     type={showLoginPassword ? "text" : "password"}
                                     name="password"
@@ -478,8 +542,12 @@ export default function AuthLayoutUnified({
                                     autoComplete="current-password"
                                     required
                                     placeholder="Password"
-                                    onChange={(e) => loginForm.setData("password", e.target.value)}
-                                    className={`${loginInput} pl-6 pr-12`}
+                                    onChange={(e) => {
+                                        loginForm.setData("password", e.target.value);
+                                        if (loginErrors.password) loginForm.clearErrors("password");
+                                    }}
+                                    aria-invalid={!!loginErrors.password}
+                                    className={`${loginInput} pl-6 pr-12${loginErrors.password ? loginInputError : ""}`}
                                 />
                                 <button
                                     type="button"
@@ -500,10 +568,15 @@ export default function AuthLayoutUnified({
                                     )}
                                 </button>
                             </div>
-                            {loginForm.errors.password && (
-                                <p className="mt-1.5 ml-4 text-xs font-semibold text-rose-700">
-                                    {loginForm.errors.password}
-                                </p>
+                            {loginErrors.password && (
+                                <div role="alert" className="mt-2 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-2.5 text-xs">
+                                    <p className="font-semibold text-rose-700">{loginErrors.password}</p>
+                                    {canResetPassword && (
+                                        <Link href={route("password.request")} className="mt-1 inline-block font-bold text-[#14432f] hover:underline">
+                                            Lupa password? Atur ulang di sini
+                                        </Link>
+                                    )}
+                                </div>
                             )}
                         </div>
 
@@ -523,7 +596,7 @@ export default function AuthLayoutUnified({
                         <div className="pt-3">
                             <button
                                 type="submit"
-                                disabled={loginForm.processing}
+                                disabled={loginForm.processing || lockSeconds > 0}
                                 className="w-full h-12 sm:h-[50px] rounded-full border-[1.5px] text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-[#14432f] border-[#14432f] text-white hover:bg-[#1c5a40] sm:bg-white sm:border-[#3b9270] sm:text-[#18231f] sm:hover:bg-[#f1f8f4]"
                             >
                                 {loginForm.processing ? (

@@ -38,7 +38,7 @@ class HandleInertiaRequests extends Middleware
                 // Kirim kolom yang dibutuhkan FE saja. `role` dipakai FE untuk
                 // menampilkan menu User/Admin; password tidak pernah dikirim.
                 'user' => $request->user()?->only([
-                    'id', 'name', 'email', 'phone', 'address', 'avatar_url', 'role', 'email_verified_at',
+                    'id', 'name', 'email', 'phone', 'avatar_url', 'role', 'email_verified_at',
                 ]),
             ],
             // Pesan singkat setelah aksi, contoh: redirect()->with('success', 'Pesanan dibuat').

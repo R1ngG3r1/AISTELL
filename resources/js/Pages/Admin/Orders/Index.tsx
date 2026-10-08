@@ -4,6 +4,7 @@ import OrderCardList from '@/Components/eco/OrderCardList';
 import PageHeader from '@/Components/eco/PageHeader';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import Pagination from '@/Components/Pagination';
+import { PaymentBadge } from '@/Components/eco/Payment';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatTime } from '@/lib/format';
@@ -103,7 +104,10 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                                             {formatDate(order.date)}, {formatTime(order.time)}
                                         </td>
                                         <td>
-                                            <StatusBadge order={order} />
+                                            <div className="flex flex-col items-start gap-1.5">
+                                                <StatusBadge order={order} />
+                                                <PaymentBadge payment={order.payment} />
+                                            </div>
                                         </td>
                                         <td className="text-right">
                                             <Link

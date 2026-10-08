@@ -8,7 +8,7 @@ memantau statusnya secara realtime.
 | Area | Fitur |
 | --- | --- |
 | Publik | Landing page, daftar akun, login (email **atau** username), lupa password |
-| User | Dashboard, pesan layanan, Pesanan Saya (detail, batalkan), profil + foto profil + alamat utama |
+| User | Dashboard, pesan layanan, Pesanan Saya (detail, batalkan), profil + foto profil + buku alamat (peta OpenStreetMap) |
 | Admin | Dashboard ringkasan, Kelola Pesanan (terima / tolak / selesai), Kelola Layanan, daftar Pengguna |
 
 ---
@@ -263,7 +263,8 @@ users 1 ──── N orders N ──── 1 services
 
 | Tabel | Isi |
 | --- | --- |
-| `users` | Akun user & admin: nama, email, telepon, alamat utama, foto profil, `role` (`user` / `admin`) |
+| `users` | Akun user & admin: nama, email, telepon, foto profil, `role` (`user` / `admin`) |
+| `addresses` | Buku alamat user: label, alamat, detail, titik peta (latitude/longitude), `is_primary` (alamat utama → mengisi otomatis lokasi pemesanan) |
 | `services` | Layanan kebersihan: nama, deskripsi, harga |
 | `orders` | Pesanan: layanan, harga saat dipesan, tanggal, jam, lokasi, kontak, catatan, `status` |
 | `sessions`, `cache`, `jobs`, `migrations` | Tabel sistem Laravel, jangan diedit manual |

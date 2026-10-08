@@ -21,6 +21,7 @@ class OrderService
     private const WITH = [
         'service:id,name,price',
         'user:id,name,email,phone,avatar_path', // avatar_path → avatar_url untuk foto pemesan
+        'payment', // pembayaran terbaru (status bayar)
     ];
 
     /**
@@ -67,7 +68,7 @@ class OrderService
     public function paginateForUser(User $user, int $perPage = 10): LengthAwarePaginator
     {
         return $user->orders()
-            ->with('service:id,name,price')
+            ->with(['service:id,name,price', 'payment'])
             ->latest()
             ->paginate($perPage)
             ->withQueryString();

@@ -18,10 +18,7 @@ import {
     faClipboardList,
     faHourglassHalf,
     faLayerGroup,
-    faListCheck,
     faPaperPlane,
-    faUser,
-    faUsers,
     faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -118,126 +115,136 @@ export default function AdminDashboard({ auth, stats, latestOrders, pendingOrder
                 </Panel>
             </section>
 
-            {/* Distribusi & pesanan terbaru */}
-            <section className="mt-5 grid items-start gap-5 xl:grid-cols-3">
-                <Panel title="Distribusi Status" delay={60}>
-                    <p className="-mt-2 mb-3 text-xs text-[#0c2b20]/50">Dari {stats.total} pesanan</p>
-                    <div className="space-y-1.5">
-                        {statuses.map((s, i) => (
-                            <ProgressRow
-                                key={s.status}
-                                icon={s.icon}
-                                label={s.label}
-                                value={stats[s.status]}
-                                max={stats.total}
-                                barClass={s.bar}
-                                iconClass={s.tile}
-                                href={orderUrl(s.status)}
-                                delay={i * 90}
-                            />
-                        ))}
-                    </div>
-                </Panel>
+            {/*
+              Dua kolom (kiri lebar, kanan sempit). Kartu ditumpuk per kolom, bukan per baris,
+              sehingga tinggi kartu yang berbeda tidak meninggalkan ruang kosong. Kartu terakhir
+              di setiap kolom mengisi sisa tinggi agar kedua kolom berakhir sejajar.
+            */}
+            <section className="mt-5 grid gap-5 xl:grid-cols-3">
+                {/* Kolom kiri: yang perlu ditindaklanjuti lebih dulu */}
+                <div className="flex flex-col gap-5 xl:col-span-2">
+                    <Panel
+                        title={
+                            <>
+                                Perlu Tindakan
+                                {pendingOrders.length > 0 && (
+                                    <span className="rounded-full bg-[#fdf3d7] px-2 py-0.5 text-[11px] font-bold text-[#b7861b]">{stats.menunggu} menunggu</span>
+                                )}
+                            </>
+                        }
+                        action={{ label: 'Tinjau semua', href: orderUrl('menunggu') }}
+                        delay={120}
+                    >
+                        {pendingOrders.length === 0 ? (
+                            <div className="rounded-2xl border border-dashed border-[#cfdcc9] px-6 py-5 text-center text-sm text-[#0c2b20]/55">
+                                Tidak ada pesanan yang menunggu konfirmasi. 🌿
+                            </div>
+                        ) : (
+                            <ul className="grid gap-2 md:grid-cols-2">
+                                {pendingOrders.map((o) => (
+                                    <li key={o.id}>
+                                        <Link
+                                            href={route('admin.orders.show', o.id)}
+                                            className="group flex items-center gap-3 rounded-2xl border border-[#e1e8db] bg-[#f6f8f2] p-3 transition hover:border-[#b8dcc7] hover:bg-white"
+                                        >
+                                            <Avatar name={o.contact_name} src={o.user?.avatar_url} />
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-sm font-bold">{o.service?.name}</p>
+                                                <p className="truncate text-xs text-[#0c2b20]/55">
+                                                    {o.contact_name} · {formatDate(o.date)}, {formatTime(o.time)}
+                                                </p>
+                                            </div>
+                                            <FontAwesomeIcon
+                                                icon={faChevronRight}
+                                                className="text-xs text-[#0c2b20]/30 transition group-hover:translate-x-0.5 group-hover:text-[#287e59]"
+                                            />
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </Panel>
 
-                <Panel
-                    title="Pesanan Terbaru"
-                    action={{ label: 'Lihat semua', href: orderUrl() }}
-                    className="xl:col-span-2"
-                    bodyClassName="-mx-5 -mb-5 sm:-mx-6 sm:-mb-6"
-                    delay={120}
-                >
-                    {latestOrders.length === 0 ? (
-                        <EmptyState title="Belum ada pesanan masuk" />
-                    ) : (
-                        <>
-                        <OrderCardList orders={latestOrders} className="md:hidden" />
-                        <div className="hidden overflow-x-auto md:block">
-                            <table className="table-eco">
-                                <thead>
-                                    <tr>
-                                        <th>Pemesan</th>
-                                        <th>Layanan</th>
-                                        <th>Jadwal</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {latestOrders.map((o) => (
-                                        <tr key={o.id} className="cursor-pointer" onClick={() => router.visit(route('admin.orders.show', o.id))}>
-                                            <td>
-                                                <Link href={route('admin.orders.show', o.id)} className="flex items-center gap-3">
-                                                    <Avatar name={o.contact_name} src={o.user?.avatar_url} />
-                                                    <span>
-                                                        <span className="block font-semibold">{o.contact_name}</span>
-                                                        <span className="text-xs text-[#0c2b20]/45">#{o.id}</span>
-                                                    </span>
-                                                </Link>
-                                            </td>
-                                            <td className="whitespace-nowrap">{o.service?.name}</td>
-                                            <td className="whitespace-nowrap text-[#0c2b20]/60">
-                                                {formatDate(o.date)}, {formatTime(o.time)}
-                                            </td>
-                                            <td>
-                                                <StatusBadge order={o} />
-                                            </td>
+                    <Panel
+                        title="Pesanan Terbaru"
+                        action={{ label: 'Lihat semua', href: orderUrl() }}
+                        className="flex-1"
+                        bodyClassName="-mx-5 -mb-5 sm:-mx-6 sm:-mb-6"
+                        delay={60}
+                    >
+                        {latestOrders.length === 0 ? (
+                            <EmptyState title="Belum ada pesanan masuk" />
+                        ) : (
+                            <>
+                            <OrderCardList orders={latestOrders} className="md:hidden" />
+                            <div className="hidden overflow-x-auto md:block">
+                                <table className="table-eco">
+                                    <thead>
+                                        <tr>
+                                            <th>Pemesan</th>
+                                            <th>Layanan</th>
+                                            <th>Jadwal</th>
+                                            <th>Status</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        </>
-                    )}
-                </Panel>
-            </section>
+                                    </thead>
+                                    <tbody>
+                                        {latestOrders.map((o) => (
+                                            <tr key={o.id} className="cursor-pointer" onClick={() => router.visit(route('admin.orders.show', o.id))}>
+                                                <td>
+                                                    <Link href={route('admin.orders.show', o.id)} className="flex items-center gap-3">
+                                                        <Avatar name={o.contact_name} src={o.user?.avatar_url} />
+                                                        <span>
+                                                            <span className="block font-semibold">{o.contact_name}</span>
+                                                            <span className="text-xs text-[#0c2b20]/45">#{o.id}</span>
+                                                        </span>
+                                                    </Link>
+                                                </td>
+                                                <td className="whitespace-nowrap">{o.service?.name}</td>
+                                                <td className="whitespace-nowrap text-[#0c2b20]/60">
+                                                    {formatDate(o.date)}, {formatTime(o.time)}
+                                                </td>
+                                                <td>
+                                                    <StatusBadge order={o} />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            </>
+                        )}
+                    </Panel>
+                </div>
 
-            {/* Jadwal, perlu tindakan, akses cepat */}
-            <section className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                <Panel title="Jadwal Layanan" delay={60}>
-                    <MiniCalendar schedule={schedule} />
-                    <p className="mt-3 text-xs text-[#0c2b20]/50">
-                        Tanggal bertanda = jadwal layanan yang belum dibatalkan/ditolak. Angka = jumlah jadwal di hari itu.
-                    </p>
-                </Panel>
+                {/* Kolom kanan (di tablet: dua kartu berdampingan) */}
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[auto_1fr]">
+                    <Panel title="Jadwal Layanan" delay={120}>
+                        <MiniCalendar schedule={schedule} />
+                        <p className="mt-3 text-xs text-[#0c2b20]/50">
+                            Tanggal bertanda = jadwal layanan yang belum dibatalkan/ditolak. Angka = jumlah jadwal di hari itu.
+                        </p>
+                    </Panel>
 
-                <Panel title="Perlu Tindakan" action={{ label: 'Tinjau', href: orderUrl('menunggu') }} delay={120}>
-                    {pendingOrders.length === 0 ? (
-                        <div className="grid h-full place-items-center rounded-2xl border border-dashed border-[#cfdcc9] p-6 text-center text-sm text-[#0c2b20]/55">
-                            Tidak ada pesanan yang menunggu konfirmasi. 🌿
-                        </div>
-                    ) : (
-                        <ul className="space-y-2">
-                            {pendingOrders.map((o) => (
-                                <li key={o.id}>
-                                    <Link
-                                        href={route('admin.orders.show', o.id)}
-                                        className="group flex items-center gap-3 rounded-2xl border border-[#e1e8db] bg-[#f6f8f2] p-3 transition hover:border-[#b8dcc7] hover:bg-white"
-                                    >
-                                        <Avatar name={o.contact_name} src={o.user?.avatar_url} />
-                                        <div className="min-w-0 flex-1">
-                                            <p className="truncate text-sm font-bold">{o.service?.name}</p>
-                                            <p className="truncate text-xs text-[#0c2b20]/55">
-                                                {o.contact_name} · {formatDate(o.date)}
-                                            </p>
-                                        </div>
-                                        <FontAwesomeIcon
-                                            icon={faChevronRight}
-                                            className="text-xs text-[#0c2b20]/30 transition group-hover:translate-x-0.5 group-hover:text-[#287e59]"
-                                        />
-                                    </Link>
-                                </li>
+                    {/* Baris progres menyebar rata bila kartu lebih tinggi dari isinya */}
+                    <Panel title="Distribusi Status" delay={180} bodyClassName="flex flex-col">
+                        <p className="-mt-2 mb-3 text-xs text-[#0c2b20]/50">Dari {stats.total} pesanan</p>
+                        <div className="flex flex-1 flex-col justify-between gap-1.5">
+                            {statuses.map((s, i) => (
+                                <ProgressRow
+                                    key={s.status}
+                                    icon={s.icon}
+                                    label={s.label}
+                                    value={stats[s.status]}
+                                    max={stats.total}
+                                    barClass={s.bar}
+                                    iconClass={s.tile}
+                                    href={orderUrl(s.status)}
+                                    delay={i * 90}
+                                />
                             ))}
-                        </ul>
-                    )}
-                </Panel>
-
-                <Panel title="Akses Cepat" delay={180} className="md:col-span-2 xl:col-span-1">
-                    <div className="grid grid-cols-2 gap-3">
-                        <IconTile icon={faListCheck} label="Kelola Pesanan" href={orderUrl()} />
-                        <IconTile icon={faLayerGroup} label="Kelola Layanan" href={route('admin.services.index')} />
-                        <IconTile icon={faUsers} label="Pengguna" href={route('users.index')} />
-                        <IconTile icon={faUser} label="Profil Saya" href={route('profile.edit')} />
-                    </div>
-                </Panel>
+                        </div>
+                    </Panel>
+                </div>
             </section>
         </AuthenticatedLayout>
     );

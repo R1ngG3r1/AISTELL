@@ -44,7 +44,7 @@ class DashboardController extends Controller
     {
         return Inertia::render('Admin/Dashboard', [
             'stats' => fn () => $this->orders->statusCounts(),
-            'latestOrders' => fn () => $this->orders->latest(limit: 8),
+            'latestOrders' => fn () => $this->orders->latest(limit: 6),
             'pendingOrders' => fn () => $this->orders->pending(4),
             'schedule' => fn () => $this->orders->schedule(),
         ]);

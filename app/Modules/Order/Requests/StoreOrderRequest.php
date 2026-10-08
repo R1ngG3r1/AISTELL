@@ -26,6 +26,9 @@ class StoreOrderRequest extends FormRequest
             'contact_name' => ['required', 'string', 'max:100'],
             'contact_phone' => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s]{8,20}$/'],
             'location' => ['required', 'string', 'max:1000'],
+            // Titik peta opsional (dari peta di formulir), harus berpasangan.
+            'latitude' => ['nullable', 'required_with:longitude', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'required_with:latitude', 'numeric', 'between:-180,180'],
             'date' => ['required', 'date_format:Y-m-d', 'after_or_equal:today'],
             'time' => ['required', 'date_format:H:i'],
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -61,6 +64,8 @@ class StoreOrderRequest extends FormRequest
             'contact_name' => 'nama pemesan',
             'contact_phone' => 'nomor kontak',
             'location' => 'lokasi layanan',
+            'latitude' => 'titik peta',
+            'longitude' => 'titik peta',
             'date' => 'tanggal layanan',
             'time' => 'waktu layanan',
             'notes' => 'catatan',

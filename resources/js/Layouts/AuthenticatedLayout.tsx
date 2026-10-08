@@ -1,4 +1,5 @@
 import Avatar from '@/Components/eco/Avatar';
+import Footer from '@/Components/eco/Footer';
 import FlashMessage from '@/Components/FlashMessage';
 import { LIVE_INTERVAL, useLivePoll } from '@/lib/live';
 import { tipOfTheDay } from '@/lib/tips';
@@ -241,13 +242,7 @@ export default function Authenticated({
                     {children}
                 </main>
 
-                <footer className="mx-auto flex max-w-[1280px] flex-col items-center justify-between gap-2 border-t border-[#dfe7d9] px-4 py-6 text-xs text-[#0c2b20]/45 sm:flex-row sm:px-6 lg:px-8">
-                    <span className="inline-flex items-center gap-1.5">
-                        <img src="/landingpage/LOGO.png" alt="" aria-hidden="true" className="h-3.5 w-3.5 object-contain" />
-                        AISTEL · Clean Space, Better Living
-                    </span>
-                    <span>© {new Date().getFullYear()} Awareness Initiative for Sustainable Environment &amp; Living</span>
-                </footer>
+                <Footer />
             </div>
 
             <FlashMessage />

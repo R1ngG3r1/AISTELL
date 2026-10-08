@@ -41,8 +41,20 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    /** Batas percobaan login gagal sebelum dikunci sementara. */
+    public const MAX_ATTEMPTS = 5;
+
     /**
      * Attempt to authenticate the request's credentials.
+     *
+     * Penyebab gagal dibedakan, dan setiap kunci error dipakai FE untuk aksi lanjutan:
+     *   account  → akun belum terdaftar      (tombol "Buat akun")
+     *   password → akun ada, password salah  (tautan "Lupa password?")
+     *   login    → terlalu banyak percobaan  (banner hitung mundur)
+     *   email    → nama dipakai >1 akun / kolom kosong
+     *
+     * Percobaan gagal untuk akun yang tidak terdaftar tetap dihitung oleh rate limiter,
+     * sehingga pengecekan "email mana yang terdaftar" tidak bisa dilakukan beruntun.
      *
      * @throws ValidationException
      */
@@ -53,17 +65,29 @@ class LoginRequest extends FormRequest
         // Field "email" di form login menerima email ATAU username (nama akun).
         $email = $this->resolveEmail(trim($this->string('email')->toString()));
 
-        $credentials = [
-            'email' => $email,
-            'password' => $this->string('password')->toString(),
-        ];
-
-        if ($email === null || ! Auth::attempt($credentials, $this->boolean('remember'))) {
+        // 1) Cek akun terlebih dahulu.
+        if ($email === null || ! User::query()->where('email', $email)->exists()) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'account' => trans('auth.not_registered'),
             ]);
+        }
+
+        // 2) Akun ada → cek password.
+        $credentials = ['email' => $email, 'password' => $this->string('password')->toString()];
+
+        if (! Auth::attempt($credentials, $this->boolean('remember'))) {
+            RateLimiter::hit($this->throttleKey());
+            $left = RateLimiter::remaining($this->throttleKey(), self::MAX_ATTEMPTS);
+
+            // Peringatan hanya muncul saat percobaan hampir habis.
+            $message = trans('auth.password');
+            if ($left > 0 && $left <= 2) {
+                $message .= ' '.trans('auth.attempts_left', ['count' => $left]);
+            }
+
+            throw ValidationException::withMessages(['password' => $message]);
         }
 
         RateLimiter::clear($this->throttleKey());
@@ -104,7 +128,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (! RateLimiter::tooManyAttempts($this->throttleKey(), self::MAX_ATTEMPTS)) {
             return;
         }
 
@@ -113,7 +137,7 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),

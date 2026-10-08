@@ -89,22 +89,16 @@ it('avatar_url dikirim ke frontend tanpa membocorkan path file', function () {
             ->missing('auth.user.avatar_path'));
 });
 
-it('alamat utama tersimpan dan halaman profil berisi ringkasan akun', function () {
+it('halaman profil berisi buku alamat dan ringkasan akun', function () {
     $user = User::factory()->create();
+    $user->addresses()->create(['label' => 'Rumah', 'address' => 'Jl. Mawar No. 1, Bandung'])->forceFill(['is_primary' => true])->save();
     Order::factory()->for($user)->create();
     Order::factory()->for($user)->status(OrderStatus::Selesai)->create();
 
-    $this->actingAs($user)->patch('/profile', [
-        'name' => $user->name,
-        'email' => $user->email,
-        'address' => 'Jl. Mawar No. 1, Bandung',
-    ])->assertSessionHasNoErrors();
-
-    expect($user->fresh()->address)->toBe('Jl. Mawar No. 1, Bandung');
-
     $this->actingAs($user)->get('/profile')
         ->assertInertia(fn (Assert $page) => $page
-            ->where('auth.user.address', 'Jl. Mawar No. 1, Bandung')
+            ->where('addresses.0.address', 'Jl. Mawar No. 1, Bandung')
+            ->where('addresses.0.is_primary', true)
             ->where('summary.orders.total', 2)
             ->where('summary.orders.selesai', 1)
             ->has('summary.memberSince'));

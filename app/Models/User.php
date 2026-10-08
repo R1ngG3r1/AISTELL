@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Modules\Address\Models\Address;
 use App\Modules\Order\Models\Order;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -34,7 +35,6 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
-        'address',
         'password',
     ];
 
@@ -111,5 +111,11 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /** Relasi 1:N — buku alamat; satu di antaranya alamat utama (is_primary). */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
     }
 }

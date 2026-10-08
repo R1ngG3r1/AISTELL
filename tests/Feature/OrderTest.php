@@ -30,7 +30,7 @@ it('user dapat mengajukan pesanan dengan status awal menunggu', function () {
     $response = $this->actingAs($user)->post('/orders', validOrderData());
 
     $order = Order::firstOrFail();
-    $response->assertRedirect("/orders/{$order->id}");
+    $response->assertRedirect("/orders/{$order->id}/payment");
 
     expect($order->user_id)->toBe($user->id)
         ->and($order->status)->toBe(OrderStatus::Menunggu);
