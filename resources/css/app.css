@@ -690,11 +690,6 @@ body {
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.service-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--primary);
-    box-shadow: 0 12px 28px -10px rgba(40, 126, 89, 0.25);
-}
 
 .service-icon-box {
     width: 52px;
@@ -1127,7 +1122,13 @@ body {
     }
 
     .hero-image-wrapper {
-        display: none;
+        display: flex;
+        justify-content: center;
+    }
+
+    .hero-image {
+        max-width: 100%;
+        height: 360px;
     }
 
     .hero-title {
@@ -1321,15 +1322,26 @@ body {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
         grid-template-areas:
+            'image'
             'head'
-            'cards'
-            'image';
+            'cards';
         row-gap: 24px;
     }
 
     .keunggulan-image {
         min-height: 0;
-        height: 260px;
+        height: 220px;
+    }
+
+    .hero-image-wrapper {
+        display: flex;
+        justify-content: center;
+    }
+
+    .hero-image {
+        height: 240px;
+        max-width: 100%;
+        border-radius: 20px;
     }
 
     .services-grid {
@@ -1339,17 +1351,16 @@ body {
     }
 
     .service-card {
-        flex-direction: row;
+        flex-direction: column;
         align-items: flex-start;
-        gap: 16px;
+        gap: 0;
         padding: 20px;
     }
 
     .service-icon-box {
-        flex-shrink: 0;
         width: 46px;
         height: 46px;
-        margin-bottom: 0;
+        margin-bottom: 16px;
         font-size: 18px;
     }
 

@@ -1,5 +1,6 @@
 import { Leaf } from '@/Components/eco/Illustrations';
 import { LocationPicker } from '@/Components/eco/map';
+import TimeWheel, { Zone } from '@/Components/eco/TimeWheel';
 import PageHeader from '@/Components/eco/PageHeader';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import InputError from '@/Components/InputError';
@@ -21,6 +22,9 @@ type Props = PageProps<{ services: Service[]; selectedServiceId: number | null; 
 /** Teks lokasi pesanan dari alamat tersimpan: alamat lengkap + detail (no. rumah/patokan). */
 const locationText = (a: Address) => (a.detail ? `${a.address}\n${a.detail}` : a.address);
 
+// Selisih jam terhadap WIB (zona waktu server).
+const ZONE_OFFSET: Record<Zone, number> = { WIB: 0, WITA: 1, WIT: 2 };
+
 function Step({ n, title, children, delay = 0 }: { n: number; title: string; children: ReactNode; delay?: number }) {
     return (
         <Reveal delay={delay} className="card p-6 md:p-7">
@@ -41,7 +45,7 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
 
     // useForm Inertia: menyimpan isi form + error validasi dari backend (StoreOrderRequest).
     // Nama, telepon, dan alamat diisi otomatis dari akun, tapi boleh diubah.
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, transform } = useForm({
         service_id: selectedServiceId ? String(selectedServiceId) : '',
         contact_name: auth.user.name,
         contact_phone: auth.user.phone ?? '',
@@ -53,8 +57,18 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
         notes: '',
     });
 
+    // Waktu diinput dalam zona Indonesia pilihan pengguna, lalu dikonversi ke WIB (zona server) saat dikirim.
+    const [zone, setZone] = useState<Zone>('WIB');
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+        transform((d) => {
+            if (!d.date || !d.time || ZONE_OFFSET[zone] === 0) return d;
+            const wib = new Date(`${d.date}T${d.time}:00Z`);
+            wib.setUTCHours(wib.getUTCHours() - ZONE_OFFSET[zone]);
+            const iso = wib.toISOString();
+            return { ...d, date: iso.slice(0, 10), time: iso.slice(11, 16) };
+        });
         post(route('orders.store')); // → POST /orders
     };
 
@@ -249,7 +263,7 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
                                 </div>
                                 <div>
                                     <InputLabel htmlFor="time" value="Waktu" />
-                                    <TextInput id="time" type="time" value={data.time} onChange={(e) => setData('time', e.target.value)} />
+                                    <TimeWheel id="time" value={data.time} zone={zone} onChange={(t) => setData('time', t)} onZoneChange={setZone} />
                                     <InputError message={errors.time} className="mt-2" />
                                 </div>
                             </div>
@@ -294,7 +308,7 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
                                 { icon: faUser, value: data.contact_name || '—' },
                                 { icon: faLocationDot, value: data.location || '—' },
                                 { icon: faCalendarDays, value: data.date ? formatDate(data.date) : '—' },
-                                { icon: faClock, value: data.time || '—' },
+                                { icon: faClock, value: data.time ? `${data.time} ${zone}` : '—' },
                             ].map((row, i) => (
                                 <div key={i} className="flex gap-3">
                                     <FontAwesomeIcon icon={row.icon} className="mt-0.5 w-4 text-leaf-400" />

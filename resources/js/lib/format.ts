@@ -16,9 +16,9 @@ export function formatDate(value: string): string {
     });
 }
 
-/** "09:00:00" → "09:00" */
+/** "09:00:00" → "09:00 WIB" (waktu pesanan disimpan dalam WIB) */
 export function formatTime(value: string): string {
-    return value.slice(0, 5);
+    return `${value.slice(0, 5)} WIB`;
 }
 
 

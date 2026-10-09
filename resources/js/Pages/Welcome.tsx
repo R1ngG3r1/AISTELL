@@ -32,7 +32,7 @@ interface WelcomeProps {
     canRegister?: boolean;
 }
 
-export default function Welcome({ auth, services = [] }: WelcomeProps) {
+export default function Welcome({ auth }: WelcomeProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const getServiceIcon = (name: string) => {
@@ -45,9 +45,7 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
         return faSeedling;
     };
 
-    const displayServices: Service[] = (services && services.length > 0)
-        ? services
-        : [
+    const displayServices: Service[] = [
             {
                 id: 1,
                 name: "Kebersihan Hunian",
@@ -72,7 +70,7 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
                 description: "Sterilisasi dan desinfeksi area lingkungan untuk kehidupan yang lebih sehat.",
                 price: "100000.00",
             },
-        ];
+    ];
 
     const stats = [
         { value: "500+", label: "Layanan Selesai" },
@@ -381,23 +379,13 @@ export default function Welcome({ auth, services = [] }: WelcomeProps) {
 
                     <div className="services-grid">
                         {displayServices.map((item) => (
-                            <Link
-                                key={item.id}
-                                href={
-                                    auth?.user
-                                        ? (auth.user.role === 'admin' ? route('admin.services.index') : route('orders.create', { service: item.id }))
-                                        : route('login')
-                                }
-                                className="service-card"
-                            >
+                            <div key={item.id} className="service-card">
                                 <div className="service-icon-box">
                                     <FontAwesomeIcon icon={getServiceIcon(item.name)} />
                                 </div>
                                 <h3 className="service-title">{item.name}</h3>
-                                <p className="service-description line-clamp-3" title={item.description || undefined}>
-                                    {item.description}
-                                </p>
-                            </Link>
+                                <p className="service-description">{item.description}</p>
+                            </div>
                         ))}
                     </div>
                 </div>

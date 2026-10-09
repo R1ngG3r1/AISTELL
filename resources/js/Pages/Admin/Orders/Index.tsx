@@ -38,8 +38,8 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
             <Head title="Kelola Pesanan" />
 
             {/* Tab filter status → ?status=... */}
-            <div className="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-                <div className="inline-flex gap-1 rounded-full bg-white/70 p-1 shadow-soft ring-1 ring-forest-900/5">
+            <div className="mb-5">
+                <div className="grid grid-cols-3 gap-1.5 rounded-3xl bg-white/70 p-1.5 shadow-soft ring-1 ring-forest-900/5 sm:inline-flex sm:gap-1 sm:rounded-full sm:p-1">
                     {tabs.map((t) => (
                         <button
                             key={t.value}
@@ -49,7 +49,7 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                                     preserveScroll: true,
                                 })
                             }
-                            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition ${
+                            className={`whitespace-nowrap rounded-full px-2 py-2 text-center text-sm sm:px-4 font-semibold transition ${
                                 current === t.value ? 'bg-forest-900 text-cream shadow-soft' : 'text-forest-900/60 hover:bg-forest-900/5'
                             }`}
                         >

@@ -497,7 +497,7 @@ function Summary({ order, payment }: { order: Order; payment: Payment | null }) 
                     <div className="min-w-0">
                         <p className="truncate font-bold">{order.service?.name}</p>
                         <p className="text-xs text-forest-900/50">
-                            {formatDate(order.date)} · {formatTime(order.time)} WIB
+                            {formatDate(order.date)} · {formatTime(order.time)}
                         </p>
                     </div>
                 </div>
