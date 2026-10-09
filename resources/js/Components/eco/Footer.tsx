@@ -20,6 +20,7 @@ export default function Footer() {
                     <div>
                         <div className="flex items-center gap-2.5">
                             <img
+                                loading="lazy"
                                 src="/landingpage/LOGO.png"
                                 alt=""
                                 aria-hidden="true"
@@ -104,25 +105,27 @@ export default function Footer() {
                         <ul className="mt-3.5 space-y-2.5 text-xs sm:text-[13px] text-[#84a595]">
                             <li>
                                 <a
-                                    href="mailto:hello@aistel.id"
+                                    href="mailto:aistel.eco@gmail.com"
                                     className="flex items-center gap-2.5 transition hover:text-white"
                                 >
                                     <FontAwesomeIcon icon={faEnvelope} className="w-3.5 text-[#4de097]" />
-                                    <span>hello@aistel.id</span>
+                                    <span>aistel.eco@gmail.com</span>
                                 </a>
                             </li>
                             <li>
                                 <a
-                                    href="tel:+6281234567890"
+                                    href="https://wa.me/6281995623510"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="flex items-center gap-2.5 transition hover:text-white"
                                 >
                                     <FontAwesomeIcon icon={faPhone} className="w-3.5 text-[#4de097]" />
-                                    <span className="whitespace-nowrap">+62 812-3456-7890</span>
+                                    <span className="whitespace-nowrap">+62 819 9562 3510</span>
                                 </a>
                             </li>
                             <li className="flex items-center gap-2.5">
                                 <FontAwesomeIcon icon={faLocationDot} className="w-3.5 text-[#4de097]" />
-                                <span>Indonesia</span>
+                                <span>Lampung, Indonesia</span>
                             </li>
                         </ul>
                     </div>

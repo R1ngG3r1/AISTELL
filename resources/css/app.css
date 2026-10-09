@@ -1071,6 +1071,16 @@ body {
     color: #84a595;
 }
 
+.footer-contact-info a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-contact-info a:hover {
+    color: #ffffff;
+}
+
 .footer-bottom-container {
     max-width: 1200px;
     margin: 56px auto 0;

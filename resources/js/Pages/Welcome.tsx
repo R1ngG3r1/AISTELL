@@ -279,7 +279,8 @@ export default function Welcome({ auth }: WelcomeProps) {
 
                         <div className="hero-image-wrapper">
                             <img
-                                src="/landingpage/gambar1.png"
+                                src="/landingpage/gambar1.webp"
+                                fetchPriority="high"
                                 alt="AISTEL - Clean Space Better Living"
                                 className="hero-image"
                             />
@@ -329,7 +330,9 @@ export default function Welcome({ auth }: WelcomeProps) {
                 <div className="keunggulan-container">
                     <div className="keunggulan-image-wrapper">
                         <img
-                            src="/landingpage/gambar2.png"
+                            src="/landingpage/gambar2.webp"
+                            loading="lazy"
+                            decoding="async"
                             alt="AISTEL - Keunggulan Platform"
                             className="keunggulan-image"
                         />
@@ -527,9 +530,9 @@ export default function Welcome({ auth }: WelcomeProps) {
                     <div className="footer-contact-col">
                         <h3 className="footer-col-title">Kontak</h3>
                         <div className="footer-contact-info">
-                            <p>hello@aistel.id</p>
-                            <p>+62 812-3456-7890</p>
-                            <p>Indonesia</p>
+                            <p><a href="mailto:aistel.eco@gmail.com">aistel.eco@gmail.com</a></p>
+                            <p><a href="https://wa.me/6281995623510" target="_blank" rel="noopener noreferrer">+62 819 9562 3510</a></p>
+                            <p>Lampung, Indonesia</p>
                         </div>
                     </div>
                 </div>
