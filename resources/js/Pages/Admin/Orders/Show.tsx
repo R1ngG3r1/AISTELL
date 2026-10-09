@@ -81,7 +81,7 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                 <FontAwesomeIcon icon={faArrowLeft} /> Semua pesanan
             </Link>
 
-            <div className="grid items-start gap-6 lg:grid-cols-[1fr_22rem]">
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
                 <div className="space-y-6">
                     <Reveal className="card p-6 md:p-8">
                         <div className="flex flex-wrap items-start justify-between gap-3">

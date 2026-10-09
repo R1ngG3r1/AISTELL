@@ -5,7 +5,6 @@ namespace App\Modules\Payment\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Order\Models\Order;
 use App\Modules\Payment\Enums\PaymentMethod;
-use App\Modules\Payment\Enums\PaymentStatus;
 use App\Modules\Payment\Services\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,19 +49,19 @@ class PaymentController extends Controller
             'success',
             $payment->method === PaymentMethod::Cod
                 ? 'Metode bayar tunai dipilih. Siapkan uang pas saat petugas datang.'
-                : 'Tagihan dibuat. Selesaikan pembayaran sebelum batas waktu.',
+                : 'Kode pembayaran dibuat. Pembayaran sedang diproses…',
         );
     }
 
-    // POST /orders/{order}/payment/simulate   (DUMMY: pengganti notifikasi dari payment gateway)
-    public function simulate(Order $order): RedirectResponse
+    // POST /orders/{order}/payment/confirm   (DUMMY: pengganti notifikasi dari payment gateway, dipanggil otomatis oleh halaman)
+    public function confirm(Order $order): RedirectResponse
     {
         Gate::authorize('pay', $order);
 
         $payment = $this->payments->current($order);
-        abort_if(! $payment || $payment->status !== PaymentStatus::Menunggu, 422, 'Tidak ada tagihan yang menunggu pembayaran.');
+        abort_if(! $payment, 422, 'Belum ada tagihan.');
 
-        $this->payments->simulatePaid($payment);
+        $this->payments->confirmPaid($payment);
 
         return redirect()->route('orders.payment', $order)->with('success', 'Pembayaran berhasil! Pesanan Anda akan segera diproses admin.');
     }

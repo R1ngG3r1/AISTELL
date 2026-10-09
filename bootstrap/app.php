@@ -23,6 +23,10 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Di belakang proxy / load balancer (Render, Cloudflare, Nginx, dll.) set TRUSTED_PROXIES=*
+        // agar Laravel tahu request aslinya HTTPS dan IP pengunjung yang benar. Kosong = tidak ada proxy.
+        $middleware->trustProxies(at: env('TRUSTED_PROXIES') ?: null);
+
         // Alias agar middleware role bisa dipanggil singkat: ->middleware('role:admin')
         $middleware->alias([
             'role' => EnsureUserHasRole::class,

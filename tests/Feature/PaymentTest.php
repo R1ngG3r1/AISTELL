@@ -33,7 +33,7 @@ it('halaman pembayaran menampilkan pesanan dan daftar metode', function () {
             ->has('methods', count(PaymentMethod::cases())));
 });
 
-it('memilih virtual account membuat nomor VA 16 digit dengan kode bank dan biaya layanan', function () {
+it('memilih virtual account membuat nomor VA 16 digit dengan kode bank dan biaya layanan, status awal menunggu', function () {
     $order = payableOrder();
 
     $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'va_bca'])
@@ -43,8 +43,7 @@ it('memilih virtual account membuat nomor VA 16 digit dengan kode bank dan biaya
     $payment = $order->payments()->sole();
     expect($payment->status)->toBe(PaymentStatus::Menunggu)
         ->and($payment->code)->toMatch('/^70012\d{11}$/')
-        ->and($payment->amount)->toBe('154000.00')
-        ->and($payment->expires_at->isFuture())->toBeTrue();
+        ->and($payment->amount)->toBe('154000.00');
 });
 
 it('QRIS berisi payload EMVCo dengan nominal dan checksum', function () {
@@ -58,40 +57,45 @@ it('QRIS berisi payload EMVCo dengan nominal dan checksum', function () {
         ->toMatch('/6304[0-9A-F]{4}$/');
 });
 
-it('ganti metode membatalkan tagihan sebelumnya', function () {
+it('ganti metode dari tunai membatalkan tagihan sebelumnya', function () {
     $order = payableOrder();
-    $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'va_bni']);
+    $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'cod']);
     $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'alfamart']);
 
     expect($order->payments()->oldest('id')->first()->status)->toBe(PaymentStatus::Dibatalkan)
         ->and($order->payment()->first()->method)->toBe(PaymentMethod::Alfamart);
 });
 
-it('simulasi pembayaran menandai tagihan lunas dan tidak bisa membayar dua kali', function () {
+it('pembayaran non-tunai baru lunas setelah jeda 3 detik dan tidak bisa dibayar dua kali', function () {
     $order = payableOrder();
-    $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'gopay']);
+    $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'gopay'])->assertSessionHas('success');
 
-    $this->actingAs($order->user)->post("/orders/{$order->id}/payment/simulate")->assertSessionHas('success');
+    // Terlalu cepat → ditolak, masih menunggu
+    $this->actingAs($order->user)->post("/orders/{$order->id}/payment/confirm")->assertSessionHasErrors('payment');
+    expect($order->payment()->first()->status)->toBe(PaymentStatus::Menunggu);
+
+    $this->travel(3)->seconds();
+    $this->actingAs($order->user)->post("/orders/{$order->id}/payment/confirm")->assertSessionHas('success');
 
     expect($order->payment()->first())->status->toBe(PaymentStatus::Lunas)->paid_at->not->toBeNull();
 
     $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'qris'])->assertSessionHasErrors('method');
 });
 
-it('tagihan yang lewat batas waktu menjadi kedaluwarsa', function () {
+it('tunai tidak bisa dilunasi lewat konfirmasi otomatis', function () {
     $order = payableOrder();
-    $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'qris']);
+    $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'cod']);
 
-    $this->travel(2)->hours();
-
-    expect($order->payment()->first()->status)->toBe(PaymentStatus::Kedaluwarsa);
-    $this->actingAs($order->user)->post("/orders/{$order->id}/payment/simulate")->assertStatus(422);
+    $this->travel(10)->seconds();
+    $this->actingAs($order->user)->post("/orders/{$order->id}/payment/confirm")->assertSessionHasErrors('payment');
+    expect($order->payment()->first()->status)->toBe(PaymentStatus::Menunggu);
 });
 
 it('pembayaran lunas dikembalikan saat pesanan dibatalkan / ditolak', function () {
     $order = payableOrder();
     $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'va_bri']);
-    $this->actingAs($order->user)->post("/orders/{$order->id}/payment/simulate");
+    $this->travel(3)->seconds();
+    $this->actingAs($order->user)->post("/orders/{$order->id}/payment/confirm");
 
     app(OrderService::class)->changeStatus($order->fresh(), OrderStatus::Ditolak);
 
@@ -100,7 +104,7 @@ it('pembayaran lunas dikembalikan saat pesanan dibatalkan / ditolak', function (
 
 it('tagihan menunggu dibatalkan saat user membatalkan pesanan', function () {
     $order = payableOrder();
-    $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'indomaret']);
+    $this->actingAs($order->user)->post("/orders/{$order->id}/payment", ['method' => 'cod']);
 
     $this->actingAs($order->user)->patch("/orders/{$order->id}/cancel");
 
@@ -114,8 +118,8 @@ it('bayar tunai di lokasi menjadi lunas saat pesanan selesai', function () {
     $payment = $order->payment()->first();
     expect($payment->expires_at)->toBeNull()->and($payment->code)->toBeNull();
 
-    // Tunai tidak bisa "disimulasikan" lunas oleh user
-    $this->actingAs($order->user)->post("/orders/{$order->id}/payment/simulate")->assertSessionHasErrors('payment');
+    // Tunai tetap menunggu sampai pesanan selesai
+    expect($payment->status)->toBe(PaymentStatus::Menunggu);
 
     $service = app(OrderService::class);
     $service->changeStatus($order->fresh(), OrderStatus::Diproses);

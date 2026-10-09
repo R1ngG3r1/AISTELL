@@ -109,6 +109,10 @@ export default {
                     '0%': { opacity: '0', transform: 'translateX(24px)' },
                     '100%': { opacity: '1', transform: 'translateX(0)' },
                 },
+                'progress-fill': {
+                    '0%': { width: '0%' },
+                    '100%': { width: '100%' },
+                },
                 grow: {
                     '0%': { transform: 'scaleX(0)' },
                     '100%': { transform: 'scaleX(1)' },
@@ -125,6 +129,7 @@ export default {
                 'scale-in': 'scale-in .25s cubic-bezier(.2,.7,.2,1) both',
                 'toast-in': 'toast-in .35s cubic-bezier(.2,.7,.2,1) both',
                 grow: 'grow 1s cubic-bezier(.2,.7,.2,1) both',
+                'progress-fill': 'progress-fill 3s linear forwards',
             },
         },
     },

@@ -2,20 +2,18 @@ import Avatar from '@/Components/eco/Avatar';
 import Footer from '@/Components/eco/Footer';
 import FlashMessage from '@/Components/FlashMessage';
 import { LIVE_INTERVAL, useLivePoll } from '@/lib/live';
-import { tipOfTheDay } from '@/lib/tips';
 import { Counters, PageProps } from '@/types';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
     faBars,
     faBroom,
     faClipboardList,
+    faHeadset,
     faHouse,
     faLayerGroup,
-    faLightbulb,
     faListCheck,
     faRightFromBracket,
     faUser,
-    faUsers,
     faXmark,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -30,13 +28,14 @@ const userMenu: MenuItem[] = [
     { label: 'Dashboard', route: 'dashboard', icon: faHouse, active: ['dashboard'] },
     { label: 'Pesan Layanan', route: 'services.index', icon: faBroom, active: ['services.*', 'orders.create'] },
     { label: 'Pesanan Saya', route: 'orders.index', icon: faClipboardList, active: ['orders.index', 'orders.show'], badge: 'activeOrders' },
+    { label: 'Helpdesk', route: 'helpdesk.index', icon: faHeadset, active: ['helpdesk.*'], badge: 'helpdeskUnread' },
 ];
 
 const adminMenu: MenuItem[] = [
     { label: 'Dashboard', route: 'admin.dashboard', icon: faHouse, active: ['admin.dashboard'] },
     { label: 'Kelola Pesanan', route: 'admin.orders.index', icon: faListCheck, active: ['admin.orders.*'], badge: 'pendingOrders' },
     { label: 'Kelola Layanan', route: 'admin.services.index', icon: faLayerGroup, active: ['admin.services.*'] },
-    { label: 'Pengguna', route: 'users.index', icon: faUsers, active: ['users.*'] },
+    { label: 'Helpdesk', route: 'admin.helpdesk.index', icon: faHeadset, active: ['admin.helpdesk.*'], badge: 'helpdeskUnread' },
 ];
 
 const accountMenu: MenuItem[] = [{ label: 'Profil Saya', route: 'profile.edit', icon: faUser, active: ['profile.*'] }];
@@ -69,7 +68,13 @@ function SidebarLink({ item }: { item: MenuItem }) {
                     className={`grid h-5 min-w-5 place-items-center rounded-full px-1.5 text-[11px] font-bold tabular-nums ${
                         active ? 'bg-[#287e59] text-white' : 'bg-[#4de097] text-[#07271e]'
                     }`}
-                    title={item.badge === 'pendingOrders' ? `${count} pesanan menunggu konfirmasi` : `${count} pesanan aktif`}
+                    title={
+                        item.badge === 'pendingOrders'
+                            ? `${count} pesanan menunggu konfirmasi`
+                            : item.badge === 'helpdeskUnread'
+                              ? `${count} pesan belum dibaca`
+                              : `${count} pesanan aktif`
+                    }
                 >
                     {count}
                 </span>
@@ -126,14 +131,6 @@ function Sidebar() {
                         <SidebarLink key={item.route} item={item} />
                     ))}
                 </nav>
-
-                {/* Tips harian */}
-                <div className="mt-7 rounded-2xl border border-white/15 bg-white/[0.07] p-4 backdrop-blur-sm">
-                    <p className="flex items-center gap-2 text-xs font-bold text-[#4de097]">
-                        <FontAwesomeIcon icon={faLightbulb} /> Tips hari ini
-                    </p>
-                    <p className="mt-2 text-[12.5px] leading-relaxed text-[#d8eadf]">{tipOfTheDay(1)}</p>
-                </div>
             </div>
 
             {/* Profil */}

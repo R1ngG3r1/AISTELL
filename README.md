@@ -8,8 +8,8 @@ memantau statusnya secara realtime.
 | Area | Fitur |
 | --- | --- |
 | Publik | Landing page, daftar akun, login (email **atau** username), lupa password |
-| User | Dashboard, pesan layanan, Pesanan Saya (detail, batalkan), profil + foto profil + buku alamat (peta OpenStreetMap) |
-| Admin | Dashboard ringkasan, Kelola Pesanan (terima / tolak / selesai), Kelola Layanan, daftar Pengguna |
+| User | Dashboard (kalender jadwal, tips hijau), pesan layanan, pembayaran (dummy: QRIS, VA bank, e-wallet, minimarket, tunai), Pesanan Saya (detail, batalkan), **Helpdesk** (chat dengan admin), profil + foto profil + buku alamat (peta OpenStreetMap) |
+| Admin | Dashboard ringkasan, Kelola Pesanan (terima / tolak / selesai, status pembayaran), Kelola Layanan, **Helpdesk** (balas chat semua pengguna) |
 
 ---
 
@@ -207,8 +207,8 @@ Dibuat otomatis oleh `php artisan migrate --seed` (atau `php artisan db:seed`). 
 
 | Email | Role | Isi |
 | --- | --- | --- |
-| `admin@aistel.test` | Admin | Mengelola pesanan, layanan, dan melihat pengguna |
-| `user@aistel.test` | User | Punya 5 contoh pesanan (satu untuk setiap status) |
+| `admin@aistel.test` | Admin | Mengelola pesanan, layanan, dan membalas chat Helpdesk |
+| `user@aistel.test` | User | Punya 5 contoh pesanan (satu untuk setiap status) dan 2 pesan Helpdesk contoh |
 | `user2@aistel.test` | User | Punya 1 pesanan (untuk mengetes bahwa user tidak bisa melihat pesanan orang lain) |
 
 Login bisa memakai **email** atau **username** (nama akun, jika nama itu hanya dipakai satu akun).
@@ -259,6 +259,9 @@ Isi database (data akun, pesanan) **tidak** disimpan di Git. Yang disimpan di Gi
 
 ```
 users 1 ──── N orders N ──── 1 services
+  │                 └── N payments
+  ├── N addresses
+  └── 1 helpdesk_threads 1 ──── N helpdesk_messages 1 ──── 0..1 helpdesk_attachments
 ```
 
 | Tabel | Isi |
@@ -267,6 +270,9 @@ users 1 ──── N orders N ──── 1 services
 | `addresses` | Buku alamat user: label, alamat, detail, titik peta (latitude/longitude), `is_primary` (alamat utama → mengisi otomatis lokasi pemesanan) |
 | `services` | Layanan kebersihan: nama, deskripsi, harga |
 | `orders` | Pesanan: layanan, harga saat dipesan, tanggal, jam, lokasi, kontak, catatan, `status` |
+| `payments` | Tagihan pembayaran per pesanan (DUMMY, belum ke payment gateway): metode, biaya, kode VA/QRIS, `status` |
+| `helpdesk_threads`, `helpdesk_messages` | Chat user ↔ admin: satu percakapan per user, pesan (bisa diedit/dihapus), penanda sudah dibaca |
+| `helpdesk_attachments` | Lampiran chat (foto/dokumen maks. 2 MB) yang disimpan **di database** (base64), tanpa storage |
 | `sessions`, `cache`, `jobs`, `migrations` | Tabel sistem Laravel, jangan diedit manual |
 
 Status pesanan: `menunggu` → `diproses` → `selesai`, atau berakhir di `ditolak` / `dibatalkan`.
@@ -316,7 +322,9 @@ AISTELL/
 │       ├── Dashboard/            /dashboard (user) & /admin/dashboard
 │       ├── Order/                pesanan: controller, model, aturan status, migrasi, routes
 │       ├── Service/              layanan kebersihan: lihat + kelola (admin)
-│       └── User/                 daftar pengguna (admin)
+│       ├── Address/              buku alamat user (titik peta)
+│       ├── Payment/              pembayaran dummy: metode, kode VA/QRIS, status
+│       └── Helpdesk/             chat user ↔ admin (polling, edit/hapus pesan, lampiran)
 ├── database/
 │   ├── migrations/               migrasi tabel users & tabel sistem
 │   ├── seeders/                  AdminSeeder, ServiceSeeder, DatabaseSeeder (data demo)
@@ -439,3 +447,4 @@ File yang **tidak boleh** di-commit (sudah ada di `.gitignore`): `.env`, `vendor
 | [docs/BACKEND_ROADMAP.md](docs/BACKEND_ROADMAP.md) | Arsitektur backend, hak akses per role, kontrak data (props) untuk frontend, rencana deploy |
 | [docs/PANDUAN_DATABASE.md](docs/PANDUAN_DATABASE.md) | Mengelola akun, admin, layanan, pesanan, backup & restore database |
 | [docs/DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md) | Warna, tipografi, dan komponen UI |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | Langkah deploy, daftar periksa production, pilihan hosting (+ `.env.production.example`) |

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Modules\Helpdesk\Services\HelpdeskService;
 use App\Modules\Order\Services\OrderService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -56,9 +57,12 @@ class HandleInertiaRequests extends Middleware
                 'timezone' => config('app.timezone'),
             ]),
 
-            // Badge di sidebar: pesanan baru (admin) / pesanan aktif (user).
+            // Badge di sidebar: pesanan baru (admin) / pesanan aktif (user), dan pesan helpdesk belum dibaca.
             'counters' => Inertia::always(fn () => $request->user()
-                ? app(OrderService::class)->counters($request->user())
+                ? [
+                    ...app(OrderService::class)->counters($request->user()),
+                    'helpdeskUnread' => app(HelpdeskService::class)->unreadCount($request->user()),
+                ]
                 : null),
         ];
     }

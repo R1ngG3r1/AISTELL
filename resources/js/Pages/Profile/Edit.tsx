@@ -57,7 +57,7 @@ export default function Edit({ auth, mustVerifyEmail, status, summary, addresses
         >
             <Head title="Profil Saya" />
 
-            <div className="grid items-start gap-6 lg:grid-cols-[20rem_1fr]">
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
                 {/* Kartu identitas */}
                 <Reveal variant="left" className="lg:sticky lg:top-8">
                     <div className="relative isolate overflow-hidden rounded-[28px] bg-[#07271e] p-6 text-white shadow-lift">

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Modules\Helpdesk\Services\HelpdeskService;
 use App\Modules\Order\Enums\OrderStatus;
 use App\Modules\Order\Models\Order;
 use App\Modules\Service\Models\Service;
@@ -49,6 +50,22 @@ class DatabaseSeeder extends Seeder
         if ($user2->orders()->doesntExist()) {
             $this->demoOrder($user2, $services->random(), OrderStatus::Menunggu);
         }
+
+        $this->demoHelpdesk($user, User::where('email', env('ADMIN_EMAIL', 'admin@aistel.test'))->first());
+    }
+
+    /** Contoh percakapan helpdesk (hanya jika belum ada), supaya halaman chat tidak kosong saat dicoba. */
+    private function demoHelpdesk(User $user, ?User $admin): void
+    {
+        $helpdesk = app(HelpdeskService::class);
+        $thread = $helpdesk->threadFor($user);
+
+        if (! $admin || $thread->messages()->exists()) {
+            return;
+        }
+
+        $helpdesk->send($thread, $user, 'Halo admin, apakah jadwal angkut sampah saya sudah dikonfirmasi?');
+        $helpdesk->send($thread, $admin, 'Halo! Pesanan Anda sedang kami proses, petugas akan datang sesuai jadwal. Ada yang bisa kami bantu lagi?');
     }
 
     private function demoUser(string $email, string $name, string $phone): User

@@ -92,7 +92,9 @@ app/
     │   ├── Requests/StoreOrderRequest.php, UpdateOrderStatusRequest.php
     │   ├── Routes/web.php
     │   └── Services/OrderService.php
-    └── User/                               contoh bawaan (/users, sekarang khusus admin)
+    ├── Address/                            buku alamat user
+    ├── Payment/                            pembayaran DUMMY (metode, kode VA/QRIS, status)
+    └── Helpdesk/                           chat user ↔ admin (polling, edit/hapus, lampiran di database)
 
 database/
 ├── migrations/2026_09_24_000000_add_role_and_phone_to_users_table.php
@@ -152,7 +154,10 @@ menunggu ──terima──▶ diproses ──▶ selesai
 | Batalkan pesanan (masih menunggu) | – | ✓ | – | `OrderPolicy::cancel` |
 | Semua pesanan, ubah status | – | – | ✓ | `role:admin` |
 | Kelola layanan | – | – | ✓ | `role:admin` |
-| Daftar pengguna `/users` | – | – | ✓ | `role:admin` |
+| Pembayaran pesanan sendiri (dummy) | – | ✓ | – | `role:user` + `OrderPolicy::pay` |
+| Helpdesk: chat dengan admin `/helpdesk` | – | ✓ | – | `role:user` (hanya percakapan sendiri) |
+| Helpdesk: semua percakapan `/admin/helpdesk` | – | – | ✓ | `role:admin` |
+| Edit / hapus pesan helpdesk, unduh lampiran | – | ✓ | ✓ | `auth`; edit/hapus hanya pengirimnya |
 | Profil & password | – | ✓ | ✓ | `auth` (admin tidak bisa menghapus akunnya) |
 
 Setelah login, admin diarahkan ke `/admin/dashboard` dan user ke `/dashboard`.
@@ -214,7 +219,9 @@ field form. Yang diubah cukup tampilannya. Jika perlu data tambahan, minta ke BE
 | Admin | Dashboard Admin | `Admin/Dashboard.tsx` | ✅ Desain eco-modern |
 | Admin | Kelola Pesanan: daftar & detail | `Admin/Orders/Index.tsx`, `Admin/Orders/Show.tsx` | ✅ Desain eco-modern |
 | Admin | Kelola Layanan (tambah/ubah/hapus) | `Admin/Services/Index.tsx` | ✅ Desain eco-modern |
-| Admin | Daftar pengguna (tambahan) | `User/Index.tsx` | ✅ Desain eco-modern |
+| User | Pembayaran (dummy) | `Payments/Show.tsx` | ✅ Desain eco-modern |
+| User | Helpdesk (chat dengan admin) | `Helpdesk/Index.tsx` | ✅ Desain kaca |
+| Admin | Helpdesk (daftar & balas chat) | `Admin/Helpdesk/Index.tsx` | ✅ Desain kaca |
 | Layout | Navbar setelah login (menu per role) | `Layouts/AuthenticatedLayout.tsx` | ✅ Desain eco-modern |
 
 Komponen pembantu yang bisa dipakai ulang: `Components/StatusBadge.tsx` (warna status pesanan),
@@ -298,9 +305,10 @@ ilegal ditolak.
 
 ---
 
-## 8. Fase 11 — Deploy (belum)
+## 8. Fase 11 — Deploy
 
-Setelah hosting ditentukan:
+Panduan lengkap, daftar periksa, dan pilihan hosting: **[DEPLOY.md](DEPLOY.md)** (contoh env:
+`.env.production.example`). Ringkasnya:
 
 ```bash
 # .env production: APP_ENV=production, APP_DEBUG=false, DB_*, ADMIN_EMAIL, ADMIN_PASSWORD
@@ -318,7 +326,8 @@ php artisan config:cache && php artisan route:cache && php artisan view:cache
 
 ## 9. Pengembangan berikutnya (di luar MVP)
 
-Mengikuti PRD 10, fitur berikut belum dibuat: pembayaran online, Google Login, Google Maps,
-chat, rating, promo, dan notifikasi. Ide kecil yang bisa ditambahkan: kolom `is_active` di
+Mengikuti PRD 10, fitur berikut belum dibuat: pembayaran online sungguhan (saat ini dummy), Google Login,
+Google Maps, rating, promo, dan notifikasi push/email. Chat (Helpdesk) sudah ada dengan polling; untuk
+WebSocket sungguhan bisa memakai Laravel Reverb. Ide kecil yang bisa ditambahkan: kolom `is_active` di
 `services` (menyembunyikan layanan tanpa menghapusnya), dan riwayat perubahan status
 (tabel `order_status_logs`).

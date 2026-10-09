@@ -21,8 +21,8 @@ export default function Panel({
     delay?: number;
 }) {
     return (
-        <Reveal delay={delay} className={`card flex flex-col p-5 sm:p-6 ${className}`}>
-            <div className="mb-4 flex items-center justify-between gap-3">
+        <Reveal delay={delay} className={`card flex min-w-0 flex-col p-5 sm:p-6 ${className}`}>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                 <h2 className="flex items-center gap-2.5 text-[15px] font-extrabold text-[#0c2b20]">
                     <FontAwesomeIcon icon={faLeaf} className="text-[#287e59]" />
                     {title}

@@ -68,7 +68,7 @@ export default function AddressFormModal({
                     </button>
                 </div>
 
-                <div className="grid flex-1 gap-6 overflow-y-auto px-6 py-6 md:px-7 lg:grid-cols-[1.15fr_1fr]">
+                <div className="grid flex-1 grid-cols-1 gap-6 overflow-y-auto px-6 py-6 md:px-7 lg:grid-cols-[1.15fr_1fr]">
                     {/* Kiri: peta */}
                     <div>
                         <InputLabel value="Titik lokasi" />

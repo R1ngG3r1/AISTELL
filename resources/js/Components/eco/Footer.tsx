@@ -15,9 +15,9 @@ export default function Footer() {
     return (
         <footer className="mx-auto max-w-[1280px] px-4 pb-8 sm:px-6 lg:px-8">
             <div className="overflow-hidden rounded-[28px] border border-[#0c2b20] bg-[#07271e] p-6 text-white shadow-soft sm:p-8 lg:p-10">
-                <div className="grid gap-8 md:grid-cols-4 lg:grid-cols-5">
+                <div className="grid gap-8 md:grid-cols-[1.6fr_1fr_1.2fr]">
                     {/* Kolom Brand */}
-                    <div className="md:col-span-2 lg:col-span-3">
+                    <div>
                         <div className="flex items-center gap-2.5">
                             <img
                                 src="/landingpage/LOGO.png"
@@ -59,8 +59,8 @@ export default function Footer() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href={route('users.index')} className="text-[#84a595] transition hover:text-white">
-                                            Pengguna
+                                        <Link href={route('admin.helpdesk.index')} className="text-[#84a595] transition hover:text-white">
+                                            Helpdesk
                                         </Link>
                                     </li>
                                 </>
@@ -79,6 +79,11 @@ export default function Footer() {
                                     <li>
                                         <Link href={route('orders.index')} className="text-[#84a595] transition hover:text-white">
                                             Pesanan Saya
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href={route('helpdesk.index')} className="text-[#84a595] transition hover:text-white">
+                                            Helpdesk
                                         </Link>
                                     </li>
                                     <li>
@@ -112,7 +117,7 @@ export default function Footer() {
                                     className="flex items-center gap-2.5 transition hover:text-white"
                                 >
                                     <FontAwesomeIcon icon={faPhone} className="w-3.5 text-[#4de097]" />
-                                    <span>+62 812-3456-7890</span>
+                                    <span className="whitespace-nowrap">+62 812-3456-7890</span>
                                 </a>
                             </li>
                             <li className="flex items-center gap-2.5">

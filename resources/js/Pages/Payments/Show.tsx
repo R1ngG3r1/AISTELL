@@ -4,7 +4,6 @@ import ServiceIcon from '@/Components/eco/ServiceIcon';
 import InputError from '@/Components/InputError';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
-import { useServerClock } from '@/lib/live';
 import { Reveal } from '@/lib/motion';
 import { GROUP_LABELS, GROUP_ORDER, groupDigits, paymentSteps } from '@/lib/payment';
 import { Order, PageProps, Payment, PaymentMethodOption } from '@/types';
@@ -17,11 +16,10 @@ import {
     faCircleInfo,
     faClock,
     faCopy,
+    faSpinner,
     faDownload,
-    faFlask,
     faHandHoldingDollar,
     faRotateLeft,
-    faShieldHalved,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head, Link, router, useForm } from '@inertiajs/react';
@@ -43,7 +41,7 @@ export default function PaymentShow({ order, payment, methods }: Props) {
         content = (
             <Notice icon={faRotateLeft} title="Dana dikembalikan">
                 Pesanan ini {order.status_label.toLowerCase()}, sehingga pembayaran {formatRupiah(payment.amount)} dikembalikan ke metode
-                pembayaran asal dalam 1–3 hari kerja (simulasi).
+                pembayaran asal dalam 1–3 hari kerja.
             </Notice>
         );
     } else if (!orderActive) {
@@ -73,7 +71,7 @@ export default function PaymentShow({ order, payment, methods }: Props) {
                 <PageHeader
                     eyebrow="Pembayaran"
                     title={`Pesanan #${order.id}`}
-                    description="Pilih metode pembayaran yang Anda inginkan. Semua transaksi di sini masih simulasi (dummy)."
+                    description="Pilih metode pembayaran yang Anda inginkan."
                 />
             }
         >
@@ -83,7 +81,7 @@ export default function PaymentShow({ order, payment, methods }: Props) {
                 <FontAwesomeIcon icon={faArrowLeft} /> Detail pesanan
             </Link>
 
-            <div className="grid items-start gap-6 lg:grid-cols-[1fr_22rem]">
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
                 <div>{content}</div>
                 <Summary order={order} payment={payment} />
             </div>
@@ -223,28 +221,83 @@ function MethodChooser({
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Alur proses pembayaran (terstruktur)                                      */
+/* -------------------------------------------------------------------------- */
+
+const PROCESSING_MS = 3000;
+
+const PROGRESS_STEPS = [
+    { title: 'Metode dipilih', hint: 'Metode pembayaran Anda tersimpan' },
+    { title: 'Kode pembayaran dibuat', hint: 'QR / nomor VA / kode bayar siap dipakai' },
+    { title: 'Memproses pembayaran', hint: 'Menunggu konfirmasi pembayaran' },
+    { title: 'Pembayaran berhasil', hint: 'Status pesanan menjadi Sudah Terbayar' },
+];
+
+/** stage 'processing' = langkah 3 berjalan (animasi memuat); 'done' = semua langkah selesai. */
+function PaymentProgress({ stage, className = '' }: { stage: 'processing' | 'done'; className?: string }) {
+    const current = stage === 'done' ? PROGRESS_STEPS.length : 2; // indeks langkah yang sedang berjalan
+    return (
+        <Reveal className={`card p-5 md:p-6 ${className}`}>
+            <ol className="grid gap-4 sm:grid-cols-4 sm:gap-3">
+                {PROGRESS_STEPS.map((step, i) => {
+                    const done = i < current;
+                    const active = i === current;
+                    return (
+                        <li key={step.title} className="flex gap-3 sm:flex-col sm:gap-2">
+                            <div className="flex items-center sm:w-full">
+                                <span
+                                    className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm transition-colors duration-500 ${
+                                        done ? 'bg-forest-600 text-white' : active ? 'bg-leaf-400 text-forest-900' : 'bg-forest-50 text-forest-900/40'
+                                    }`}
+                                >
+                                    {done ? <FontAwesomeIcon icon={faCheck} /> : active ? <FontAwesomeIcon icon={faSpinner} spin /> : i + 1}
+                                </span>
+                                {i < PROGRESS_STEPS.length - 1 && (
+                                    <span className="relative ml-2 hidden h-1 flex-1 overflow-hidden rounded-full bg-forest-50 sm:block">
+                                        <span
+                                            className={`absolute inset-y-0 left-0 rounded-full bg-forest-600 ${
+                                                done ? 'w-full' : active ? 'animate-progress-fill' : 'w-0'
+                                            }`}
+                                            style={active ? { animationDuration: `${PROCESSING_MS}ms` } : undefined}
+                                        />
+                                    </span>
+                                )}
+                            </div>
+                            <div className="min-w-0">
+                                <p className={`text-sm font-bold ${done || active ? 'text-forest-900' : 'text-forest-900/40'}`}>{step.title}</p>
+                                <p className="text-xs text-forest-900/50">{active ? 'Mohon tunggu sebentar…' : step.hint}</p>
+                            </div>
+                        </li>
+                    );
+                })}
+            </ol>
+        </Reveal>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Instruksi pembayaran (tagihan menunggu)                                   */
 /* -------------------------------------------------------------------------- */
 
 function Instructions({ order, payment, onChangeMethod }: { order: Order; payment: Payment; onChangeMethod: () => void }) {
-    const [simulating, setSimulating] = useState(false);
     const steps = paymentSteps(payment);
     const channels = Object.keys(steps);
     const [channel, setChannel] = useState(channels[0]);
     const isCod = payment.method_group === 'cod';
 
-    const simulate = () =>
-        router.post(route('orders.payment.simulate', order.id), {}, {
-            preserveScroll: true,
-            onStart: () => setSimulating(true),
-            onFinish: () => setSimulating(false),
-        });
+    // DUMMY: tanpa payment gateway, pembayaran non-tunai "masuk" otomatis setelah jeda singkat.
+    useEffect(() => {
+        if (isCod) return;
+        const t = window.setTimeout(() => {
+            router.post(route('orders.payment.confirm', order.id), {}, { preserveScroll: true });
+        }, PROCESSING_MS);
+        return () => window.clearTimeout(t);
+    }, [isCod, order.id, payment.id]);
 
     return (
         <div className="space-y-5">
+            {!isCod && <PaymentProgress stage="processing" />}
             <Reveal className="card overflow-hidden">
-                {payment.expires_at && <Countdown until={payment.expires_at} />}
-
                 <div className="p-6 md:p-7">
                     <div className="flex items-center gap-3">
                         <MethodLogo method={payment.method} className="h-11 w-16 text-xs" />
@@ -304,71 +357,16 @@ function Instructions({ order, payment, onChangeMethod }: { order: Order; paymen
                         </ol>
                     </div>
 
-                    <div className="mt-7 flex flex-wrap gap-2 border-t border-forest-900/5 pt-5">
-                        <button type="button" onClick={onChangeMethod} className="btn-ghost btn-sm">
-                            Ganti metode pembayaran
-                        </button>
-                        <Link href={route('orders.show', order.id)} className="btn-ghost btn-sm">
-                            Bayar nanti
-                        </Link>
-                    </div>
+                    {isCod && (
+                        <div className="mt-7 flex flex-wrap gap-2 border-t border-forest-900/5 pt-5">
+                            <button type="button" onClick={onChangeMethod} className="btn-ghost btn-sm">
+                                Ganti metode pembayaran
+                            </button>
+                        </div>
+                    )}
                 </div>
             </Reveal>
 
-            {/* Panel simulasi: pengganti notifikasi dari payment gateway sungguhan */}
-            {!isCod && (
-                <Reveal delay={80} className="rounded-[22px] border-2 border-dashed border-sun-400/50 bg-sun-100/50 p-5">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex items-start gap-3">
-                            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sun-100 text-sun-600">
-                                <FontAwesomeIcon icon={faFlask} />
-                            </span>
-                            <div>
-                                <p className="text-sm font-bold text-forest-900">Mode simulasi</p>
-                                <p className="text-xs text-forest-900/60">
-                                    Belum terhubung ke payment gateway. Tekan tombol ini untuk berpura-pura pembayaran sudah diterima.
-                                </p>
-                            </div>
-                        </div>
-                        <button type="button" onClick={simulate} disabled={simulating} className="btn-primary shrink-0">
-                            {simulating ? 'Memproses…' : 'Simulasikan pembayaran'}
-                        </button>
-                    </div>
-                </Reveal>
-            )}
-        </div>
-    );
-}
-
-/** Hitung mundur batas waktu bayar (mengikuti jam server). Saat habis, data dimuat ulang → Kedaluwarsa. */
-function Countdown({ until }: { until: string }) {
-    const { now } = useServerClock();
-    const left = Math.max(0, Date.parse(until) - now.getTime());
-
-    useEffect(() => {
-        if (left === 0) router.reload({ only: ['payment'] });
-    }, [left === 0]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const h = Math.floor(left / 3_600_000);
-    const m = Math.floor((left % 3_600_000) / 60_000);
-    const s = Math.floor((left % 60_000) / 1000);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const deadline = new Date(until).toLocaleString('id-ID', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-
-    return (
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-forest-900 px-6 py-4 text-cream md:px-7">
-            <div>
-                <p className="text-xs text-cream/60">Selesaikan pembayaran sebelum</p>
-                <p className="text-sm font-bold">{deadline} WIB</p>
-            </div>
-            <div className="flex items-center gap-1.5 font-display text-xl font-bold tabular-nums">
-                {[pad(h), pad(m), pad(s)].map((v, i) => (
-                    <span key={i} className="flex items-center gap-1.5">
-                        <span className="rounded-lg bg-white/10 px-2 py-1">{v}</span>
-                        {i < 2 && <span className="text-cream/40">:</span>}
-                    </span>
-                ))}
-            </div>
         </div>
     );
 }
@@ -385,7 +383,7 @@ function QrBlock({ payload, reference, methodLabel }: { payload: string; referen
             <p className="font-display text-sm font-extrabold tracking-wide text-forest-900">
                 <span className="text-[#d6202f]">QRIS</span> · AISTEL
             </p>
-            <p className="text-[11px] text-forest-900/45">NMID: ID{reference.replace(/\D/g, '').padEnd(13, '0').slice(0, 13)} (dummy)</p>
+            <p className="text-[11px] text-forest-900/45">NMID: ID{reference.replace(/\D/g, '').padEnd(13, '0').slice(0, 13)}</p>
             <div className="mt-4 grid h-60 w-60 place-items-center rounded-2xl bg-white p-2 ring-1 ring-forest-900/10">
                 {src ? <img src={src} alt={`Kode QR pembayaran ${methodLabel}`} className="h-full w-full" /> : <div className="h-full w-full animate-pulse rounded-xl bg-forest-50" />}
             </div>
@@ -436,6 +434,7 @@ function PaidCard({ order, payment }: { order: Order; payment: Payment }) {
     ];
     return (
         <Reveal className="card p-6 text-center md:p-10">
+            {payment.method_group !== 'cod' && <PaymentProgress stage="done" className="mb-8 text-left" />}
             <span className="mx-auto grid h-20 w-20 animate-scale-in place-items-center rounded-full bg-leaf-100 text-4xl text-forest-600">
                 <FontAwesomeIcon icon={faCircleCheck} />
             </span>
@@ -519,10 +518,6 @@ function Summary({ order, payment }: { order: Order; payment: Payment | null }) 
                     </div>
                 </dl>
 
-                <p className="mt-5 flex items-start gap-2 text-xs text-forest-900/45">
-                    <FontAwesomeIcon icon={faShieldHalved} className="mt-0.5" />
-                    Simulasi pembayaran — tidak ada uang sungguhan yang ditarik.
-                </p>
             </Reveal>
         </aside>
     );

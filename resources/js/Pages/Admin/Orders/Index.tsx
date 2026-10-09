@@ -64,12 +64,12 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                     <EmptyState title="Tidak ada pesanan" description="Belum ada pesanan dengan status ini." />
                 ) : (
                     <>
-                    <OrderCardList orders={orders.data} className="md:hidden" />
-                    <div className="hidden overflow-x-auto md:block">
+                    <OrderCardList orders={orders.data} className="xl:hidden" />
+                    <div className="hidden overflow-x-auto xl:block">
                         <table className="table-eco">
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th>No Layanan</th>
                                     <th>Pemesan</th>
                                     <th>Layanan</th>
                                     <th>Jadwal</th>
@@ -100,7 +100,7 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                                                 {order.service?.name}
                                             </span>
                                         </td>
-                                        <td className="whitespace-nowrap text-forest-900/60">
+                                        <td className="text-forest-900/60">
                                             {formatDate(order.date)}, {formatTime(order.time)}
                                         </td>
                                         <td>

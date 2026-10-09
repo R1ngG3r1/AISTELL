@@ -3,13 +3,13 @@ import IconTile from '@/Components/eco/dashboard/IconTile';
 import MiniCalendar from '@/Components/eco/dashboard/MiniCalendar';
 import Panel from '@/Components/eco/dashboard/Panel';
 import ProgressRow from '@/Components/eco/dashboard/ProgressRow';
+import TipsCarousel from '@/Components/eco/dashboard/TipsCarousel';
 import EmptyState from '@/Components/eco/EmptyState';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatTime } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
-import { tipOfTheDay } from '@/lib/tips';
 import { Order, OrderStats, PageProps, ScheduleDay } from '@/types';
 import {
     faArrowRight,
@@ -78,11 +78,11 @@ export default function Dashboard({ auth, stats, latestOrders, upcomingOrders, s
               sehingga tinggi kartu yang berbeda tidak meninggalkan ruang kosong. Kartu terakhir
               di setiap kolom mengisi sisa tinggi agar kedua kolom berakhir sejajar.
             */}
-            <section className="mt-6 grid gap-5 xl:grid-cols-3">
+            <section className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-3">
                 {/* Kolom kiri */}
-                <div className="flex flex-col gap-5 xl:col-span-2">
+                <div className="flex min-w-0 flex-col gap-5 xl:col-span-2">
                     <Panel title="Ringkasan Pesanan" action={{ label: 'Lihat semua', href: route('orders.index') }}>
-                        <div className="grid gap-5 md:grid-cols-[15rem_1fr]">
+                        <div className="grid grid-cols-1 gap-5 md:grid-cols-[15rem_minmax(0,1fr)]">
                             {/* HP: Total selebar kartu + 2 petak; tablet kecil: 3 sejajar; md+: bertumpuk di kolom kiri */}
                             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-1">
                                 <IconTile icon={faClipboardList} label="Total Pesanan" value={stats.total} highlight horizontal className="col-span-2 sm:col-span-1" />
@@ -138,7 +138,7 @@ export default function Dashboard({ auth, stats, latestOrders, upcomingOrders, s
                 </div>
 
                 {/* Kolom kanan (di tablet: dua kartu berdampingan) */}
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[auto_1fr]">
+                <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[auto_1fr]">
                     <Panel title="Jadwal Layanan" delay={120}>
                         <MiniCalendar schedule={schedule} />
                         <div className="mt-4 space-y-2">
@@ -169,17 +169,9 @@ export default function Dashboard({ auth, stats, latestOrders, upcomingOrders, s
                         </div>
                     </Panel>
 
-                    {/* Gambar ikut membesar mengisi sisa tinggi kolom */}
+                    {/* Carousel tips: foto ikut membesar mengisi sisa tinggi kolom */}
                     <Panel title="Tips Hijau" delay={200} bodyClassName="flex flex-col">
-                        <div className="relative min-h-[11rem] flex-1 overflow-hidden rounded-2xl">
-                            <img
-                                src="/landingpage/gambar2.png"
-                                alt="Daun semanggi di bawah langit cerah"
-                                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-                            />
-                        </div>
-                        <p className="mt-4 text-sm font-semibold leading-relaxed text-[#0c2b20]">{tipOfTheDay()}</p>
-                        <p className="mt-1 text-xs text-[#0c2b20]/45">Tips berganti setiap hari 🌿</p>
+                        <TipsCarousel />
                     </Panel>
                 </div>
             </section>

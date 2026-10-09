@@ -33,11 +33,16 @@
 
 html {
     scroll-behavior: smooth;
+    /* Dekorasi / animasi yang menjorok ke luar layar (mis. kartu Reveal yang bergeser dari samping)
+       tidak boleh memunculkan scroll horizontal atau membuat halaman HP ter-zoom-out. `clip` tidak
+       mematikan position: sticky seperti `hidden`. */
+    overflow-x: clip;
 }
 
 body {
     margin: 0;
     padding: 0;
+    overflow-x: clip;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--bg-page);
     color: var(--text-dark);
@@ -1513,3 +1518,27 @@ body {
     }
 }
 
+/* Scrollbar tipis & transparan untuk panel kaca (chat, daftar percakapan): tanpa panah, hanya jempol bulat. */
+.scroll-glass {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+}
+.scroll-glass::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.scroll-glass::-webkit-scrollbar-track {
+    background: transparent;
+}
+.scroll-glass::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+}
+.scroll-glass::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+.scroll-glass::-webkit-scrollbar-button {
+    display: none;
+    height: 0;
+    width: 0;
+}

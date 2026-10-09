@@ -120,9 +120,9 @@ export default function AdminDashboard({ auth, stats, latestOrders, pendingOrder
               sehingga tinggi kartu yang berbeda tidak meninggalkan ruang kosong. Kartu terakhir
               di setiap kolom mengisi sisa tinggi agar kedua kolom berakhir sejajar.
             */}
-            <section className="mt-5 grid gap-5 xl:grid-cols-3">
+            <section className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
                 {/* Kolom kiri: yang perlu ditindaklanjuti lebih dulu */}
-                <div className="flex flex-col gap-5 xl:col-span-2">
+                <div className="flex min-w-0 flex-col gap-5 xl:col-span-2">
                     <Panel
                         title={
                             <>
@@ -140,7 +140,7 @@ export default function AdminDashboard({ auth, stats, latestOrders, pendingOrder
                                 Tidak ada pesanan yang menunggu konfirmasi. 🌿
                             </div>
                         ) : (
-                            <ul className="grid gap-2 md:grid-cols-2">
+                            <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
                                 {pendingOrders.map((o) => (
                                     <li key={o.id}>
                                         <Link
@@ -217,7 +217,7 @@ export default function AdminDashboard({ auth, stats, latestOrders, pendingOrder
                 </div>
 
                 {/* Kolom kanan (di tablet: dua kartu berdampingan) */}
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[auto_1fr]">
+                <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-1 xl:grid-rows-[auto_1fr]">
                     <Panel title="Jadwal Layanan" delay={120}>
                         <MiniCalendar schedule={schedule} />
                         <p className="mt-3 text-xs text-[#0c2b20]/50">

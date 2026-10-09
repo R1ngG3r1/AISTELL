@@ -12,13 +12,18 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Pembayaran DUMMY: nomor VA, kode bayar, dan QRIS dibuat acak di sini, dan
- * "pembayaran berhasil" disimulasikan lewat tombol. Saat memakai payment gateway
- * sungguhan, cukup ganti isi create() (minta kode ke gateway) dan ganti
- * simulatePaid() dengan webhook/callback dari gateway.
+ * Pembayaran DUMMY: nomor VA, kode bayar, dan QRIS dibuat acak di sini. Selama belum
+ * ada payment gateway, tagihan non-tunai otomatis dilunasi oleh confirmPaid() beberapa
+ * detik setelah kodenya dibuat (meniru notifikasi gateway). Saat memakai gateway
+ * sungguhan, hapus confirmPaid() dan tandai Lunas lewat webhook/callback.
+ * Bayar tunai (COD) tetap Menunggu sampai pesanan selesai (lihat syncWithOrder()).
  */
+
 class PaymentService
 {
+    /** Jeda minimal (detik) antara kode dibuat dan pembayaran dianggap masuk (dummy). */
+    public const CONFIRM_DELAY = 3;
+
     /** Pembayaran terbaru sebuah pesanan (null jika belum pernah memilih metode). */
     public function current(Order $order): ?Payment
     {
@@ -65,14 +70,18 @@ class PaymentService
     }
 
     /**
-     * DUMMY: tandai tagihan sebagai lunas, seolah-olah gateway mengirim notifikasi.
+     * DUMMY: pembayaran non-tunai dianggap masuk setelah jeda singkat, seolah gateway
+     * mengirim notifikasi. Tunai tidak pernah lewat sini.
      *
      * @throws ValidationException
      */
-    public function simulatePaid(Payment $payment): Payment
+    public function confirmPaid(Payment $payment): Payment
     {
         if ($payment->status !== PaymentStatus::Menunggu || $payment->method === PaymentMethod::Cod) {
             throw ValidationException::withMessages(['payment' => 'Tagihan ini tidak dapat dibayar.']);
+        }
+        if ($payment->created_at->diffInSeconds(now()) < self::CONFIRM_DELAY - 1) {
+            throw ValidationException::withMessages(['payment' => 'Pembayaran masih diproses.']);
         }
 
         $payment->status = PaymentStatus::Lunas;

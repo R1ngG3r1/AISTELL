@@ -108,6 +108,7 @@ export interface ScheduleDay {
 export interface Counters {
     pendingOrders?: number;
     activeOrders?: number;
+    helpdeskUnread?: number; // pesan helpdesk belum dibaca
 }
 
 /** Hasil ->paginate() Laravel. */
@@ -136,3 +137,24 @@ export type PageProps<
     };
     counters: Counters | null;
 };
+
+/** Pesan helpdesk (HelpdeskMessage::toChat). */
+export interface ChatMessage {
+    id: number;
+    body: string | null; // null jika pesan dihapus / hanya lampiran
+    from_admin: boolean;
+    created_at: string;
+    edited: boolean;
+    deleted: boolean;
+    editable_until: string | null; // batas waktu edit (server tetap memvalidasi)
+    deletable_until: string | null;
+    attachment: { name: string; mime: string; size: number; image: boolean; url: string } | null;
+}
+
+/** Ringkasan percakapan di daftar admin (HelpdeskService::adminThreads). */
+export interface HelpdeskThreadSummary {
+    id: number;
+    user: Pick<User, 'id' | 'name' | 'email' | 'avatar_url'>;
+    last_message: { body: string; from_admin: boolean; created_at: string } | null;
+    unread_count: number;
+}

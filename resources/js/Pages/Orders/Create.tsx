@@ -61,6 +61,9 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
     // Format YYYY-MM-DD sesuai zona waktu lokal (en-CA kebetulan memakai format itu).
     const today = new Date().toLocaleDateString('en-CA');
     const selected = services.find((s) => String(s.id) === data.service_id);
+    // Layanan terkunci bila datang dari halaman layanan (?service=ID yang valid).
+    const [serviceLocked] = useState(() => services.some((s) => s.id === selectedServiceId));
+    const offset = serviceLocked ? 0 : 1;
     const point = toLatLng(data);
 
     const chooseAddress = (a: Address | null) => {
@@ -85,8 +88,10 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
         >
             <Head title="Pesan Layanan" />
 
-            <form onSubmit={submit} className="grid items-start gap-6 lg:grid-cols-[1fr_22rem]">
+            <form onSubmit={submit} className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
                 <div className="space-y-5">
+                    {/* Layanan sudah dipilih dari halaman sebelumnya → langkah ini disembunyikan agar tidak memilih dua kali. */}
+                    {!serviceLocked && (
                     <Step n={1} title="Pilih layanan">
                         <div className="grid gap-3 sm:grid-cols-2">
                             {services.map((s) => {
@@ -126,8 +131,9 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
                         </div>
                         <InputError message={errors.service_id} className="mt-3" />
                     </Step>
+                    )}
 
-                    <Step n={2} title="Data pemesan" delay={80}>
+                    <Step n={1 + offset} title="Data pemesan" delay={80}>
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <InputLabel htmlFor="contact_name" value="Nama pemesan" />
@@ -148,7 +154,7 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
                         </div>
                     </Step>
 
-                    <Step n={3} title="Lokasi & jadwal" delay={160}>
+                    <Step n={2 + offset} title="Lokasi & jadwal" delay={160}>
                         <div className="space-y-4">
                             <div>
                                 <InputLabel value="Pilih alamat" />
@@ -250,7 +256,7 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
                         </div>
                     </Step>
 
-                    <Step n={4} title="Catatan tambahan" delay={240}>
+                    <Step n={3 + offset} title="Catatan tambahan" delay={240}>
                         <textarea
                             id="notes"
                             rows={3}
