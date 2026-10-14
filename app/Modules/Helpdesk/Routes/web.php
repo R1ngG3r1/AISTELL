@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 | (tanpa WebSocket, sama seperti fitur realtime lain di aplikasi ini).
 */
 
-Route::middleware(['auth', 'role:user'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     Route::get('/helpdesk', [HelpdeskController::class, 'index'])->name('helpdesk.index');
     Route::get('/helpdesk/messages', [HelpdeskController::class, 'messages'])->middleware('throttle:120,1')->name('helpdesk.messages');
     Route::post('/helpdesk/messages', [HelpdeskController::class, 'store'])->middleware('throttle:30,1')->name('helpdesk.store');

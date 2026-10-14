@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 |         melihat seluruh pesanan & mengubah status → hanya role admin.
 */
 
-Route::middleware(['auth', 'role:user'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     // /orders/create didefinisikan SEBELUM /orders/{order}, dan {order} dibatasi
     // angka (whereNumber), supaya kata "create" tidak dianggap sebagai id pesanan.

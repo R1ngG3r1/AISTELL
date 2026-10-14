@@ -33,7 +33,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => ['required', 'string', 'lowercase', app()->environment('testing') ? 'email:rfc' : 'email:rfc,dns', 'max:255', 'unique:'.User::class],
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s]{8,20}$/'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             // Checkbox "Saya menyetujui Syarat dan Ketentuan" juga dicek di backend,
@@ -41,6 +41,7 @@ class RegisteredUserController extends Controller
             'terms' => ['accepted'],
         ], [
             'terms.accepted' => 'Anda harus menyetujui Syarat dan Ketentuan serta Kebijakan Privasi AISTEL.',
+            'email.email' => 'Alamat email tidak valid atau domain emailnya tidak ditemukan.',
             'phone.regex' => 'Nomor telepon hanya boleh berisi angka, spasi, + atau - (8–20 karakter).',
         ]);
 
@@ -56,6 +57,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Email verifikasi sudah dikirim oleh event Registered di atas.
+        return redirect(route('verification.notice', absolute: false));
     }
 }
