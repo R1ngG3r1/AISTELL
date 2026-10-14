@@ -31,7 +31,7 @@ export default function AdminHelpdeskIndex({ threads, selected, messages, synced
     const [query, setQuery] = useState('');
 
     // Daftar percakapan diperbarui berkala (pesan baru / badge belum dibaca); isi chat punya polling sendiri.
-    usePoll(5000, { only: ['threads'], showProgress: false });
+    usePoll(10_000, { only: ['threads'], showProgress: false });
 
     const q = query.trim().toLowerCase();
     const shown = q ? threads.filter((t) => `${t.user.name} ${t.user.email}`.toLowerCase().includes(q)) : threads;

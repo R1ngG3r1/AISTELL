@@ -15,7 +15,7 @@ import axios from 'axios';
 import { ChangeEvent, FormEvent, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 
 /** Selang polling pesan baru / perubahan (ms). Cukup cepat agar terasa realtime, tetap ringan untuk server. */
-const POLL_MS = 2500;
+const POLL_MS = 5000;
 const TIME_ZONE = 'Asia/Jakarta';
 const MAX_FILE_BYTES = 2 * 1024 * 1024; // sama dengan batas server (2 MB)
 const ACCEPT = '.jpg,.jpeg,.png,.webp,.gif,.pdf,.txt,.doc,.docx,.xls,.xlsx';

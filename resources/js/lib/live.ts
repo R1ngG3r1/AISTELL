@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 */
 
 /** Interval polling data (ms). Cukup cepat untuk status pesanan, tetap ringan untuk server. */
-export const LIVE_INTERVAL = 10_000;
+export const LIVE_INTERVAL = 20_000;
 
 /**
  * Jam realtime. Server mengirim `clock.now` di setiap respons (termasuk polling);

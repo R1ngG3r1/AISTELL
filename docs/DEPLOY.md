@@ -54,7 +54,7 @@ Izin tulis untuk web server pada folder `storage/` dan `bootstrap/cache/`
 
 - **Foto profil memakai disk lokal** (`storage/app/private`). Di PaaS/container yang filesystem-nya
   dihapus setiap deploy (Render, Koyeb, Railway tanpa volume), foto akan hilang. Di VPS / hosting biasa aman.
-- **Helpdesk & dashboard memakai polling** (chat tiap ±2,5 detik, data dashboard tiap 10 detik).
+- **Helpdesk & dashboard memakai polling** (chat tiap ±5 detik, data dashboard tiap 20 detik).
   Hosting murah dengan batas proses / CPU ketat bisa terasa berat jika pengguna bersamaan banyak.
 - **Pembayaran masih dummy** (tidak ada uang sungguhan). Ganti `PaymentService` dengan payment gateway
   sebelum dipakai untuk transaksi nyata.

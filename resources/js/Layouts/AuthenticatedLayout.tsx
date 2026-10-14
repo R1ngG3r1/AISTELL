@@ -170,7 +170,7 @@ export default function Authenticated({
     const [mobileOpen, setMobileOpen] = useState(false);
 
     // Badge sidebar & jam selalu diperbarui; halaman dengan `live` juga memperbarui datanya.
-    useLivePoll(live ?? ['counters'], live ? LIVE_INTERVAL : 30_000);
+    useLivePoll(live ?? ['counters'], live ? LIVE_INTERVAL : 60_000);
 
     // Tutup menu mobile setiap pindah halaman
     const url = usePage().url;

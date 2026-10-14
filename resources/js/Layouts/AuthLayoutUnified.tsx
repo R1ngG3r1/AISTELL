@@ -23,6 +23,40 @@ function Spinner() {
     );
 }
 
+function GoogleIcon() {
+    return (
+        <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+        </svg>
+    );
+}
+
+// Tombol "Continue with Google": navigasi penuh ke backend (redirect OAuth), bukan Inertia.
+function GoogleButton({ className = "" }: { className?: string }) {
+    return (
+        <a
+            href={route("auth.google")}
+            className={`w-full h-11 sm:h-12 rounded-full border text-sm sm:text-base font-medium flex items-center justify-center gap-2.5 shadow-sm transition-all duration-200 active:scale-[0.99] focus:outline-none focus:ring-2 ${className}`}
+        >
+            <GoogleIcon />
+            <span>Continue with Google</span>
+        </a>
+    );
+}
+
+function OrDivider({ className = "" }: { className?: string }) {
+    return (
+        <div className={`flex items-center gap-3 text-xs ${className}`}>
+            <span className="h-px flex-1 bg-current opacity-40" />
+            <span>Or</span>
+            <span className="h-px flex-1 bg-current opacity-40" />
+        </div>
+    );
+}
+
 // Kelas bersama untuk form register (putih di atas dedaunan, gelap di desktop)
 const registerLabel =
     "block text-xs sm:text-sm font-bold text-white lg:text-[#18231f] mb-1.5 ml-2";
@@ -282,6 +316,13 @@ export default function AuthLayoutUnified({
                         </p>
                     </div>
 
+                    {/* Google */}
+                    {/* Tablet & desktop: di atas form. Mobile: di bawah tombol Sign Up (lihat bawah). */}
+                    <div className="mb-5 space-y-4 hidden sm:block">
+                        <GoogleButton className="bg-white border-white text-[#18231f] hover:bg-[#f1f8f4] focus:ring-white/40 lg:border-[#7ba794] lg:focus:ring-[#3b9270]/40" />
+                        <OrDivider className="text-white/80 lg:text-[#38916d]" />
+                    </div>
+
                     <form onSubmit={submitRegister} className="space-y-4">
                         {/* Row 1: Name & Email Address */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
@@ -392,7 +433,7 @@ export default function AuthLayoutUnified({
                             <button
                                 type="submit"
                                 disabled={registerForm.processing || !registerForm.data.terms}
-                                className="w-full h-11 sm:h-12 rounded-full border text-sm sm:text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-white/15 border-white/60 text-white hover:bg-white/25 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:text-[#18231f] lg:hover:bg-[#b6d4c5]"
+                                className="w-full h-11 sm:h-12 rounded-full border text-sm sm:text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-[#06241a]/80 border-[#06241a] text-white hover:bg-[#06241a] sm:bg-[#0d3a2a]/60 sm:border-[#3b9270]/60 sm:hover:bg-[#0d3a2a]/80 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:text-[#18231f] lg:hover:bg-[#b6d4c5]"
                             >
                                 {registerForm.processing ? (
                                     <span className="flex items-center gap-2">
@@ -403,6 +444,12 @@ export default function AuthLayoutUnified({
                                     "Sign Up"
                                 )}
                             </button>
+                        </div>
+
+                        {/* Google khusus mobile (di bawah Sign Up, sesuai desain) */}
+                        <div className="sm:hidden space-y-4 pt-1">
+                            <OrDivider className="text-white/80" />
+                            <GoogleButton className="bg-transparent border-white/70 text-white hover:bg-white/10 focus:ring-white/40" />
                         </div>
 
                         {/* Footer link */}
@@ -610,8 +657,12 @@ export default function AuthLayoutUnified({
                             </button>
                         </div>
 
+                        {/* Google */}
+                        <OrDivider className="pt-2 text-white/80 sm:text-[#18231f]/70 lg:text-[#38916d]" />
+                        <GoogleButton className="bg-[#0b3a28]/35 border-white/30 text-white backdrop-blur-sm hover:bg-[#0b3a28]/50 focus:ring-white/40 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:text-[#18231f] lg:backdrop-blur-none lg:hover:bg-[#b6d4c5] lg:focus:ring-[#3b9270]/40" />
+
                         {/* Footer link */}
-                        <div className="pt-6 sm:pt-8 text-center">
+                        <div className="pt-4 sm:pt-6 text-center">
                             <p className="text-xs sm:text-sm text-[#18231f]">
                                 Not a member?{" "}
                                 <button
