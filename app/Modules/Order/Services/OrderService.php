@@ -20,6 +20,7 @@ class OrderService
     /** Relasi yang hampir selalu ditampilkan bersama pesanan. */
     private const WITH = [
         'service:id,name,price',
+        'staff:id,name,phone,type',
         'user:id,name,email,phone,avatar_path', // avatar_path → avatar_url untuk foto pemesan
         'payment', // pembayaran terbaru (status bayar)
     ];
@@ -32,11 +33,30 @@ class OrderService
      */
     public function createFor(User $user, array $data): Order
     {
+        $this->ensureQuotaAvailable($data['date']);
+
         $order = $user->orders()->make($data);
         $order->price = Service::query()->findOrFail($data['service_id'])->price;
         $order->save();
 
         return $order;
+    }
+
+    /**
+     * Tolak pesanan baru jika kuota pesanan aktif pada tanggal itu sudah penuh
+     * (config aistel.daily_quota; 0 = tanpa batas).
+     *
+     * @throws ValidationException
+     */
+    private function ensureQuotaAvailable(string $date): void
+    {
+        $quota = (int) config('aistel.daily_quota');
+
+        if ($quota > 0 && Order::query()->whereDate('date', $date)->whereIn('status', OrderStatus::active())->count() >= $quota) {
+            throw ValidationException::withMessages([
+                'date' => 'Jadwal pada tanggal ini sudah penuh. Silakan pilih tanggal lain.',
+            ]);
+        }
     }
 
     /**
@@ -73,7 +93,7 @@ class OrderService
     {
         return $user->orders()
             ->filter($filters)
-            ->with(['service:id,name,price', 'payment'])
+            ->with(['service:id,name,price', 'payment', 'staff:id,name,phone,type'])
             ->latest()
             ->paginate($perPage)
             ->withQueryString();

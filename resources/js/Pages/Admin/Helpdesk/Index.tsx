@@ -92,7 +92,7 @@ export default function AdminHelpdeskIndex({ threads, selected, messages, synced
                                                     </span>
                                                     <span className="mt-0.5 flex items-center justify-between gap-2">
                                                         <span className={`truncate text-xs ${t.unread_count ? 'font-semibold text-white/90' : 'text-white/60'}`}>
-                                                            {t.last_message ? `${t.last_message.from_admin ? 'Anda: ' : ''}${t.last_message.body}` : '—'}
+                                                            {t.last_message ? `${t.last_message.from_admin ? 'Anda: ' : ''}${t.last_message.body}` : '-'}
                                                         </span>
                                                         {t.unread_count > 0 && (
                                                             <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-[#4de097] px-1.5 text-[11px] font-bold text-[#07271e]">

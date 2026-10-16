@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * PRD 16.3 — tabel `orders`: penghubung users ↔ services (siapa memesan apa).
+ * PRD 16.3 - tabel `orders`: penghubung users ↔ services (siapa memesan apa).
  *
  * Nama file diawali tanggal yang LEBIH BESAR dari migrasi services, karena
  * foreign key ke `services` hanya bisa dibuat setelah tabel services ada.

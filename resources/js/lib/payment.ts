@@ -37,7 +37,7 @@ export const PAYMENT_STATUS_STYLE: Record<PaymentStatus, string> = {
     dikembalikan: 'bg-forest-50 text-forest-600 ring-forest-400/30',
 };
 
-/** "7001 2345 6789 0123" — nomor panjang dikelompokkan 4 digit agar mudah dibaca. */
+/** "7001 2345 6789 0123" - nomor panjang dikelompokkan 4 digit agar mudah dibaca. */
 export const groupDigits = (code: string) => code.replace(/(.{4})(?=.)/g, '$1 ');
 
 /** Langkah pembayaran per channel, mis. { "ATM": [...], "Mobile Banking": [...] }. */

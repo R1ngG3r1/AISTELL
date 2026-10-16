@@ -9,18 +9,20 @@ use App\Modules\Order\Requests\OrderFilterRequest;
 use App\Modules\Order\Requests\UpdateOrderStatusRequest;
 use App\Modules\Order\Services\OrderService;
 use App\Modules\Service\Models\Service;
+use App\Modules\Staff\Services\StaffService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * PRD 17 "Orders — Admin": Kelola Pesanan.
+ * PRD 17 "Orders - Admin": Kelola Pesanan.
  * Semua route di sini dijaga middleware 'role:admin'.
  */
 class AdminOrderController extends Controller
 {
     public function __construct(
-        protected OrderService $orders
+        protected OrderService $orders,
+        protected StaffService $staff,
     ) {}
 
     // GET /admin/orders?status=menunggu&q=budi&service=3&from=2026-10-01&to=2026-10-31&payment=lunas
@@ -43,6 +45,8 @@ class AdminOrderController extends Controller
             'order' => fn () => $this->orders->loadDetail($order),
             // Tombol yang perlu ditampilkan FE, mis. dari Menunggu: Diproses / Ditolak / Dibatalkan.
             'allowedStatuses' => fn () => $this->statusOptions($order->status->allowedTransitions()),
+            // Pilihan petugas + penanda bentrok jadwal untuk pesanan ini.
+            'staffOptions' => fn () => $this->staff->optionsFor($order),
         ]);
     }
 

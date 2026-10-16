@@ -1,11 +1,11 @@
 import { AppNotification, PageProps } from '@/types';
-import { faBell, faClipboardList, faHeadset, faWallet } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faClipboardList, faHeadset, faShieldHalved, faWallet } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const ICONS = { order: faClipboardList, payment: faWallet, helpdesk: faHeadset } as const;
+const ICONS = { order: faClipboardList, payment: faWallet, helpdesk: faHeadset, security: faShieldHalved } as const;
 
 /** "5 menit lalu", "kemarin", … */
 function timeAgo(iso: string) {

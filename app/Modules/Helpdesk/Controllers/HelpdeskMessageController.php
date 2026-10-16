@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-/** Edit / hapus pesan sendiri dan unduh lampiran — dipakai bersama oleh user dan admin. */
+/** Edit / hapus pesan sendiri dan unduh lampiran - dipakai bersama oleh user dan admin. */
 class HelpdeskMessageController extends Controller
 {
     public function __construct(protected HelpdeskService $helpdesk) {}

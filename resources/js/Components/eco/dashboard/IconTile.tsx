@@ -2,7 +2,6 @@ import { CountUp } from '@/lib/motion';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from '@inertiajs/react';
-import { ReactNode } from 'react';
 
 /** Petak ikon bergaya "koleksi": ikon dalam kotak, label, dan nilai/keterangan. */
 export default function IconTile({

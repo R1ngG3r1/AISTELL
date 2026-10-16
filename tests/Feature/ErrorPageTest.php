@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Modules\Order\Models\Order;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('menampilkan halaman Error untuk 404', function () {
@@ -30,7 +31,7 @@ it('tetap mengembalikan JSON untuk request yang meminta JSON', function () {
 });
 
 it('pesan 403 bawaan Laravel (bahasa Inggris) tidak ditampilkan, diganti teks halaman', function () {
-    $order = App\Modules\Order\Models\Order::factory()->create();
+    $order = Order::factory()->create();
 
     $this->actingAs(User::factory()->create())
         ->get("/orders/{$order->id}")

@@ -1,6 +1,7 @@
 import ConfirmModal from '@/Components/eco/ConfirmModal';
 import { MethodLogo, PaymentBadge } from '@/Components/eco/Payment';
 import InvoiceButton from '@/Components/eco/InvoiceButton';
+import StaffAssignCard from '@/Components/eco/StaffAssignCard';
 import ReviewCard from '@/Components/eco/ReviewCard';
 import OrderTimeline from '@/Components/eco/OrderTimeline';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
@@ -11,7 +12,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { toLatLng } from '@/lib/geo';
 import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
-import { Order, OrderStatus, PageProps, StatusOption } from '@/types';
+import { Order, OrderStatus, PageProps, StaffOption, StatusOption } from '@/types';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
     faArrowLeft,
@@ -33,7 +34,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 // Props dari AdminOrderController@show
-type Props = PageProps<{ order: Order; allowedStatuses: StatusOption[] }>;
+type Props = PageProps<{ order: Order; allowedStatuses: StatusOption[]; staffOptions: StaffOption[] }>;
 
 // Tampilan tombol untuk setiap status tujuan.
 const actions: Record<OrderStatus, { text: string; className: string; icon: IconDefinition; tone: 'primary' | 'danger' }> = {
@@ -44,7 +45,7 @@ const actions: Record<OrderStatus, { text: string; className: string; icon: Icon
     menunggu: { text: 'Menunggu', className: 'btn-ghost', icon: faClock, tone: 'primary' },
 };
 
-export default function AdminOrderShow({ order, allowedStatuses }: Props) {
+export default function AdminOrderShow({ order, allowedStatuses, staffOptions }: Props) {
     const { errors } = usePage().props as { errors: Record<string, string> };
     const [target, setTarget] = useState<StatusOption | null>(null);
     const [processing, setProcessing] = useState(false);
@@ -68,11 +69,11 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
         { icon: faUser, label: 'Nama pemesan', value: order.contact_name },
         { icon: faPhone, label: 'Nomor kontak', value: order.contact_phone },
         // Email akun yang memesan (pesanan tidak menyimpan email tersendiri)
-        { icon: faEnvelope, label: 'Email pemesan', value: order.user?.email ?? '—', wide: true },
+        { icon: faEnvelope, label: 'Email pemesan', value: order.user?.email ?? '-', wide: true },
         { icon: faCalendarDays, label: 'Tanggal', value: formatDate(order.date) },
         { icon: faClock, label: 'Waktu', value: formatTime(order.time) },
         { icon: faLocationDot, label: 'Lokasi', value: order.location, wide: true },
-        { icon: faNoteSticky, label: 'Catatan', value: order.notes || '—', wide: true },
+        { icon: faNoteSticky, label: 'Catatan', value: order.notes || '-', wide: true },
     ];
 
     return (
@@ -102,7 +103,7 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                             <StatusBadge order={order} className="text-sm" />
                         </div>
                         <div className="mt-8 overflow-x-auto pb-2">
-                            <div className="min-w-[20rem] max-w-md px-5">
+                            <div className="min-w-[15rem] max-w-md px-5">
                                 <OrderTimeline order={order} />
                             </div>
                         </div>
@@ -163,6 +164,8 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                     </Reveal>
 
                     {/* Pembayaran (dummy) */}
+                    <StaffAssignCard order={order} options={staffOptions} />
+
                     <Reveal variant="right" delay={60} className="card p-6">
                         <div className="flex items-center justify-between gap-3">
                             <p className="text-xs font-bold uppercase tracking-[0.2em] text-forest-900/40">Pembayaran</p>

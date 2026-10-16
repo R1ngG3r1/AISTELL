@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * PRD 16.2 — tabel `services`: daftar layanan kebersihan yang bisa dipesan.
+ * PRD 16.2 - tabel `services`: daftar layanan kebersihan yang bisa dipesan.
  *
  * File ini berada di dalam modul, tetapi tetap ikut dijalankan oleh
  * `php artisan migrate` karena ModuleServiceProvider memanggil

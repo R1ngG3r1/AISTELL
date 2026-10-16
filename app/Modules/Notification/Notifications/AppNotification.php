@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notification;
  */
 abstract class AppNotification extends Notification
 {
-    /** Jenis notifikasi, dipakai FE untuk memilih ikon: order | payment | helpdesk. */
+    /** Jenis notifikasi, dipakai FE untuk memilih ikon: order | payment | helpdesk | security. */
     protected string $kind = 'order';
 
     /** Kirim juga lewat email. */
@@ -24,6 +24,12 @@ abstract class AppNotification extends Notification
 
     /** Tujuan saat notifikasi diklik (path relatif, mis. /orders/5). */
     abstract public function url(): string;
+
+    /** Teks tombol di email. */
+    protected function actionText(): string
+    {
+        return 'Lihat Detail';
+    }
 
     public function via(object $notifiable): array
     {
@@ -44,10 +50,10 @@ abstract class AppNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject($this->title().' — AISTEL')
+            ->subject($this->title().' - AISTEL')
             ->greeting("Halo, {$notifiable->name}!")
             ->line($this->body())
-            ->action('Lihat Detail', url($this->url()))
+            ->action($this->actionText(), url($this->url()))
             ->salutation('Salam, Tim AISTEL');
     }
 }

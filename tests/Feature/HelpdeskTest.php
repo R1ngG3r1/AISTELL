@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\User;
+use App\Modules\Helpdesk\Models\HelpdeskAttachment;
 use App\Modules\Helpdesk\Models\HelpdeskMessage;
 use App\Modules\Helpdesk\Models\HelpdeskThread;
 use App\Modules\Helpdesk\Services\HelpdeskService;
+use Illuminate\Http\UploadedFile;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -166,7 +168,7 @@ it('lampiran foto tersimpan di database tanpa storage dan hanya bisa diunduh pem
 
     $res = $this->actingAs($user)->post('/helpdesk/messages', [
         'body' => 'ini fotonya',
-        'file' => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg', 300, 200),
+        'file' => UploadedFile::fake()->image('bukti.jpg', 300, 200),
     ], ['Accept' => 'application/json'])->assertCreated()
         ->assertJsonPath('message.attachment.name', 'bukti.jpg')
         ->assertJsonPath('message.attachment.image', true);
@@ -178,24 +180,24 @@ it('lampiran foto tersimpan di database tanpa storage dan hanya bisa diunduh pem
     $this->actingAs(User::factory()->create())->get($url)->assertForbidden();
 
     // Isi file ada di tabel attachments, daftar pesan tidak membawa isinya
-    expect(\App\Modules\Helpdesk\Models\HelpdeskAttachment::count())->toBe(1)
+    expect(HelpdeskAttachment::count())->toBe(1)
         ->and(json_encode($res->json()))->not->toContain('data');
 
     // Hapus pesan → lampiran ikut dibuang
     $this->actingAs($user)->deleteJson('/helpdesk/messages/'.$res->json('message.id'))->assertOk()->assertJsonPath('message.attachment', null);
-    expect(\App\Modules\Helpdesk\Models\HelpdeskAttachment::count())->toBe(0);
+    expect(HelpdeskAttachment::count())->toBe(0);
 });
 
 it('lampiran hanya-file tanpa teks diterima, jenis berbahaya atau terlalu besar ditolak', function () {
     $user = User::factory()->create();
     $json = ['Accept' => 'application/json'];
 
-    $this->actingAs($user)->post('/helpdesk/messages', ['file' => \Illuminate\Http\UploadedFile::fake()->create('laporan.pdf', 100, 'application/pdf')], $json)
+    $this->actingAs($user)->post('/helpdesk/messages', ['file' => UploadedFile::fake()->create('laporan.pdf', 100, 'application/pdf')], $json)
         ->assertCreated()->assertJsonPath('message.attachment.image', false)->assertJsonPath('message.body', null);
 
-    $this->actingAs($user)->post('/helpdesk/messages', ['file' => \Illuminate\Http\UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload')], $json)
+    $this->actingAs($user)->post('/helpdesk/messages', ['file' => UploadedFile::fake()->create('virus.exe', 10, 'application/x-msdownload')], $json)
         ->assertUnprocessable()->assertJsonValidationErrors('file');
-    $this->actingAs($user)->post('/helpdesk/messages', ['file' => \Illuminate\Http\UploadedFile::fake()->create('besar.pdf', 3000, 'application/pdf')], $json)
+    $this->actingAs($user)->post('/helpdesk/messages', ['file' => UploadedFile::fake()->create('besar.pdf', 3000, 'application/pdf')], $json)
         ->assertUnprocessable()->assertJsonValidationErrors('file');
     $this->actingAs($user)->post('/helpdesk/messages', [], $json)->assertUnprocessable()->assertJsonValidationErrors('body');
 

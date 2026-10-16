@@ -1,6 +1,7 @@
 import Avatar from '@/Components/eco/Avatar';
 import Footer from '@/Components/eco/Footer';
 import FlashMessage from '@/Components/FlashMessage';
+import InstallPrompt from '@/Components/eco/InstallPrompt';
 import NotificationBell from '@/Components/eco/NotificationBell';
 import { LIVE_INTERVAL, useLivePoll } from '@/lib/live';
 import { Counters, PageProps } from '@/types';
@@ -8,11 +9,13 @@ import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
     faBars,
     faBroom,
+    faChartLine,
     faClipboardList,
     faHeadset,
     faHouse,
     faLayerGroup,
     faListCheck,
+    faPeopleGroup,
     faRightFromBracket,
     faUser,
     faXmark,
@@ -36,7 +39,9 @@ const adminMenu: MenuItem[] = [
     { label: 'Dashboard', route: 'admin.dashboard', icon: faHouse, active: ['admin.dashboard'] },
     { label: 'Kelola Pesanan', route: 'admin.orders.index', icon: faListCheck, active: ['admin.orders.*'], badge: 'pendingOrders' },
     { label: 'Kelola Layanan', route: 'admin.services.index', icon: faLayerGroup, active: ['admin.services.*'] },
+    { label: 'Kelola Petugas', route: 'admin.staff.index', icon: faPeopleGroup, active: ['admin.staff.*'] },
     { label: 'Helpdesk', route: 'admin.helpdesk.index', icon: faHeadset, active: ['admin.helpdesk.*'], badge: 'helpdeskUnread' },
+    { label: 'Laporan', route: 'admin.reports.index', icon: faChartLine, active: ['admin.reports.*'] },
 ];
 
 const accountMenu: MenuItem[] = [{ label: 'Profil Saya', route: 'profile.edit', icon: faUser, active: ['profile.*'] }];
@@ -98,7 +103,7 @@ function Sidebar() {
             />
             <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-[#07271e]/80 via-[#07271e]/90 to-[#051d16]/95" />
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-6">
+            <div className="scroll-glass scroll-autohide flex-1 overflow-y-auto px-4 pb-4 pt-6">
                 {/* Papan nama brand */}
                 <Link
                     href={route(isAdmin ? 'admin.dashboard' : 'dashboard')}
@@ -226,7 +231,7 @@ export default function Authenticated({
                     >
                         <FontAwesomeIcon icon={faBars} />
                     </button>
-                    <Link href="/" className="flex items-center gap-2">
+                    <Link href="/" className="flex items-center gap-2 py-2">
                         <img src="/landingpage/LOGO.png" alt="" aria-hidden="true" className="h-6 w-6 object-contain" />
                         <span className="text-lg font-extrabold tracking-tight">AISTEL</span>
                     </Link>
@@ -251,6 +256,7 @@ export default function Authenticated({
             </div>
 
             <FlashMessage />
+            <InstallPrompt />
         </div>
     );
 }

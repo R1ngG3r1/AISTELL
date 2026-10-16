@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * PRD 16.1 — tabel `users` butuh kolom `role` (user/admin) dan `phone`.
+ * PRD 16.1 - tabel `users` butuh kolom `role` (user/admin) dan `phone`.
  *
  * Tabel users sudah dibuat oleh migrasi bawaan Laravel, jadi di sini kita
  * hanya MENAMBAH kolom (Schema::table), bukan membuat tabel baru (Schema::create).

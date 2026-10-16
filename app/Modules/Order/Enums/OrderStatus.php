@@ -3,7 +3,7 @@
 namespace App\Modules\Order\Enums;
 
 /**
- * PRD 11 — Status pesanan.
+ * PRD 11 - Status pesanan.
  *
  * Kenapa pakai Enum dan bukan string biasa? Supaya tidak ada typo
  * ('diproses' vs 'di proses') dan semua aturan status berada di satu tempat.

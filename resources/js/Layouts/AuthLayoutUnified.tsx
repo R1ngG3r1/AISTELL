@@ -255,7 +255,7 @@ export default function AuthLayoutUnified({
             </div>
 
             {/* ========================================================
-                BRAND (AISTEL LOGO) — ALL DEVICES
+                BRAND (AISTEL LOGO) - ALL DEVICES
                 ======================================================== */}
             <header className="absolute top-5 left-5 sm:top-7 sm:left-8 lg:left-10 xl:top-9 xl:left-14 z-30 flex items-center">
                 <Link

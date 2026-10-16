@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Modules\Address\Models\Address;
 use App\Modules\Order\Models\Order;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -107,13 +107,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === self::ROLE_ADMIN;
     }
 
-    /** Relasi 1:N — satu user bisa memiliki banyak pesanan (PRD 16.4). */
+    /** Relasi 1:N - satu user bisa memiliki banyak pesanan (PRD 16.4). */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    /** Relasi 1:N — buku alamat; satu di antaranya alamat utama (is_primary). */
+    /** Relasi 1:N - buku alamat; satu di antaranya alamat utama (is_primary). */
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);

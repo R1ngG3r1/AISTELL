@@ -10,7 +10,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * PRD 17 "Services — User": melihat daftar & detail layanan.
+ * PRD 17 "Services - User": melihat daftar & detail layanan.
  */
 class ServiceController extends Controller
 {

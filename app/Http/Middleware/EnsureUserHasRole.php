@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * PRD 13 — Hak akses. Middleware = "penjaga pintu" yang berjalan SEBELUM controller.
+ * PRD 13 - Hak akses. Middleware = "penjaga pintu" yang berjalan SEBELUM controller.
  *
  * Pemakaian di route:  ->middleware(['auth', 'role:admin'])
  * Teks setelah titik dua ("admin") masuk ke parameter $role.

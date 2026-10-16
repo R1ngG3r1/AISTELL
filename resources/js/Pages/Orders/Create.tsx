@@ -305,10 +305,10 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
 
                         <dl className="relative mt-6 space-y-3 border-t border-white/10 pt-5 text-sm">
                             {[
-                                { icon: faUser, value: data.contact_name || '—' },
-                                { icon: faLocationDot, value: data.location || '—' },
-                                { icon: faCalendarDays, value: data.date ? formatDate(data.date) : '—' },
-                                { icon: faClock, value: data.time ? `${data.time} ${zone}` : '—' },
+                                { icon: faUser, value: data.contact_name || '-' },
+                                { icon: faLocationDot, value: data.location || '-' },
+                                { icon: faCalendarDays, value: data.date ? formatDate(data.date) : '-' },
+                                { icon: faClock, value: data.time ? `${data.time} ${zone}` : '-' },
                             ].map((row, i) => (
                                 <div key={i} className="flex gap-3">
                                     <FontAwesomeIcon icon={row.icon} className="mt-0.5 w-4 text-leaf-400" />
@@ -319,7 +319,7 @@ export default function OrderCreate({ auth, services, selectedServiceId, address
 
                         <div className="relative mt-6 flex items-baseline justify-between border-t border-white/10 pt-5">
                             <span className="text-sm text-cream/60">Estimasi biaya</span>
-                            <span className="display text-3xl">{selected ? formatRupiah(selected.price) : '—'}</span>
+                            <span className="display text-3xl">{selected ? formatRupiah(selected.price) : '-'}</span>
                         </div>
 
                         <button type="submit" disabled={processing} className="btn-leaf btn-lg group relative mt-6 w-full">

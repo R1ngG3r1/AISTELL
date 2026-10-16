@@ -3,7 +3,7 @@
 namespace App\Modules\Payment\Enums;
 
 /**
- * Metode pembayaran (DUMMY — belum terhubung ke payment gateway sungguhan).
+ * Metode pembayaran (DUMMY - belum terhubung ke payment gateway sungguhan).
  * Nantinya nilai di sini bisa dipetakan ke channel Midtrans/Xendit/dll.
  */
 enum PaymentMethod: string

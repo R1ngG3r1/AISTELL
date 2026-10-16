@@ -19,8 +19,28 @@ export interface Service {
     description: string | null;
     price: string; // decimal dari Laravel dikirim sebagai string, mis. "150000.00"
     orders_count?: number; // hanya ada di halaman admin
+    duration_minutes?: number; // perkiraan lama pengerjaan, dipakai mendeteksi jadwal petugas bentrok
     reviews_avg_rating?: string | null; // rata-rata rating, null = belum ada ulasan
     reviews_count?: number;
+}
+
+/** solo = turun sendiri; tim = bersama tim (anggota tidak dicatat, nama petugas = penanggung jawab). */
+export type StaffType = 'solo' | 'tim';
+
+/** Petugas lapangan: hanya data yang dicatat admin, tanpa akun (app/Modules/Staff). */
+export interface Staff {
+    id: number;
+    name: string;
+    phone: string;
+    type: StaffType;
+    is_active: boolean;
+    orders_count?: number; // total pesanan yang pernah ditangani (halaman admin)
+    upcoming_orders_count?: number; // pesanan aktif mulai hari ini
+}
+
+/** Pilihan petugas di halaman pesanan admin; `busy` = alasan jadwal bentrok, null = bisa ditugaskan. */
+export interface StaffOption extends Pick<Staff, 'id' | 'name' | 'phone' | 'type' | 'is_active'> {
+    busy: string | null;
 }
 
 /** Ulasan pesanan (user & admin melihat detailnya; halaman layanan memakai PublicReview). */
@@ -64,6 +84,8 @@ export interface Order {
     service?: Pick<Service, 'id' | 'name' | 'price'> & { description?: string | null };
     payment?: Payment | null; // pembayaran terbaru (null = belum memilih metode)
     review?: Review | null; // ulasan user (null = belum diulas)
+    staff_id?: number | null;
+    staff?: Pick<Staff, 'id' | 'name' | 'phone' | 'type'> | null; // petugas yang ditugaskan admin
     user?: Pick<User, 'id' | 'name' | 'email' | 'phone' | 'avatar_url'>;
 }
 
@@ -142,7 +164,7 @@ export interface Counters {
 /** Satu notifikasi di lonceng (NotificationService::listFor). */
 export interface AppNotification {
     id: string;
-    kind: 'order' | 'payment' | 'helpdesk';
+    kind: 'order' | 'payment' | 'helpdesk' | 'security';
     title: string;
     body: string;
     url: string;
@@ -196,4 +218,37 @@ export interface HelpdeskThreadSummary {
     user: Pick<User, 'id' | 'name' | 'email' | 'avatar_url'>;
     last_message: { body: string; from_admin: boolean; created_at: string } | null;
     unread_count: number;
+}
+
+/** Pilihan periode halaman Laporan (ReportRequest::forView). */
+export type ReportRange = '7d' | '30d' | '90d' | 'month' | 'year' | 'custom';
+
+export interface ReportFilters {
+    range: ReportRange;
+    from: string; // "2026-10-01"
+    to: string;
+}
+
+/** Angka ringkasan + pembanding dengan periode sebelumnya (delta = persen, null jika sebelumnya 0). */
+export interface ReportMetric {
+    value: number;
+    previous: number;
+    delta: number | null;
+}
+
+/** Data halaman Laporan (ReportService::build). */
+export interface Report {
+    summary: {
+        revenue: ReportMetric;
+        orders: ReportMetric;
+        completed: ReportMetric;
+        rating: { value: number | null; count: number; previous: number | null };
+    };
+    granularity: 'day' | 'month';
+    revenueSeries: { key: string; value: number; count: number }[];
+    ordersSeries: { key: string; value: number }[];
+    byService: { name: string; orders: number; revenue: number }[];
+    byMethod: { name: string; count: number; revenue: number }[];
+    byStatus: { name: string; value: number }[];
+    previousPeriod: { from: string; to: string };
 }

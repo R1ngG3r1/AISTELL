@@ -27,6 +27,8 @@ class ServiceRequest extends FormRequest
             'name' => ['required', 'string', 'max:100', Rule::unique('services', 'name')->ignore($this->route('service'))],
             'description' => ['nullable', 'string', 'max:2000'],
             'price' => ['required', 'numeric', 'min:0', 'max:9999999999'],
+            // Opsional: kosong = default 120 menit (create) / tidak berubah (update). Dipakai mendeteksi jadwal petugas bentrok.
+            'duration_minutes' => ['sometimes', 'integer', 'min:15', 'max:720'],
         ];
     }
 
@@ -44,6 +46,7 @@ class ServiceRequest extends FormRequest
             'name' => 'nama layanan',
             'description' => 'deskripsi',
             'price' => 'harga',
+            'duration_minutes' => 'durasi pengerjaan',
         ];
     }
 }

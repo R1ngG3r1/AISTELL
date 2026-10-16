@@ -19,7 +19,7 @@ class NewReviewNotification extends AppNotification
     {
         $name = $this->review->user->name;
         $service = $this->review->service->name;
-        $comment = filled($this->review->comment) ? ' — "'.Str::limit($this->review->comment, 80).'"' : '';
+        $comment = filled($this->review->comment) ? ' - "'.Str::limit($this->review->comment, 80).'"' : '';
 
         return "{$name} menilai {$service}{$comment}";
     }

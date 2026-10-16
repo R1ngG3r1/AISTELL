@@ -2,7 +2,7 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 
 /**
- * Design system AISTEL — "Eco-modern".
+ * Design system AISTEL - "Eco-modern".
  * Warna dasar diambil dari landing page awal (#072d23, #328e67, #b4d96f, #f7f8f3)
  * lalu dikembangkan menjadi skala agar konsisten di semua halaman.
  *

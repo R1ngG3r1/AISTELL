@@ -82,7 +82,7 @@ export default function AddressBook({ addresses, className = '' }: { addresses: 
                                 {a.detail && <p className="mt-1 text-sm text-forest-900/50">{a.detail}</p>}
                                 <p className={`mt-2 flex items-center gap-1.5 text-xs font-medium ${point ? 'text-forest-600' : 'text-sun-600'}`}>
                                     <FontAwesomeIcon icon={faLocationDot} />
-                                    {point ? 'Titik peta tersimpan' : 'Belum ada titik peta — ubah alamat untuk menambahkannya'}
+                                    {point ? 'Titik peta tersimpan' : 'Belum ada titik peta - ubah alamat untuk menambahkannya'}
                                 </p>
 
                                 <div className="mt-4 flex flex-wrap gap-2 border-t border-forest-900/5 pt-4">

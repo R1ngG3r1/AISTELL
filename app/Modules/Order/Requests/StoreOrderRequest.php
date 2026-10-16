@@ -7,7 +7,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Validation\Validator;
 
 /**
- * PRD 12 — Informasi pemesanan.
+ * PRD 12 - Informasi pemesanan.
  *
  * Perhatikan: TIDAK ada 'user_id' dan 'status' di sini. Keduanya ditentukan
  * backend (PRD 17), sehingga nilai kiriman dari frontend untuk dua field itu diabaikan.

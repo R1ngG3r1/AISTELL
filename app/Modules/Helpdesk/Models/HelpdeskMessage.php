@@ -35,7 +35,7 @@ class HelpdeskMessage extends Model
         return $this->belongsTo(User::class, 'sender_id');
     }
 
-    /** Lampiran lengkap (termasuk isi file) — hanya untuk diunduh. */
+    /** Lampiran lengkap (termasuk isi file) - hanya untuk diunduh. */
     public function attachment(): HasOne
     {
         return $this->hasOne(HelpdeskAttachment::class, 'message_id');

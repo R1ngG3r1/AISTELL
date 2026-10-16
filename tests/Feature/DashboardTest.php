@@ -132,7 +132,7 @@ it('polling hanya mengirim prop yang diminta beserta badge & jam', function () {
     $this->actingAs($user)
         ->get('/dashboard', [
             'X-Inertia' => 'true',
-            'X-Inertia-Version' => app(HandleInertiaRequests::class)->version(request()),
+            'X-Inertia-Version' => (string) app(HandleInertiaRequests::class)->version(request()),
             'X-Inertia-Partial-Component' => 'Dashboard',
             'X-Inertia-Partial-Data' => 'stats',
         ])

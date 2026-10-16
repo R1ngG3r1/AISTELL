@@ -26,6 +26,7 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
         name: '',
         description: '',
         price: '',
+        duration_minutes: '120',
     });
 
     const openCreate = () => {
@@ -36,7 +37,12 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
 
     const openEdit = (service: Service) => {
         clearErrors();
-        setData({ name: service.name, description: service.description ?? '', price: String(Number(service.price)) });
+        setData({
+            name: service.name,
+            description: service.description ?? '',
+            price: String(Number(service.price)),
+            duration_minutes: String(service.duration_minutes ?? 120),
+        });
         setEditing(service);
     };
 
@@ -111,8 +117,9 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
                                     </span>
                                 </div>
                                 <h3 className="mt-5 text-lg font-bold">{service.name}</h3>
-                                <p className="mt-1 line-clamp-2 flex-1 text-sm text-forest-900/55">{service.description || '—'}</p>
+                                <p className="mt-1 line-clamp-2 flex-1 text-sm text-forest-900/55">{service.description || '-'}</p>
                                 <p className="display mt-4 text-2xl">{formatRupiah(service.price)}</p>
+                                <p className="mt-1 text-xs text-forest-900/45">± {service.duration_minutes ?? 120} menit pengerjaan</p>
                                 <div className="mt-5 flex gap-2 border-t border-forest-900/5 pt-4">
                                     <button onClick={() => openEdit(service)} className="btn-ghost btn-sm flex-1">
                                         <FontAwesomeIcon icon={faPen} /> Ubah
@@ -175,6 +182,21 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
                             </div>
                             {data.price && <p className="mt-1.5 text-xs text-forest-900/50">= {formatRupiah(data.price)}</p>}
                             <InputError message={errors.price} className="mt-2" />
+                        </div>
+                        <div>
+                            <InputLabel htmlFor="duration_minutes" value="Perkiraan lama pengerjaan (menit)" />
+                            <TextInput
+                                id="duration_minutes"
+                                type="number"
+                                min={15}
+                                max={720}
+                                step={15}
+                                value={data.duration_minutes}
+                                onChange={(e) => setData('duration_minutes', e.target.value)}
+                                placeholder="120"
+                            />
+                            <p className="mt-1.5 text-xs text-forest-900/50">Dipakai untuk mencegah satu petugas mendapat dua pesanan yang jamnya bertabrakan.</p>
+                            <InputError message={errors.duration_minutes} className="mt-2" />
                         </div>
                     </div>
 

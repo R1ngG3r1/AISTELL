@@ -648,7 +648,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   SOLUSI KEBERSIHAN (SERVICES) — latar terang
+   SOLUSI KEBERSIHAN (SERVICES) - latar terang
    -------------------------------------------------------------------------- */
 .services-section {
     padding: 88px 32px;
@@ -726,7 +726,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   CARA KERJA (STEPS) — latar daun gelap
+   CARA KERJA (STEPS) - latar daun gelap
    -------------------------------------------------------------------------- */
 .cara-kerja-section {
     padding: 88px 32px;
@@ -1446,7 +1446,7 @@ body {
         @apply btn bg-clay-500 text-white shadow-soft hover:-translate-y-0.5 hover:bg-clay-600 focus-visible:ring-clay-500;
     }
     .btn-sm {
-        @apply px-3.5 py-1.5 text-xs;
+        @apply px-3.5 py-1.5 text-xs max-sm:min-h-10;
     }
     .btn-lg {
         @apply px-7 py-3.5 text-base;
@@ -1539,27 +1539,93 @@ body {
     }
 }
 
-/* Scrollbar tipis & transparan untuk panel kaca (chat, daftar percakapan): tanpa panah, hanya jempol bulat. */
-.scroll-glass {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+/* Scrollbar halaman & daftar yang bisa di-scroll (permukaan terang): tipis, bulat, tanpa panah, hijau merek.
+   Chrome/Edge/Safari memakai ::-webkit-scrollbar. Penting: Chrome 121+ MENGABAIKAN gaya itu (termasuk
+   penyembunyi panah) bila scrollbar-width/scrollbar-color standar diset, jadi properti standar hanya
+   dipasang untuk Firefox di bawah. */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
 }
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(40, 126, 89, 0.45);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(40, 126, 89, 0.7);
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+@supports (-moz-appearance: none) {
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(40, 126, 89, 0.5) transparent;
+    }
+}
+
+/* Scrollbar tipis & transparan untuk panel gelap/kaca (sidebar, chat, daftar percakapan): tanpa panah, hanya jempol bulat. */
 .scroll-glass::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
 .scroll-glass::-webkit-scrollbar-track {
     background: transparent;
 }
 .scroll-glass::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.25);
+    border: 2px solid transparent;
+    background-clip: padding-box;
     border-radius: 999px;
 }
 .scroll-glass::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.45);
+    background-clip: padding-box;
 }
 .scroll-glass::-webkit-scrollbar-button {
     display: none;
     height: 0;
     width: 0;
+}
+
+/* Panel gelap yang jarang perlu di-scroll (sidebar): jempol baru terlihat saat kursor di atasnya, dan
+   tempatnya dicadangkan agar isi tidak bergeser saat muncul. */
+.scroll-autohide {
+    scrollbar-gutter: stable;
+}
+.scroll-autohide::-webkit-scrollbar-thumb {
+    background: transparent;
+    background-clip: padding-box;
+}
+.scroll-autohide:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    background-clip: padding-box;
+}
+/* Dipisah dari aturan hover: satu selektor tak dikenal membuat seluruh daftar selektor dibuang. */
+.scroll-autohide:focus-within::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    background-clip: padding-box;
+}
+@supports (-moz-appearance: none) {
+    .scroll-glass {
+        scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+    }
+    .scroll-autohide {
+        scrollbar-color: transparent transparent;
+    }
+    .scroll-autohide:hover,
+    .scroll-autohide:focus-within {
+        scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+    }
 }

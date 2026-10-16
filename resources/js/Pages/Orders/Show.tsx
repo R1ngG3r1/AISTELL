@@ -1,3 +1,5 @@
+import Avatar from '@/Components/eco/Avatar';
+import StaffTypeBadge, { staffRoleLabel } from '@/Components/eco/StaffTypeBadge';
 import ConfirmModal from '@/Components/eco/ConfirmModal';
 import { MethodLogo, PaymentBadge } from '@/Components/eco/Payment';
 import { Leaf } from '@/Components/eco/Illustrations';
@@ -58,7 +60,7 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
         { icon: faCalendarDays, label: 'Tanggal', value: formatDate(order.date) },
         { icon: faClock, label: 'Waktu', value: formatTime(order.time) },
         { icon: faLocationDot, label: 'Lokasi', value: order.location, wide: true },
-        { icon: faNoteSticky, label: 'Catatan', value: order.notes || '—', wide: true },
+        { icon: faNoteSticky, label: 'Catatan', value: order.notes || '-', wide: true },
     ];
 
     return (
@@ -82,7 +84,7 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                         </div>
 
                         <div className="mt-8 overflow-x-auto pb-2">
-                            <div className="min-w-[20rem] max-w-md px-5">
+                            <div className="min-w-[15rem] max-w-md px-5">
                                 <OrderTimeline order={order} />
                             </div>
                         </div>
@@ -129,9 +131,29 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                         )}
                         <div className="relative mt-5 flex items-baseline justify-between border-t border-white/10 pt-4">
                             <span className="text-sm text-cream/60">Biaya</span>
-                            <span className="display text-3xl">{orderPrice(order) ? formatRupiah(orderPrice(order)!) : '—'}</span>
+                            <span className="display text-3xl">{orderPrice(order) ? formatRupiah(orderPrice(order)!) : '-'}</span>
                         </div>
                     </Reveal>
+
+                    {/* Petugas yang ditugaskan admin */}
+                    {order.staff && (order.status === 'menunggu' || order.status === 'diproses' || order.status === 'selesai') && (
+                        <Reveal variant="right" delay={30} className="card p-5">
+                            <p className="text-xs font-bold uppercase tracking-[0.2em] text-forest-900/40">Petugas</p>
+                            <div className="mt-3 flex items-center gap-3">
+                                <Avatar name={order.staff.name} className="h-11 w-11" />
+                                <div className="min-w-0 text-sm">
+                                    <p className="truncate font-semibold">{order.staff.name}</p>
+                                    <p className="mb-0.5 flex items-center gap-1.5 text-xs text-forest-900/55">
+                                        <StaffTypeBadge type={order.staff.type} className="!py-0.5" /> {staffRoleLabel(order.staff.type)}
+                                    </p>
+                                    <a href={`tel:${order.staff.phone}`} className="text-forest-900/55 hover:text-forest-600">
+                                        <FontAwesomeIcon icon={faPhone} className="me-1.5 text-xs" />
+                                        {order.staff.phone}
+                                    </a>
+                                </div>
+                            </div>
+                        </Reveal>
+                    )}
 
                     {/* Pembayaran (dummy) */}
                     {(order.payment || order.status === 'menunggu' || order.status === 'diproses') && (

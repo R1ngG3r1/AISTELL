@@ -7,6 +7,7 @@ use App\Modules\Helpdesk\Services\HelpdeskService;
 use App\Modules\Order\Enums\OrderStatus;
 use App\Modules\Order\Models\Order;
 use App\Modules\Service\Models\Service;
+use App\Modules\Staff\Models\Staff;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -49,6 +50,11 @@ class DatabaseSeeder extends Seeder
 
         if ($user2->orders()->doesntExist()) {
             $this->demoOrder($user2, $services->random(), OrderStatus::Menunggu);
+        }
+
+        // Petugas contoh (hanya jika belum ada) agar fitur penugasan bisa dicoba.
+        foreach ([['Budi Santoso', '081200000001', 'solo'], ['Siti Rahma', '081200000002', 'tim'], ['Agus Prasetyo', '081200000003', 'solo']] as [$name, $phone, $type]) {
+            Staff::firstOrCreate(['phone' => $phone], ['name' => $name, 'type' => $type]);
         }
 
         $this->demoHelpdesk($user, User::where('email', env('ADMIN_EMAIL', 'admin@aistel.test'))->first());

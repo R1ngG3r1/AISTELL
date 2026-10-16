@@ -1,4 +1,4 @@
-# Backend AISTEL — Panduan & Status
+# Backend AISTEL - Panduan & Status
 
 Panduan kelola akun & database: [PANDUAN_DATABASE.md](PANDUAN_DATABASE.md).
 
@@ -167,7 +167,7 @@ Setelah login, admin diarahkan ke `/admin/dashboard` dan user ke `/dashboard`.
 ## 5. Kontrak data untuk Frontend
 
 Semua halaman juga menerima props bersama: `auth.user` (`id, name, email, phone, address, avatar_url, role`),
-`flash.success` / `flash.error`, `clock` (`now`, `timezone` — untuk jam realtime), dan `counters`
+`flash.success` / `flash.error`, `clock` (`now`, `timezone` - untuk jam realtime), dan `counters`
 (badge sidebar: `pendingOrders` untuk admin, `activeOrders` untuk user). `clock` & `counters` memakai
 `Inertia::always`, jadi selalu ikut terkirim saat polling.
 
@@ -305,7 +305,7 @@ ilegal ditolak.
 
 ---
 
-## 8. Fase 11 — Deploy
+## 8. Fase 11 - Deploy
 
 Panduan lengkap, daftar periksa, dan pilihan hosting: **[DEPLOY.md](DEPLOY.md)** (contoh env:
 `.env.production.example`). Ringkasnya:

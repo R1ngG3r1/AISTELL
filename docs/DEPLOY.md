@@ -61,6 +61,30 @@ Izin tulis untuk web server pada folder `storage/` dan `bootstrap/cache/`
 - **Peta** memakai tile OpenStreetMap publik: cukup untuk skala kecil. Untuk trafik besar pakai penyedia tile sendiri.
 - Di belakang proxy (PaaS / Cloudflare) isi `TRUSTED_PROXIES=*`.
 
+### Keamanan: CSP, HSTS, dan sesi admin
+
+Pengaturannya ada di `config/security.php` (nilai bawaan sudah aman):
+
+| `.env` | Fungsi |
+| --- | --- |
+| `SECURITY_CSP_REPORT_ONLY=true` | Saat **pertama kali online**, nyalakan ini dulu: pelanggaran CSP hanya dilaporkan di konsol browser (F12), tidak memblokir. Kalau semua halaman bersih, ubah ke `false`. |
+| `SECURITY_HSTS=true` | Memaksa browser memakai HTTPS (180 hari). Hanya dikirim di production lewat HTTPS. Matikan bila situs belum seluruhnya HTTPS. |
+| `ADMIN_IDLE_MINUTES=30` | Admin keluar otomatis setelah sekian menit tanpa aktivitas (`0` = nonaktif). |
+| `SECURITY_NOTIFY_NEW_ADMIN_DEVICE=true` | Email + notifikasi saat akun admin masuk dari perangkat baru. Butuh `MAIL_*` yang benar. |
+
+Bila nanti menambah sumber eksternal baru (CDN, peta, font), daftarkan domainnya di `SecurityHeaders::policy()`, kalau tidak browser akan memblokirnya.
+
+### PWA (pasang di layar utama)
+
+Berkas PWA ada di `public/`: `manifest.webmanifest`, `sw.js` (service worker), `offline.html`, dan ikon di `public/pwa/`.
+
+- **Wajib HTTPS** di produksi. Browser hanya mengaktifkan service worker dan tombol "Pasang" di HTTPS (kecuali `localhost`).
+- Pastikan web server menyajikan `sw.js` dan `manifest.webmanifest` apa adanya dari folder `public/` (bukan lewat Laravel) dan tidak menambahkan cache panjang pada `sw.js`.
+- `sw.js` **hanya** menyimpan aset statis publik (`/build/assets`, gambar, font). Halaman, JSON, dan data pengguna tidak pernah disimpan.
+- Mengubah daftar berkas yang di-cache atau kebijakannya? Naikkan `VERSION` di `sw.js` agar cache lama dibuang.
+- Mengganti logo? Jalankan ulang `php scripts/generate-pwa-icons.php` untuk membuat ikon baru.
+- Service worker hanya aktif pada build produksi (`npm run build`), tidak saat `npm run dev`.
+
 ## 5. Memperbarui versi (deploy ulang)
 
 ```bash

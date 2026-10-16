@@ -159,7 +159,7 @@ export function HeroScene({ className = '' }: { className?: string }) {
     );
 }
 
-/** Pot tanaman kecil — untuk state kosong & halaman error. */
+/** Pot tanaman kecil - untuk state kosong & halaman error. */
 export function Sprout({ className = '', wilted = false }: { className?: string; wilted?: boolean }) {
     return (
         <svg viewBox="0 0 160 160" className={className} aria-hidden>

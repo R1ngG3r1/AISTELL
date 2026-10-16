@@ -65,6 +65,7 @@ export default function AdminOrdersIndex({ orders, filters, statuses, services }
                                     <th>Pemesan</th>
                                     <th>Layanan</th>
                                     <th>Jadwal</th>
+                                    <th>Petugas</th>
                                     <th>Status</th>
                                     <th />
                                 </tr>
@@ -94,6 +95,9 @@ export default function AdminOrdersIndex({ orders, filters, statuses, services }
                                         </td>
                                         <td className="text-forest-900/60">
                                             {formatDate(order.date)}, {formatTime(order.time)}
+                                        </td>
+                                        <td className="whitespace-nowrap text-forest-900/60">
+                                            {order.staff ? `${order.staff.name}${order.staff.type === 'tim' ? ' (Tim)' : ''}` : <span className="text-clay-600">Belum ada</span>}
                                         </td>
                                         <td>
                                             <div className="flex flex-col items-start gap-1.5">

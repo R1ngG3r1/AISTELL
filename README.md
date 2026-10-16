@@ -1,4 +1,4 @@
-# AISTEL — Clean Space. Better Living.
+# AISTEL - Clean Space. Better Living.
 
 **AISTEL** (*Awareness Initiative for Sustainable Environment & Living*) adalah aplikasi web untuk
 memesan layanan kebersihan dan perawatan lingkungan secara online. Pengguna memilih layanan,
@@ -20,11 +20,15 @@ pengguna melalui fitur chat.
 
 **Admin**
 - Dashboard ringkasan pesanan
+- Laporan: pendapatan dan pesanan per hari/bulan (7/30/90 hari, bulan ini, tahun ini, rentang kustom) dengan pembanding periode sebelumnya, grafik per layanan/metode bayar/status, tampilan tabel, rekap PDF, dan ekspor daftar pesanan ke CSV
 - Kelola pesanan: terima, tolak, dan selesaikan, serta pantau status pembayaran
 - Cari dan filter pesanan: nama/email/telepon/layanan/no. pesanan, status, layanan, rentang tanggal, status bayar
 - Kelola layanan: tambah, ubah, dan hapus
+- Kelola petugas: catat nama dan telepon petugas lapangan (tanpa akun), tugaskan ke pesanan dengan pengecekan jadwal bentrok berdasarkan durasi layanan; kuota pesanan per hari lewat ORDER_DAILY_QUOTA
 - Helpdesk: membalas chat semua pengguna
 - Notifikasi: lonceng saat ada pesanan baru, pesanan dibatalkan pelanggan, dan pesan helpdesk baru
+- Aplikasi bisa dipasang di layar utama HP (PWA): ikon, tampilan layar penuh, dan halaman "Anda sedang offline" yang ramah; aset statis di-cache, data pribadi tidak pernah disimpan
+- Keamanan: header keamanan + Content-Security-Policy, admin keluar otomatis saat tidak aktif (30 menit), dan email saat akun admin masuk dari perangkat baru
 
 **Layanan yang tersedia:** Kebersihan Hunian, Perawatan Tanaman, Pengelolaan Sampah, Sanitasi Lingkungan.
 
@@ -105,10 +109,21 @@ routes/           definisi URL aplikasi
 tests/            test otomatis
 ```
 
-## Test
+## Test dan kualitas kode
+
+Semua perintah ini juga dijalankan otomatis oleh GitHub Actions di setiap push ke `main` dan setiap pull request.
 
 ```bash
-php artisan test
+# Backend
+php artisan test              # test PHP (Pest)
+./vendor/bin/pint --test      # cek gaya kode; hapus --test untuk memperbaiki otomatis
+
+# Frontend
+npm run typecheck             # tipe TypeScript
+npm run lint                  # ESLint
+npm test                      # Vitest (fungsi, komponen grafik/rating, dan contract test enum PHP ↔ frontend)
+npm run build                 # build produksi
+npm run format                # Prettier (opsional, belum diwajibkan di CI)
 ```
 
 ## Tim

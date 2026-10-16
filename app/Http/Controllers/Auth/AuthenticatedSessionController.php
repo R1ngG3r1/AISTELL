@@ -36,7 +36,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         // Arahkan ke dashboard sesuai role. Kalau sebelumnya user mencoba membuka
-        // halaman tertentu lalu disuruh login, kembalikan ke sana — asalkan role-nya
+        // halaman tertentu lalu disuruh login, kembalikan ke sana - asalkan role-nya
         // boleh membuka halaman itu (mis. admin tidak dikirim ke /orders lalu kena 403).
         $user = $request->user();
         $home = route($user->isAdmin() ? 'admin.dashboard' : 'dashboard', absolute: false);

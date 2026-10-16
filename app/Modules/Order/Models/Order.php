@@ -8,6 +8,7 @@ use App\Modules\Payment\Enums\PaymentStatus;
 use App\Modules\Payment\Models\Payment;
 use App\Modules\Review\Models\Review;
 use App\Modules\Service\Models\Service;
+use App\Modules\Staff\Models\Staff;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -70,19 +71,25 @@ class Order extends Model
         return Attribute::get(fn () => $this->status?->label());
     }
 
-    /** Relasi N:1 — setiap pesanan dimiliki satu user. */
+    /** Relasi N:1 - setiap pesanan dimiliki satu user. */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /** Relasi N:1 — setiap pesanan mengacu pada satu layanan. */
+    /** Relasi N:1 - setiap pesanan mengacu pada satu layanan. */
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
-    /** Relasi 1:N — semua percobaan pembayaran (ganti metode, kedaluwarsa, …). */
+    /** Relasi 1:N - semua percobaan pembayaran (ganti metode, kedaluwarsa, …). */
+    /** Petugas lapangan yang ditugaskan admin (null = belum ada). */
+    public function staff(): BelongsTo
+    {
+        return $this->belongsTo(Staff::class);
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);

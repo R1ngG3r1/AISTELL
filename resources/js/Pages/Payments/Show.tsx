@@ -147,12 +147,14 @@ function MethodChooser({
                                 <button
                                     type="button"
                                     onClick={() => setOpen(isOpen && open === group ? '' : group)}
-                                    className="flex w-full items-center gap-4 px-4 py-3.5 text-left"
+                                    className="flex w-full items-center gap-3 px-4 py-3.5 text-left sm:gap-4"
                                     aria-expanded={isOpen}
                                 >
-                                    <div className="flex -space-x-2">
-                                        {items.slice(0, 3).map((m) => (
-                                            <MethodLogo key={m.value} method={m.value} className="h-8 w-11 text-[9.5px] ring-2 ring-white" />
+                                    <div className="hidden -space-x-2 min-[360px]:flex">
+                                        {items.slice(0, 3).map((m, i) => (
+                                            <span key={m.value} className={i === 2 ? 'hidden sm:block' : ''}>
+                                                <MethodLogo method={m.value} className="h-7 w-10 text-[9px] ring-2 ring-white sm:h-8 sm:w-11 sm:text-[9.5px]" />
+                                            </span>
                                         ))}
                                     </div>
                                     <span className="min-w-0 flex-1">
@@ -430,7 +432,7 @@ function PaidCard({ order, payment }: { order: Order; payment: Payment }) {
     const rows = [
         { label: 'No. transaksi', value: payment.reference },
         { label: 'Metode', value: payment.method_label },
-        { label: 'Waktu bayar', value: payment.paid_at ? new Date(payment.paid_at).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '—' },
+        { label: 'Waktu bayar', value: payment.paid_at ? new Date(payment.paid_at).toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }) : '-' },
         { label: 'Total dibayar', value: formatRupiah(payment.amount) },
     ];
     return (

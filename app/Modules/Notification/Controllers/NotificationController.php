@@ -18,7 +18,7 @@ class NotificationController extends Controller
         return response()->json($this->notifications->listFor($request->user()));
     }
 
-    // POST /notifications/{id}/read — hanya milik user yang login (404 jika bukan miliknya)
+    // POST /notifications/{id}/read - hanya milik user yang login (404 jika bukan miliknya)
     public function read(Request $request, string $id): JsonResponse
     {
         $request->user()->notifications()->findOrFail($id)->markAsRead();

@@ -2,12 +2,14 @@
 
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Modules\Security\Middleware\AdminIdleTimeout;
+use App\Modules\Security\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
-use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -22,7 +24,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            // Logout admin otomatis saat tidak aktif (butuh sesi, jadi di grup web).
+            AdminIdleTimeout::class,
         ]);
+
+        // Header keamanan (CSP dll.) GLOBAL, bukan di grup web: halaman 404 untuk URL yang tidak dikenal
+        // tidak melewati grup web, tetapi tetap harus diberi header.
+        $middleware->append(SecurityHeaders::class);
 
         // Di belakang proxy / load balancer (Render, Cloudflare, Nginx, dll.) set TRUSTED_PROXIES=*
         // agar Laravel tahu request aslinya HTTPS dan IP pengunjung yang benar. Kosong = tidak ada proxy.

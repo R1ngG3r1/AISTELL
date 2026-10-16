@@ -18,7 +18,6 @@ use Illuminate\Validation\ValidationException;
  * sungguhan, hapus confirmPaid() dan tandai Lunas lewat webhook/callback.
  * Bayar tunai (COD) tetap Menunggu sampai pesanan selesai (lihat syncWithOrder()).
  */
-
 class PaymentService
 {
     /** Jeda minimal (detik) antara kode dibuat dan pembayaran dianggap masuk (dummy). */

@@ -73,8 +73,8 @@ export default function OrderFilterBar({ routeName, filters, statuses, services,
                 ))}
             </div>
 
-            <div className="flex flex-wrap items-end gap-3">
-                <label className="relative block w-full sm:w-72">
+            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
+                <label className="relative col-span-2 block w-full sm:w-72">
                     <span className="sr-only">Cari</span>
                     <FontAwesomeIcon icon={faMagnifyingGlass} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-forest-900/35" />
                     <input
@@ -88,9 +88,9 @@ export default function OrderFilterBar({ routeName, filters, statuses, services,
                 </label>
 
                 {services && (
-                    <label className="block">
+                    <label className="block min-w-0">
                         <span className="sr-only">Layanan</span>
-                        <select value={filters.service ?? ''} onChange={(e) => visit({ service: e.target.value })} className={`${field} w-auto min-w-40`}>
+                        <select value={filters.service ?? ''} onChange={(e) => visit({ service: e.target.value })} className={`${field} w-full sm:w-auto sm:min-w-48`}>
                             <option value="">Semua layanan</option>
                             {services.map((s) => (
                                 <option key={s.id} value={s.id}>
@@ -102,9 +102,9 @@ export default function OrderFilterBar({ routeName, filters, statuses, services,
                 )}
 
                 {showPayment && (
-                    <label className="block">
+                    <label className="block min-w-0">
                         <span className="sr-only">Status bayar</span>
-                        <select value={filters.payment ?? ''} onChange={(e) => visit({ payment: e.target.value })} className={`${field} w-auto min-w-36`}>
+                        <select value={filters.payment ?? ''} onChange={(e) => visit({ payment: e.target.value })} className={`${field} w-full sm:w-auto sm:min-w-52`}>
                             <option value="">Semua pembayaran</option>
                             <option value="lunas">Sudah lunas</option>
                             <option value="belum">Belum lunas</option>
@@ -112,19 +112,19 @@ export default function OrderFilterBar({ routeName, filters, statuses, services,
                     </label>
                 )}
 
-                <div className="flex items-center gap-2">
-                    <label className="block">
+                <div className="col-span-2 grid grid-cols-2 gap-3 sm:flex sm:items-end sm:gap-2">
+                    <label className="block min-w-0">
                         <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-wider text-forest-900/40">Jadwal dari</span>
                         <input type="date" value={filters.from ?? ''} max={filters.to ?? undefined} onChange={(e) => visit({ from: e.target.value })} className={field} />
                     </label>
-                    <label className="block">
+                    <label className="block min-w-0">
                         <span className="mb-0.5 block text-[11px] font-semibold uppercase tracking-wider text-forest-900/40">Sampai</span>
                         <input type="date" value={filters.to ?? ''} min={filters.from ?? undefined} onChange={(e) => visit({ to: e.target.value })} className={field} />
                     </label>
                 </div>
 
                 {active && (
-                    <button type="button" onClick={reset} className="btn-ghost btn-sm h-11">
+                    <button type="button" onClick={reset} className="btn-ghost btn-sm col-span-2 h-11 sm:col-span-1">
                         <FontAwesomeIcon icon={faRotateLeft} /> Reset
                     </button>
                 )}

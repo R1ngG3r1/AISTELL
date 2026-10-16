@@ -8,6 +8,7 @@ use App\Modules\Notification\Notifications\NewOrderNotification;
 use App\Modules\Notification\Notifications\NewReviewNotification;
 use App\Modules\Notification\Notifications\OrderStatusNotification;
 use App\Modules\Notification\Notifications\PaymentPaidNotification;
+use App\Modules\Notification\Notifications\StaffAssignedNotification;
 use App\Modules\Notification\Services\NotificationService;
 use App\Modules\Order\Models\Order;
 use App\Modules\Payment\Enums\PaymentMethod;
@@ -34,6 +35,14 @@ class NotificationServiceProvider extends ServiceProvider
 
         // Status berubah → user pemilik. Kalau pemilik sendiri yang membatalkan,
         // adminlah yang diberi tahu.
+        // Petugas ditugaskan → user pemilik tahu siapa yang akan datang.
+        Order::updated(function (Order $order) use ($notifications) {
+            if ($order->wasChanged('staff_id') && $order->staff_id) {
+                $order->loadMissing('service', 'user', 'staff');
+                $notifications()->send($order->user, new StaffAssignedNotification($order));
+            }
+        });
+
         Order::updated(function (Order $order) use ($notifications) {
             if (! $order->wasChanged('status')) {
                 return;

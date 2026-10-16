@@ -45,22 +45,22 @@ export default function Footer() {
                             {isAdmin ? (
                                 <>
                                     <li>
-                                        <Link href={route('admin.dashboard')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('admin.dashboard')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Dashboard Admin
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href={route('admin.orders.index')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('admin.orders.index')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Kelola Pesanan
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href={route('admin.services.index')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('admin.services.index')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Kelola Layanan
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href={route('admin.helpdesk.index')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('admin.helpdesk.index')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Helpdesk
                                         </Link>
                                     </li>
@@ -68,27 +68,27 @@ export default function Footer() {
                             ) : (
                                 <>
                                     <li>
-                                        <Link href={route('dashboard')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('dashboard')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Dashboard
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href={route('services.index')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('services.index')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Layanan
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href={route('orders.index')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('orders.index')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Pesanan Saya
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href={route('helpdesk.index')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('helpdesk.index')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Helpdesk
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href={route('profile.edit')} className="text-[#84a595] transition hover:text-white">
+                                        <Link href={route('profile.edit')} className="inline-block py-1.5 text-[#84a595] transition hover:text-white">
                                             Profil Saya
                                         </Link>
                                     </li>
@@ -106,7 +106,7 @@ export default function Footer() {
                             <li>
                                 <a
                                     href="mailto:aistel.eco@gmail.com"
-                                    className="flex items-center gap-2.5 transition hover:text-white"
+                                    className="flex items-center gap-2.5 py-1.5 transition hover:text-white"
                                 >
                                     <FontAwesomeIcon icon={faEnvelope} className="w-3.5 text-[#4de097]" />
                                     <span>aistel.eco@gmail.com</span>
@@ -117,7 +117,7 @@ export default function Footer() {
                                     href="https://wa.me/6281995623510"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-2.5 transition hover:text-white"
+                                    className="flex items-center gap-2.5 py-1.5 transition hover:text-white"
                                 >
                                     <FontAwesomeIcon icon={faPhone} className="w-3.5 text-[#4de097]" />
                                     <span className="whitespace-nowrap">+62 819 9562 3510</span>

@@ -11,7 +11,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * PRD 17 "Services — Admin": tambah, ubah, hapus layanan.
+ * PRD 17 "Services - Admin": tambah, ubah, hapus layanan.
  *
  * Pola Inertia: aksi yang mengubah data (POST/PUT/DELETE) diakhiri redirect,
  * bukan return JSON. Halaman React lalu dimuat ulang dengan data terbaru.

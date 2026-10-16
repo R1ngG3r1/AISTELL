@@ -30,7 +30,7 @@ export default function Panel({
                 {action && (
                     <Link
                         href={action.href}
-                        className="shrink-0 rounded-full bg-[#eaf2e6] px-3 py-1 text-xs font-bold text-[#287e59] transition hover:bg-[#287e59] hover:text-white"
+                        className="shrink-0 rounded-full bg-[#eaf2e6] px-3 py-1.5 text-xs font-bold text-[#287e59] transition hover:bg-[#287e59] hover:text-white"
                     >
                         {action.label}
                     </Link>

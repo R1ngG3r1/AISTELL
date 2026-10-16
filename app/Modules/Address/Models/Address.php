@@ -30,7 +30,7 @@ class Address extends Model
         ];
     }
 
-    /** Relasi N:1 — setiap alamat dimiliki satu user. */
+    /** Relasi N:1 - setiap alamat dimiliki satu user. */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

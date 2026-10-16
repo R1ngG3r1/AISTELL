@@ -17,7 +17,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * PRD 17 "Orders — User": Pesan Layanan & Pesanan Saya.
+ * PRD 17 "Orders - User": Pesan Layanan & Pesanan Saya.
  */
 class OrderController extends Controller
 {
@@ -65,7 +65,7 @@ class OrderController extends Controller
         Gate::authorize('view', $order);
 
         return Inertia::render('Orders/Show', [
-            'order' => fn () => $order->load(['service:id,name,price,description', 'payment', 'review']),
+            'order' => fn () => $order->load(['service:id,name,price,description', 'payment', 'review', 'staff:id,name,phone,type']),
         ]);
     }
 

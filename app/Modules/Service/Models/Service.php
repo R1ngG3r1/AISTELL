@@ -25,16 +25,18 @@ class Service extends Model
         'name',
         'description',
         'price',
+        'duration_minutes',
     ];
 
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
+            'duration_minutes' => 'integer',
         ];
     }
 
-    /** Relasi 1:N — satu layanan bisa dipesan di banyak order. */
+    /** Relasi 1:N - satu layanan bisa dipesan di banyak order. */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);

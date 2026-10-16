@@ -44,7 +44,7 @@ export default function DashboardHero({
             {/*
               HP     : maskot kecil di samping sapaan; deskripsi, tombol, dan jam selebar kartu di bawahnya.
               Tablet : maskot di samping seluruh teks; jam & avatar turun ke baris bawah.
-              Desktop: satu baris — maskot + teks di kiri, jam & avatar di kanan.
+              Desktop: satu baris - maskot + teks di kiri, jam & avatar di kanan.
             */}
             <div className="relative flex flex-col gap-5 p-5 sm:gap-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:p-10">
                 <div className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-4 sm:gap-x-6">

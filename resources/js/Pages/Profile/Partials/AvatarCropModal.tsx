@@ -82,7 +82,7 @@ export default function AvatarCropModal({
                 y: Math.min(maxY, Math.max(-maxY, next.y)),
             };
         },
-        [image, baseScale, zoom],
+        [image, baseScale, zoom, FRAME],
     );
 
     const applyZoom = useCallback(

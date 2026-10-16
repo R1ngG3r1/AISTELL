@@ -10,7 +10,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * PRD 6.2 & 6.3 — Dashboard User dan Dashboard Admin.
+ * PRD 6.2 & 6.3 - Dashboard User dan Dashboard Admin.
  *
  * Setiap prop dibungkus fn() supaya polling realtime dari frontend
  * (router.reload({ only: [...] })) hanya menjalankan query yang diminta.
@@ -21,7 +21,7 @@ class DashboardController extends Controller
         protected OrderService $orders
     ) {}
 
-    // GET /dashboard — ringkasan pesanan milik user yang login
+    // GET /dashboard - ringkasan pesanan milik user yang login
     public function user(Request $request): Response|RedirectResponse
     {
         // Admin yang membuka /dashboard diarahkan ke dashboard admin.
@@ -39,7 +39,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    // GET /admin/dashboard — ringkasan seluruh pesanan
+    // GET /admin/dashboard - ringkasan seluruh pesanan
     public function admin(): Response
     {
         return Inertia::render('Admin/Dashboard', [
