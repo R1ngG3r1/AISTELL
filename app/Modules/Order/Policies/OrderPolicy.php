@@ -30,6 +30,20 @@ class OrderPolicy
             && in_array($order->status, OrderStatus::active(), true);
     }
 
+    /** Mengulas: hanya pemilik, pesanan sudah selesai, dan belum pernah diulas. */
+    public function review(User $user, Order $order): bool
+    {
+        return $order->user_id === $user->id
+            && $order->status === OrderStatus::Selesai
+            && ! $order->review()->exists();
+    }
+
+    /** Mengubah / menghapus ulasan: hanya pemilik pesanan, dan ulasannya memang ada. */
+    public function manageReview(User $user, Order $order): bool
+    {
+        return $order->user_id === $user->id && $order->review()->exists();
+    }
+
     /** User hanya bisa membatalkan pesanannya sendiri yang belum diproses admin. */
     public function cancel(User $user, Order $order): bool
     {

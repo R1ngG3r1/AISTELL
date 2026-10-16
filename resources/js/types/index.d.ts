@@ -19,6 +19,22 @@ export interface Service {
     description: string | null;
     price: string; // decimal dari Laravel dikirim sebagai string, mis. "150000.00"
     orders_count?: number; // hanya ada di halaman admin
+    reviews_avg_rating?: string | null; // rata-rata rating, null = belum ada ulasan
+    reviews_count?: number;
+}
+
+/** Ulasan pesanan (user & admin melihat detailnya; halaman layanan memakai PublicReview). */
+export interface Review {
+    id: number;
+    rating: number; // 1–5
+    comment: string | null;
+    created_at: string;
+    updated_at: string; // beda dengan created_at = ulasan pernah diubah
+}
+
+/** Ulasan di halaman layanan (Review::toPublic), nama pengulas disingkat. */
+export interface PublicReview extends Omit<Review, 'updated_at'> {
+    reviewer: string;
 }
 
 export type OrderStatus =
@@ -47,6 +63,7 @@ export interface Order {
     updated_at: string;
     service?: Pick<Service, 'id' | 'name' | 'price'> & { description?: string | null };
     payment?: Payment | null; // pembayaran terbaru (null = belum memilih metode)
+    review?: Review | null; // ulasan user (null = belum diulas)
     user?: Pick<User, 'id' | 'name' | 'email' | 'phone' | 'avatar_url'>;
 }
 
@@ -90,6 +107,16 @@ export interface Address {
     is_primary: boolean;
 }
 
+/** Filter daftar pesanan (OrderFilterRequest::forView); null/kosong = tidak difilter. */
+export interface OrderFilters {
+    status: OrderStatus | null;
+    q: string | null;
+    service: number | null;
+    from: string | null; // "2026-10-01"
+    to: string | null;
+    payment: 'lunas' | 'belum' | null;
+}
+
 export interface StatusOption {
     value: OrderStatus;
     label: string;
@@ -109,6 +136,18 @@ export interface Counters {
     pendingOrders?: number;
     activeOrders?: number;
     helpdeskUnread?: number; // pesan helpdesk belum dibaca
+    notificationsUnread?: number; // notifikasi lonceng belum dibaca
+}
+
+/** Satu notifikasi di lonceng (NotificationService::listFor). */
+export interface AppNotification {
+    id: string;
+    kind: 'order' | 'payment' | 'helpdesk';
+    title: string;
+    body: string;
+    url: string;
+    read: boolean;
+    created_at: string;
 }
 
 /** Hasil ->paginate() Laravel. */

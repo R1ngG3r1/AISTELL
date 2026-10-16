@@ -5,10 +5,11 @@ namespace App\Modules\Order\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Order\Enums\OrderStatus;
 use App\Modules\Order\Models\Order;
+use App\Modules\Order\Requests\OrderFilterRequest;
 use App\Modules\Order\Requests\UpdateOrderStatusRequest;
 use App\Modules\Order\Services\OrderService;
+use App\Modules\Service\Models\Service;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,17 +23,16 @@ class AdminOrderController extends Controller
         protected OrderService $orders
     ) {}
 
-    // GET /admin/orders?status=menunggu
-    public function index(Request $request): Response
+    // GET /admin/orders?status=menunggu&q=budi&service=3&from=2026-10-01&to=2026-10-31&payment=lunas
+    public function index(OrderFilterRequest $request): Response
     {
-        // tryFrom → null jika ?status tidak valid, sehingga filter diabaikan (tidak error).
-        $status = OrderStatus::tryFrom((string) $request->query('status'));
-
         return Inertia::render('Admin/Orders/Index', [
             // fn() → ikut diperbarui saat polling realtime di frontend
-            'orders' => fn () => $this->orders->paginateAll($status),
-            'filters' => ['status' => $status?->value],
+            'orders' => fn () => $this->orders->paginateAll($request->filters()),
+            // Nilai yang tidak valid sudah dibuang, jadi kolom filter selalu cocok dengan hasilnya.
+            'filters' => $request->forView(),
             'statuses' => $this->statusOptions(OrderStatus::cases()),
+            'services' => Service::query()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 

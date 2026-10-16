@@ -1,6 +1,7 @@
 import Avatar from '@/Components/eco/Avatar';
 import Footer from '@/Components/eco/Footer';
 import FlashMessage from '@/Components/FlashMessage';
+import NotificationBell from '@/Components/eco/NotificationBell';
 import { LIVE_INTERVAL, useLivePoll } from '@/lib/live';
 import { Counters, PageProps } from '@/types';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -229,12 +230,19 @@ export default function Authenticated({
                         <img src="/landingpage/LOGO.png" alt="" aria-hidden="true" className="h-6 w-6 object-contain" />
                         <span className="text-lg font-extrabold tracking-tight">AISTEL</span>
                     </Link>
-                    <Link href={route('profile.edit')} aria-label="Profil saya">
-                        <Avatar name={user.name} src={user.avatar_url} />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <NotificationBell />
+                        <Link href={route('profile.edit')} aria-label="Profil saya">
+                            <Avatar name={user.name} src={user.avatar_url} />
+                        </Link>
+                    </div>
                 </div>
 
                 <main className="mx-auto max-w-[1280px] px-4 pb-12 pt-6 sm:px-6 lg:px-8 lg:pt-8">
+                    {/* Lonceng notifikasi desktop (di mobile ada di topbar) */}
+                    <div className="mb-4 hidden justify-end lg:flex">
+                        <NotificationBell />
+                    </div>
                     {header && <div className="mb-8">{header}</div>}
                     {children}
                 </main>

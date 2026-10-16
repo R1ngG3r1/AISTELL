@@ -1,5 +1,7 @@
 import ConfirmModal from '@/Components/eco/ConfirmModal';
 import { MethodLogo, PaymentBadge } from '@/Components/eco/Payment';
+import InvoiceButton from '@/Components/eco/InvoiceButton';
+import ReviewCard from '@/Components/eco/ReviewCard';
 import OrderTimeline from '@/Components/eco/OrderTimeline';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import InputError from '@/Components/InputError';
@@ -128,6 +130,8 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                             </div>
                         )}
                     </Reveal>
+
+                    <ReviewCard order={order} />
                 </div>
 
                 <aside className="space-y-4 lg:sticky lg:top-8">
@@ -192,6 +196,7 @@ export default function AdminOrderShow({ order, allowedStatuses }: Props) {
                         ) : (
                             <p className="mt-3 text-sm text-forest-900/55">Pemesan belum memilih metode pembayaran.</p>
                         )}
+                        <InvoiceButton order={order} className="mt-4" />
                     </Reveal>
                 </aside>
             </div>

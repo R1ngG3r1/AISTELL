@@ -3,6 +3,7 @@
 namespace App\Modules\Service\Models;
 
 use App\Modules\Order\Models\Order;
+use App\Modules\Review\Models\Review;
 use Database\Factories\ServiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +38,11 @@ class Service extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 
     /**

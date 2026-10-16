@@ -1,11 +1,15 @@
 import GuestLayout, { authButton, authStatus } from '@/Layouts/GuestLayout';
 import { faEnvelopeOpenText } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePoll } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
 export default function VerifyEmail({ status }: { status?: string }) {
     const { post, processing } = useForm({});
+
+    // Tautan di email boleh dibuka di perangkat lain. Begitu akun terverifikasi, server mengalihkan
+    // permintaan ini ke dashboard, jadi halaman ini lanjut sendiri tanpa perlu dimuat ulang.
+    usePoll(4000, { only: ['status'], showProgress: false });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -15,7 +19,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
     return (
         <GuestLayout
             title="Verifikasi Email"
-            subtitle="Terima kasih sudah mendaftar! Klik tautan yang kami kirim ke email Anda untuk memverifikasi akun. Belum menerima email? Kami bisa mengirim ulang."
+            subtitle="Terima kasih sudah mendaftar! Klik tautan yang kami kirim ke email Anda untuk memverifikasi akun, bisa dari perangkat mana pun, halaman ini akan lanjut otomatis. Belum menerima email? Kami bisa mengirim ulang."
         >
             <Head title="Verifikasi Email - AISTEL" />
 

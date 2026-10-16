@@ -4,9 +4,12 @@ namespace App\Modules\Order\Models;
 
 use App\Models\User;
 use App\Modules\Order\Enums\OrderStatus;
+use App\Modules\Payment\Enums\PaymentStatus;
 use App\Modules\Payment\Models\Payment;
+use App\Modules\Review\Models\Review;
 use App\Modules\Service\Models\Service;
 use Database\Factories\OrderFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -89,6 +92,46 @@ class Order extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class)->latestOfMany();
+    }
+
+    /**
+     * Terapkan filter daftar pesanan (lihat OrderFilterRequest::filters()).
+     * Kunci yang kosong/tidak ada diabaikan.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function scopeFilter(Builder $query, array $filters): void
+    {
+        $query
+            ->when($filters['status'] ?? null, fn (Builder $q, $status) => $q->where('status', $status))
+            ->when($filters['service'] ?? null, fn (Builder $q, $id) => $q->where('service_id', $id))
+            ->when($filters['from'] ?? null, fn (Builder $q, $date) => $q->whereDate('date', '>=', $date))
+            ->when($filters['to'] ?? null, fn (Builder $q, $date) => $q->whereDate('date', '<=', $date))
+            ->when($filters['payment'] ?? null, fn (Builder $q, $payment) => $payment === 'lunas'
+                ? $q->whereHas('payments', fn (Builder $p) => $p->where('status', PaymentStatus::Lunas))
+                : $q->whereDoesntHave('payments', fn (Builder $p) => $p->where('status', PaymentStatus::Lunas)))
+            ->when($filters['q'] ?? null, function (Builder $q, string $term) {
+                // % dan _ dari pengguna dianggap huruf biasa, bukan wildcard LIKE.
+                $like = '%'.addcslashes($term, '%_\\').'%';
+
+                $q->where(function (Builder $w) use ($term, $like) {
+                    // "12" atau "#12" → cari nomor pesanan
+                    if (preg_match('/^#?(\d+)$/', $term, $m)) {
+                        $w->orWhere('id', (int) $m[1]);
+                    }
+
+                    $w->orWhere('contact_name', 'like', $like)
+                        ->orWhere('contact_phone', 'like', $like)
+                        ->orWhereHas('user', fn (Builder $u) => $u->where('email', 'like', $like))
+                        ->orWhereHas('service', fn (Builder $s) => $s->where('name', 'like', $like));
+                });
+            });
+    }
+
+    /** Ulasan user untuk pesanan ini (maks. satu). */
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
     }
 
     protected static function newFactory(): OrderFactory

@@ -22,6 +22,7 @@ import {
     faRotateLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import InvoiceButton from '@/Components/eco/InvoiceButton';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import QRCode from 'qrcode';
 import { FormEventHandler, useEffect, useState } from 'react';
@@ -455,6 +456,7 @@ function PaidCard({ order, payment }: { order: Order; payment: Payment }) {
                 <Link href={route('orders.index')} className="btn-ghost">
                     Pesanan saya
                 </Link>
+                <InvoiceButton order={{ id: order.id, payment }} className="sm:w-auto" />
             </div>
         </Reveal>
     );

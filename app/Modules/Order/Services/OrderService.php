@@ -64,22 +64,32 @@ class OrderService
         return $this->changeStatus($order, OrderStatus::Dibatalkan);
     }
 
-    /** "Pesanan Saya": hanya milik user tersebut, terbaru di atas. */
-    public function paginateForUser(User $user, int $perPage = 10): LengthAwarePaginator
+    /**
+     * "Pesanan Saya": hanya milik user tersebut, terbaru di atas.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function paginateForUser(User $user, array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
         return $user->orders()
+            ->filter($filters)
             ->with(['service:id,name,price', 'payment'])
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
     }
 
-    /** "Kelola Pesanan" admin: semua pesanan, bisa difilter berdasarkan status. */
-    public function paginateAll(?OrderStatus $status = null, int $perPage = 15): LengthAwarePaginator
+    /**
+     * "Kelola Pesanan" admin: semua pesanan, bisa dicari dan difilter
+     * (status, layanan, rentang tanggal, status bayar; lihat Order::scopeFilter).
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function paginateAll(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
         return Order::query()
             ->with(self::WITH) // eager loading: cegah N+1 query
-            ->when($status, fn (Builder $q) => $q->where('status', $status))
+            ->filter($filters)
             ->latest()
             ->paginate($perPage)
             ->withQueryString(); // agar ?status=... ikut di link halaman berikutnya
@@ -87,7 +97,7 @@ class OrderService
 
     public function loadDetail(Order $order): Order
     {
-        return $order->load(self::WITH);
+        return $order->load([...self::WITH, 'review']);
     }
 
     /**

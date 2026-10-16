@@ -1,6 +1,7 @@
 import Avatar from '@/Components/eco/Avatar';
 import EmptyState from '@/Components/eco/EmptyState';
 import OrderCardList from '@/Components/eco/OrderCardList';
+import OrderFilterBar from '@/Components/eco/OrderFilterBar';
 import PageHeader from '@/Components/eco/PageHeader';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import Pagination from '@/Components/Pagination';
@@ -9,7 +10,7 @@ import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatTime } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
-import { Order, PageProps, Paginated, StatusOption } from '@/types';
+import { Order, OrderFilters, PageProps, Paginated, StatusOption } from '@/types';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head, Link, router } from '@inertiajs/react';
@@ -17,13 +18,14 @@ import { Head, Link, router } from '@inertiajs/react';
 // Props dari AdminOrderController@index
 type Props = PageProps<{
     orders: Paginated<Order>;
-    filters: { status: string | null };
+    filters: OrderFilters;
     statuses: StatusOption[];
+    services: { id: number; name: string }[];
 }>;
 
-export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
-    const tabs = [{ value: '', label: 'Semua' }, ...statuses];
+export default function AdminOrdersIndex({ orders, filters, statuses, services }: Props) {
     const current = filters.status ?? '';
+    const filtered = Object.values(filters).some(Boolean);
 
     return (
         <AuthenticatedLayout live={['orders']}
@@ -31,37 +33,27 @@ export default function AdminOrdersIndex({ orders, filters, statuses }: Props) {
                 <PageHeader
                     eyebrow="Kelola Pesanan"
                     title="Pesanan masuk"
-                    description={`${orders.total} pesanan${current ? ` berstatus ${statuses.find((s) => s.value === current)?.label.toLowerCase()}` : ''}.`}
+                    description={`${orders.total} pesanan${filtered ? ' sesuai filter' : ''}${current ? `, berstatus ${statuses.find((s) => s.value === current)?.label.toLowerCase()}` : ''}.`}
                 />
             }
         >
             <Head title="Kelola Pesanan" />
 
-            {/* Tab filter status → ?status=... */}
-            <div className="mb-5">
-                <div className="grid grid-cols-3 gap-1.5 rounded-3xl bg-white/70 p-1.5 shadow-soft ring-1 ring-forest-900/5 sm:inline-flex sm:gap-1 sm:rounded-full sm:p-1">
-                    {tabs.map((t) => (
-                        <button
-                            key={t.value}
-                            onClick={() =>
-                                router.get(route('admin.orders.index'), t.value ? { status: t.value } : {}, {
-                                    preserveState: true,
-                                    preserveScroll: true,
-                                })
-                            }
-                            className={`whitespace-nowrap rounded-full px-2 py-2 text-center text-sm sm:px-4 font-semibold transition ${
-                                current === t.value ? 'bg-forest-900 text-cream shadow-soft' : 'text-forest-900/60 hover:bg-forest-900/5'
-                            }`}
-                        >
-                            {t.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            <OrderFilterBar
+                routeName="admin.orders.index"
+                filters={filters}
+                statuses={statuses}
+                services={services}
+                showPayment
+                searchPlaceholder="Cari nama, email, telepon, layanan, atau no. pesanan…"
+            />
 
             <Reveal className="card overflow-hidden">
                 {orders.data.length === 0 ? (
-                    <EmptyState title="Tidak ada pesanan" description="Belum ada pesanan dengan status ini." />
+                    <EmptyState
+                        title="Tidak ada pesanan"
+                        description={filtered ? 'Tidak ada pesanan yang cocok. Ubah atau reset filter.' : 'Belum ada pesanan masuk.'}
+                    />
                 ) : (
                     <>
                     <OrderCardList orders={orders.data} className="xl:hidden" />

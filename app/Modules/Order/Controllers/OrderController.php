@@ -4,7 +4,9 @@ namespace App\Modules\Order\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Address\Services\AddressService;
+use App\Modules\Order\Enums\OrderStatus;
 use App\Modules\Order\Models\Order;
+use App\Modules\Order\Requests\OrderFilterRequest;
 use App\Modules\Order\Requests\StoreOrderRequest;
 use App\Modules\Order\Services\OrderService;
 use App\Modules\Service\Services\ServiceCatalog;
@@ -23,12 +25,14 @@ class OrderController extends Controller
         protected OrderService $orders
     ) {}
 
-    // GET /orders
-    public function index(Request $request): Response
+    // GET /orders?status=selesai&q=sampah&from=2026-10-01&to=2026-10-31
+    public function index(OrderFilterRequest $request): Response
     {
         return Inertia::render('Orders/Index', [
             // fn() → ikut diperbarui saat polling realtime di frontend
-            'orders' => fn () => $this->orders->paginateForUser($request->user()),
+            'orders' => fn () => $this->orders->paginateForUser($request->user(), $request->filters()),
+            'filters' => $request->forView(),
+            'statuses' => collect(OrderStatus::cases())->map(fn (OrderStatus $s) => ['value' => $s->value, 'label' => $s->label()])->all(),
         ]);
     }
 
@@ -61,7 +65,7 @@ class OrderController extends Controller
         Gate::authorize('view', $order);
 
         return Inertia::render('Orders/Show', [
-            'order' => fn () => $order->load(['service:id,name,price,description', 'payment']),
+            'order' => fn () => $order->load(['service:id,name,price,description', 'payment', 'review']),
         ]);
     }
 

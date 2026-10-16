@@ -39,13 +39,16 @@ Route::middleware('guest')->group(function () {
         ->name('password.store');
 });
 
+// Tautan verifikasi dari email SENGAJA di luar grup 'auth': pemilik email bisa membukanya di
+// perangkat lain (mis. HP) yang belum login. Keamanannya dari tanda tangan URL + hash email.
+Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
+    ->whereNumber('id')
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
+
 Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
-
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')

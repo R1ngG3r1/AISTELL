@@ -11,15 +11,20 @@ pengguna melalui fitur chat.
 - Daftar dan login (dengan email atau username), serta lupa password
 - Pesan layanan: pilih layanan, tanggal, waktu (WIB/WITA/WIT), dan lokasi di peta
 - Pembayaran (simulasi): QRIS, Virtual Account, e-wallet, minimarket, tunai
-- Pesanan Saya: lihat detail, pantau status, dan batalkan pesanan
+- Pesanan Saya: lihat detail, pantau status, batalkan pesanan, serta cari dan filter riwayat (status, tanggal)
+- Invoice PDF: unduh bukti pembayaran setelah pesanan lunas
+- Rating & ulasan: beri bintang 1–5 dan komentar setelah pesanan selesai; rata-rata rating tampil di halaman layanan
 - Helpdesk: chat langsung dengan admin
+- Notifikasi: lonceng di aplikasi + email saat status pesanan berubah, pembayaran lunas, dan balasan helpdesk
 - Profil, foto profil, dan buku alamat
 
 **Admin**
 - Dashboard ringkasan pesanan
 - Kelola pesanan: terima, tolak, dan selesaikan, serta pantau status pembayaran
+- Cari dan filter pesanan: nama/email/telepon/layanan/no. pesanan, status, layanan, rentang tanggal, status bayar
 - Kelola layanan: tambah, ubah, dan hapus
 - Helpdesk: membalas chat semua pengguna
+- Notifikasi: lonceng saat ada pesanan baru, pesanan dibatalkan pelanggan, dan pesan helpdesk baru
 
 **Layanan yang tersedia:** Kebersihan Hunian, Perawatan Tanaman, Pengelolaan Sampah, Sanitasi Lingkungan.
 

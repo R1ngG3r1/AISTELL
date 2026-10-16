@@ -1,4 +1,5 @@
 import EmptyState from '@/Components/eco/EmptyState';
+import OrderFilterBar from '@/Components/eco/OrderFilterBar';
 import PageHeader from '@/Components/eco/PageHeader';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import Pagination from '@/Components/Pagination';
@@ -7,20 +8,22 @@ import StatusBadge from '@/Components/StatusBadge';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
-import { Order, PageProps, Paginated } from '@/types';
+import { Order, OrderFilters, PageProps, Paginated, StatusOption } from '@/types';
 import { faCalendarDays, faChevronRight, faLocationDot, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head, Link } from '@inertiajs/react';
 
 // Props dari OrderController@index
-export default function OrdersIndex({ orders }: PageProps<{ orders: Paginated<Order> }>) {
+export default function OrdersIndex({ orders, filters, statuses }: PageProps<{ orders: Paginated<Order>; filters: OrderFilters; statuses: StatusOption[] }>) {
+    const filtered = Object.values(filters).some(Boolean);
+
     return (
         <AuthenticatedLayout live={['orders']}
             header={
                 <PageHeader
                     eyebrow="Pesanan Saya"
                     title="Riwayat pesanan"
-                    description={`${orders.total} pesanan tercatat. Klik salah satu untuk melihat detail dan statusnya.`}
+                    description={`${orders.total} pesanan ${filtered ? 'sesuai filter' : 'tercatat'}. Klik salah satu untuk melihat detail dan statusnya.`}
                     actions={
                         <Link href={route('services.index')} className="btn-primary">
                             <FontAwesomeIcon icon={faPlus} /> Pesan Baru
@@ -31,7 +34,15 @@ export default function OrdersIndex({ orders }: PageProps<{ orders: Paginated<Or
         >
             <Head title="Pesanan Saya" />
 
-            {orders.data.length === 0 ? (
+            {(filtered || orders.total > 0) && (
+                <OrderFilterBar routeName="orders.index" filters={filters} statuses={statuses} searchPlaceholder="Cari layanan atau no. pesanan…" />
+            )}
+
+            {orders.data.length === 0 && filtered ? (
+                <div className="card">
+                    <EmptyState title="Tidak ada pesanan yang cocok" description="Ubah atau reset filter untuk melihat pesanan lainnya." />
+                </div>
+            ) : orders.data.length === 0 ? (
                 <div className="card">
                     <EmptyState
                         title="Belum ada pesanan"

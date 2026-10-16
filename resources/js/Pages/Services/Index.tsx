@@ -1,5 +1,6 @@
 import EmptyState from '@/Components/eco/EmptyState';
 import PageHeader from '@/Components/eco/PageHeader';
+import { RatingSummary } from '@/Components/eco/Rating';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatRupiah } from '@/lib/format';
@@ -69,7 +70,8 @@ export default function ServicesIndex({ auth, services }: PageProps<{ services: 
                                 <p className="relative mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-forest-900/60">
                                     {service.description}
                                 </p>
-                                <p className="relative mt-5 text-sm text-forest-900/50">
+                                <RatingSummary avg={service.reviews_avg_rating} count={service.reviews_count} className="relative mt-3" />
+                                <p className="relative mt-4 text-sm text-forest-900/50">
                                     Mulai <strong className="display text-2xl text-forest-900">{formatRupiah(service.price)}</strong>
                                 </p>
                                 <div className="relative mt-5 flex gap-2">

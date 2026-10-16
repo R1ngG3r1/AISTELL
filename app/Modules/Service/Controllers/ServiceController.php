@@ -3,6 +3,7 @@
 namespace App\Modules\Service\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Review\Services\ReviewService;
 use App\Modules\Service\Models\Service;
 use App\Modules\Service\Services\ServiceCatalog;
 use Inertia\Inertia;
@@ -29,10 +30,11 @@ class ServiceController extends Controller
     // GET /services/{service}
     // Route model binding: Laravel otomatis mencari Service dengan id dari URL,
     // dan mengembalikan 404 jika tidak ditemukan.
-    public function show(Service $service): Response
+    public function show(Service $service, ReviewService $reviews): Response
     {
         return Inertia::render('Services/Show', [
-            'service' => $service,
+            'service' => $service->loadAvg('reviews', 'rating')->loadCount('reviews'),
+            'reviews' => $reviews->forService($service),
         ]);
     }
 }

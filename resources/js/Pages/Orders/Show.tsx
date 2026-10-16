@@ -1,6 +1,7 @@
 import ConfirmModal from '@/Components/eco/ConfirmModal';
 import { MethodLogo, PaymentBadge } from '@/Components/eco/Payment';
 import { Leaf } from '@/Components/eco/Illustrations';
+import ReviewCard from '@/Components/eco/ReviewCard';
 import OrderTimeline from '@/Components/eco/OrderTimeline';
 import ServiceIcon from '@/Components/eco/ServiceIcon';
 import StatusBadge from '@/Components/StatusBadge';
@@ -9,6 +10,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { toLatLng } from '@/lib/geo';
 import { formatDate, formatRupiah, formatTime, orderPrice } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
+import InvoiceButton from '@/Components/eco/InvoiceButton';
 import { Order, PageProps } from '@/types';
 import {
     faArrowLeft,
@@ -109,6 +111,10 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                             </div>
                         )}
                     </Reveal>
+
+                    <Reveal delay={150}>
+                        <ReviewCard order={order} canWrite />
+                    </Reveal>
                 </div>
 
                 <aside className="space-y-4 lg:sticky lg:top-8">
@@ -151,6 +157,7 @@ export default function OrderShow({ order }: PageProps<{ order: Order }>) {
                                       ? 'Lihat cara bayar'
                                       : 'Bayar sekarang'}
                             </Link>
+                            <InvoiceButton order={order} className="mt-2" />
                         </Reveal>
                     )}
 

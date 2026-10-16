@@ -17,7 +17,11 @@ class ServiceCatalog
     /** @return Collection<int, Service> */
     public function all(): Collection
     {
-        return Service::query()->orderBy('name')->get();
+        return Service::query()
+            ->withAvg('reviews', 'rating')
+            ->withCount('reviews')
+            ->orderBy('name')
+            ->get();
     }
 
     public function create(array $data): Service

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Modules\Helpdesk\Services\HelpdeskService;
+use App\Modules\Notification\Services\NotificationService;
 use App\Modules\Order\Services\OrderService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -62,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                 ? [
                     ...app(OrderService::class)->counters($request->user()),
                     'helpdeskUnread' => app(HelpdeskService::class)->unreadCount($request->user()),
+                    'notificationsUnread' => app(NotificationService::class)->unreadCount($request->user()),
                 ]
                 : null),
         ];

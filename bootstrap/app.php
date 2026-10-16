@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
@@ -37,6 +38,18 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
+        // Tautan verifikasi email kedaluwarsa / diubah → arahkan dengan pesan yang jelas,
+        // bukan halaman 403 "Invalid signature".
+        $exceptions->render(function (InvalidSignatureException $e, Request $request) {
+            if ($request->routeIs('verification.verify') && ! $request->expectsJson()) {
+                $message = 'Tautan verifikasi sudah kedaluwarsa atau tidak valid. Masuk lalu kirim ulang email verifikasi.';
+
+                return $request->user()
+                    ? redirect()->route('verification.notice')->with('error', $message)
+                    : redirect()->route('login')->with('status', $message);
+            }
+        });
+
         // Tampilkan error sebagai halaman React (resources/js/Pages/Error.tsx),
         // bukan halaman polos bawaan Laravel.
         $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
@@ -67,7 +80,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 'status' => $status,
                 // Pesan dari abort(403, '...') ditulis sendiri oleh kita, jadi aman ditampilkan.
                 // Pesan 404/500 bisa berisi detail internal, jadi tidak dikirim.
-                'message' => $status === 403 && $e instanceof HttpExceptionInterface ? $e->getMessage() : null,
+                'message' => $status === 403 && $e instanceof HttpExceptionInterface && $e->getMessage() !== 'This action is unauthorized.'
+                    ? $e->getMessage()
+                    : null,
                 'homeUrl' => $request->user() ? route('dashboard') : route('home'),
             ])->toResponse($request)->setStatusCode($status);
         });

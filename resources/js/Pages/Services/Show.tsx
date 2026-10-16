@@ -2,7 +2,9 @@ import ServiceIcon from '@/Components/eco/ServiceIcon';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatRupiah } from '@/lib/format';
 import { Reveal } from '@/lib/motion';
-import { PageProps, Service } from '@/types';
+import { RatingSummary, Stars } from '@/Components/eco/Rating';
+import { formatDate } from '@/lib/format';
+import { PageProps, PublicReview, Service } from '@/types';
 import { faArrowLeft, faArrowRight, faChevronDown, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Head, Link } from '@inertiajs/react';
@@ -11,7 +13,7 @@ import { useState } from 'react';
 const promises = ['Tim terlatih & terverifikasi', 'Peralatan dan bahan ramah lingkungan', 'Status pesanan bisa dipantau kapan saja'];
 
 // Props dari ServiceController@show
-export default function ServiceShow({ auth, service }: PageProps<{ service: Service }>) {
+export default function ServiceShow({ auth, service, reviews }: PageProps<{ service: Service; reviews: PublicReview[] }>) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -32,7 +34,10 @@ export default function ServiceShow({ auth, service }: PageProps<{ service: Serv
                         <span className="grid h-14 w-14 shrink-0 animate-float place-items-center rounded-2xl bg-leaf-400 text-xl text-forest-900 sm:h-16 sm:w-16 sm:rounded-3xl sm:text-2xl">
                             <ServiceIcon name={service.name} />
                         </span>
-                        <h1 className="display text-3xl sm:text-4xl lg:text-5xl">{service.name}</h1>
+                        <div>
+                            <h1 className="display text-3xl sm:text-4xl lg:text-5xl">{service.name}</h1>
+                            <RatingSummary avg={service.reviews_avg_rating} count={service.reviews_count} className="mt-1.5 text-cream" />
+                        </div>
                     </div>
 
                     <button
@@ -76,6 +81,26 @@ export default function ServiceShow({ auth, service }: PageProps<{ service: Serv
                         )}
                     </div>
                 </div>
+            </Reveal>
+
+            <Reveal delay={100} className="card mt-6 p-6 md:p-8">
+                <h2 className="display text-2xl">Ulasan pelanggan</h2>
+                {reviews.length === 0 ? (
+                    <p className="mt-3 text-forest-900/55">Belum ada ulasan untuk layanan ini.</p>
+                ) : (
+                    <ul className="mt-5 divide-y divide-forest-900/10">
+                        {reviews.map((r) => (
+                            <li key={r.id} className="py-4 first:pt-0 last:pb-0">
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                    <Stars value={r.rating} />
+                                    <span className="font-semibold">{r.reviewer}</span>
+                                    <span className="text-sm text-forest-900/45">{formatDate(r.created_at)}</span>
+                                </div>
+                                {r.comment && <p className="mt-2 whitespace-pre-line break-words text-forest-900/80">{r.comment}</p>}
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </Reveal>
         </AuthenticatedLayout>
     );
