@@ -1,0 +1,1 @@
+import{j as e}from"./app-Ct1qA6TT.js";function m({message:t,className:r="",...n}){return t?e.jsx("p",{...n,className:`animate-fade-up text-sm font-medium text-clay-600 ${r}`,children:t}):null}export{m as I};
