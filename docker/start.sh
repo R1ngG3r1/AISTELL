@@ -21,4 +21,12 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+# Pastikan hanya satu MPM (prefork) yang aktif
+rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.*
+a2enmod mpm_prefork >/dev/null 2>&1 || true
+
+# Diagnosis: tampilkan MPM yang termuat dan file asalnya
+echo "=== mods-enabled (mpm) ==="; ls /etc/apache2/mods-enabled | grep mpm || true
+echo "=== LoadModule mpm ==="; grep -rn "LoadModule mpm" /etc/apache2 || true
+
 exec apache2-foreground
