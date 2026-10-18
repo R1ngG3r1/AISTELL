@@ -176,7 +176,7 @@ export default function AuthLayoutUnified({
                 ======================================================== */}
             <div className="lg:hidden fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
                 <img
-                    src="/login/gambar1.jpeg"
+                    src="/img-login/gambar1.jpeg"
                     alt=""
                     className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${
                         isLogin ? "opacity-100" : "opacity-0"
@@ -184,7 +184,7 @@ export default function AuthLayoutUnified({
                     style={{ objectPosition: "50% 20%" }}
                 />
                 <img
-                    src="/login/gambar2.jpeg"
+                    src="/img-login/gambar2.jpeg"
                     alt=""
                     className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-in-out ${
                         !isLogin ? "opacity-100" : "opacity-0"
@@ -210,7 +210,7 @@ export default function AuthLayoutUnified({
             >
                 <div className="absolute inset-y-0 left-0 w-[48%] xl:w-[47%] h-full overflow-hidden">
                     <img
-                        src="/login/gambar1.jpeg"
+                        src="/img-login/gambar1.jpeg"
                         alt=""
                         className="w-full h-full"
                         style={{ objectFit: "cover", objectPosition: "50% 5%" }}
@@ -237,7 +237,7 @@ export default function AuthLayoutUnified({
             >
                 <div className="absolute inset-y-0 right-0 w-[52%] xl:w-[50%] h-full overflow-hidden">
                     <img
-                        src="/login/gambar2.jpeg"
+                        src="/img-login/gambar2.jpeg"
                         alt=""
                         className="w-full h-full object-cover object-center"
                     />

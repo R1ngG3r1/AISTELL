@@ -38,8 +38,8 @@ describe('isStaticAsset: yang boleh disimpan', () => {
         '/build/assets/app-DsfQp3.js',
         '/build/assets/app-Ab12.css',
         '/landingpage/LOGO.png',
-        '/dashboard/maskot.webp',
-        '/login/gambar1.jpeg',
+        '/img-dashboard/maskot.webp',
+        '/img-login/gambar1.jpeg',
         '/tips/pilahsampah.jpg',
         '/pwa/icon-192.png',
         '/favicon.svg',
@@ -109,7 +109,7 @@ describe('PRECACHE', () => {
         expect(sw.PRECACHE).toContain(sw.OFFLINE_URL);
     });
 
-    it.each(['/offline.html', '/dashboard/maskot.webp', '/landingpage/LOGO.png', '/pwa/icon-192.png', '/favicon.svg'])('%s ada di folder public', (path) => {
+    it.each(['/offline.html', '/img-dashboard/maskot.webp', '/landingpage/LOGO.png', '/pwa/icon-192.png', '/favicon.svg'])('%s ada di folder public', (path) => {
         expect(sw.PRECACHE).toContain(path);
         expect(existsSync(resolve(process.cwd(), 'public', path.slice(1)))).toBe(true);
     });

@@ -17,7 +17,7 @@ const OFFLINE_URL = '/offline.html';
 const MAX_STATIC_ENTRIES = 150;
 
 /** Disimpan saat service worker dipasang, supaya halaman offline selalu tersedia. */
-const PRECACHE = [OFFLINE_URL, '/dashboard/maskot.webp', '/landingpage/LOGO.png', '/pwa/icon-192.png', '/favicon.svg'];
+const PRECACHE = [OFFLINE_URL, '/img-dashboard/maskot.webp', '/landingpage/LOGO.png', '/pwa/icon-192.png', '/favicon.svg'];
 
 const SAME_ORIGIN_STATIC = [/^\/build\/assets\//, /^\/(landingpage|dashboard|login|tips|pwa)\//, /^\/favicon\.(svg|ico)$/];
 const FONT_HOST = 'https://fonts.bunny.net';

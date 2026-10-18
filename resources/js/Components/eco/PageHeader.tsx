@@ -18,7 +18,7 @@ export default function PageHeader({
         <div className="relative flex flex-col gap-5 overflow-hidden rounded-[28px] border border-[#dfe7d9] bg-[#fbfcf8] p-6 shadow-soft sm:p-8 md:flex-row md:items-end md:justify-between">
             {/* Ilustrasi lanskap tipis di sisi kanan, selaras dengan banner dashboard */}
             <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 md:block">
-                <img src="/login/gambar1.jpeg" alt="" className="h-full w-full object-cover opacity-70" style={{ objectPosition: '50% 58%' }} />
+                <img src="/img-login/gambar1.jpeg" alt="" className="h-full w-full object-cover opacity-70" style={{ objectPosition: '50% 58%' }} />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#fbfcf8] via-[#fbfcf8]/70 to-transparent" />
             </div>
 

@@ -32,7 +32,7 @@ export default function DashboardHero({
     return (
         <section className="relative overflow-hidden rounded-[28px] border border-[#dfe7d9] bg-[#eef3ea] shadow-soft">
             <img
-                src="/login/gambar1.jpeg"
+                src="/img-login/gambar1.jpeg"
                 alt=""
                 aria-hidden="true"
                 className="absolute inset-0 h-full w-full object-cover"
@@ -49,7 +49,7 @@ export default function DashboardHero({
             <div className="relative flex flex-col gap-5 p-5 sm:gap-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between lg:p-10">
                 <div className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-4 sm:gap-x-6">
                     <img
-                        src="/dashboard/maskot.webp"
+                        src="/img-dashboard/maskot.webp"
                         alt="Maskot AISTEL"
                         draggable={false}
                         className="h-28 w-auto shrink-0 animate-float select-none drop-shadow-[0_10px_14px_rgba(7,39,30,0.18)] sm:row-span-2 sm:h-40 lg:h-44"

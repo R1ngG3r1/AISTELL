@@ -32,7 +32,7 @@ export default function Guest({
             {/* Tablet & mobile: latar penuh */}
             <div className="pointer-events-none fixed inset-0 z-0 lg:hidden" aria-hidden="true">
                 <img
-                    src="/login/gambar1.jpeg"
+                    src="/img-login/gambar1.jpeg"
                     alt=""
                     className="h-full w-full object-cover"
                     style={{ objectPosition: '50% 20%' }}
@@ -44,7 +44,7 @@ export default function Guest({
             <div className="pointer-events-none fixed inset-0 z-0 hidden lg:block" aria-hidden="true">
                 <div className="absolute inset-y-0 left-0 h-full w-[48%] overflow-hidden xl:w-[47%]">
                     <img
-                        src="/login/gambar1.jpeg"
+                        src="/img-login/gambar1.jpeg"
                         alt=""
                         className="h-full w-full"
                         style={{ objectFit: 'cover', objectPosition: '50% 5%' }}

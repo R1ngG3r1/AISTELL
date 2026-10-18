@@ -28,7 +28,7 @@ export default function ServiceShow({ auth, service, reviews }: PageProps<{ serv
                 variant="up"
                 className="relative overflow-hidden rounded-[2rem] bg-forest-900 p-5 text-cream shadow-lift ring-1 ring-white/10 sm:p-7 lg:px-9 lg:py-8"
             >
-                <img src="/dashboard/latarcard.jpg" alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
+                <img src="/img-dashboard/latarcard.jpg" alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-cover" />
                 <div className="relative">
                     <div className="flex items-center gap-4 sm:gap-5">
                         <span className="grid h-14 w-14 shrink-0 animate-float place-items-center rounded-2xl bg-leaf-400 text-xl text-forest-900 sm:h-16 sm:w-16 sm:rounded-3xl sm:text-2xl">

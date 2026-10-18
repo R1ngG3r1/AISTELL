@@ -120,7 +120,7 @@ export default function Error({ status, message, homeUrl }: Props) {
                     </div>
 
                     <img
-                        src="/dashboard/maskot.webp"
+                        src="/img-dashboard/maskot.webp"
                         alt="Maskot AISTEL, burung hijau penjaga lingkungan"
                         width={407}
                         height={600}
