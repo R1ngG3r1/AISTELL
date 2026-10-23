@@ -29,6 +29,8 @@
     --accent: #2ea368;
     --accent-mint: #4de097;
     --card-border-light: #e1ece4;
+    /* Lebar maksimum isi landing page; lebar agar layar besar tidak menyisakan ruang kosong di kiri-kanan. */
+    --container-max: 1640px;
 }
 
 html {
@@ -79,9 +81,9 @@ body {
 }
 
 .navbar {
-    max-width: 1240px;
+    max-width: var(--container-max);
     margin: 0 auto;
-    padding: 22px 48px;
+    padding: 22px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -237,12 +239,12 @@ body {
     flex: 1;
     display: flex;
     align-items: center;
-    padding: 20px 48px;
+    padding: 20px 40px;
     box-sizing: border-box;
 }
 
 .hero-container {
-    max-width: 1240px;
+    max-width: var(--container-max);
     width: 100%;
     margin: 0 auto;
     display: grid;
@@ -354,8 +356,8 @@ body {
 
 .hero-image {
     width: 100%;
-    max-width: 580px;
-    height: clamp(300px, 40vh, 420px);
+    max-width: 760px;
+    height: clamp(300px, 46vh, 480px);
     object-fit: cover;
     object-position: center;
     border-radius: 28px;
@@ -369,12 +371,12 @@ body {
     width: 100%;
     background-color: var(--bg-dark);
     color: var(--text-light);
-    padding: 28px 48px;
+    padding: 28px 40px;
     box-sizing: border-box;
 }
 
 .stats-container {
-    max-width: 1240px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -464,7 +466,7 @@ body {
 }
 
 .challenges-container {
-    max-width: 1040px;
+    max-width: 1320px;
     margin: 0 auto;
 }
 
@@ -550,7 +552,7 @@ body {
 }
 
 .keunggulan-container {
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1.15fr 1fr;
@@ -657,7 +659,7 @@ body {
 }
 
 .services-container {
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 0 auto;
 }
 
@@ -734,7 +736,7 @@ body {
 }
 
 .cara-kerja-container {
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 0 auto;
 }
 
@@ -816,7 +818,7 @@ body {
 }
 
 .tentang-container {
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -985,7 +987,7 @@ body {
 }
 
 .footer-top-container {
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 0 auto;
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
@@ -1082,7 +1084,7 @@ body {
 }
 
 .footer-bottom-container {
-    max-width: 1200px;
+    max-width: var(--container-max);
     margin: 56px auto 0;
     padding-top: 24px;
     border-top: 1px solid rgba(132, 165, 149, 0.15);
@@ -1573,6 +1575,18 @@ body {
         scrollbar-width: thin;
         scrollbar-color: rgba(40, 126, 89, 0.5) transparent;
     }
+}
+
+/* Landing page: scrollbar halaman disembunyikan agar konten memenuhi lebar layar (tetap bisa di-scroll).
+   Chrome tidak menggambar ulang ::-webkit-scrollbar saat :has() berubah setelah Inertia me-mount halaman,
+   jadi pakai properti standar scrollbar-width (Chrome 121+, Firefox) yang langsung diterapkan ulang. */
+html:has(.home-wrapper) {
+    scrollbar-width: none;
+}
+html:has(.home-wrapper)::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
 }
 
 /* Scrollbar tipis & transparan untuk panel gelap/kaca (sidebar, chat, daftar percakapan): tanpa panah, hanya jempol bulat. */

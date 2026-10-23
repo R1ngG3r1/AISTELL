@@ -79,7 +79,7 @@ export default function Guest({
                 <div className="my-auto flex w-full max-w-[400px] animate-fade-up flex-col justify-center rounded-3xl border border-white/50 bg-white/35 p-6 shadow-xl shadow-[#06241a]/10 backdrop-blur-md sm:max-w-[480px] sm:p-10 lg:max-w-[420px] lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                     {title && (
                         <div className="mb-6 text-center sm:mb-8 lg:text-left">
-                            <h1 className="text-3xl font-black leading-tight tracking-tight text-[#18231f] sm:text-[44px]">
+                            <h1 className="text-3xl font-black leading-tight tracking-tight text-[#18231f] sm:text-[44px] short:text-4xl">
                                 {title}
                             </h1>
                             {subtitle && (

@@ -1,5 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
+import plugin from 'tailwindcss/plugin';
 
 /**
  * Design system AISTEL - "Eco-modern".
@@ -134,5 +135,13 @@ export default {
         },
     },
 
-    plugins: [forms],
+    plugins: [
+        forms,
+        // Varian `short:` = desktop dengan tinggi layar pendek (laptop 768px, browser di-zoom): jarak & ukuran dirapatkan.
+        // Dibuat lewat addVariant, bukan `screens`, karena screen berbentuk objek mematikan varian max-* (mis. max-sm:).
+        // `:root &` menaikkan spesifisitas agar menang atas lg:/xl: yang di-output belakangan.
+        plugin(({ addVariant }) => {
+            addVariant('short', '@media (min-width: 1024px) and (max-height: 820px) { :root & }');
+        }),
+    ],
 };

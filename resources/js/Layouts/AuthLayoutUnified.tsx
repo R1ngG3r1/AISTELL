@@ -12,6 +12,8 @@ interface AuthLayoutUnifiedProps {
  * - Desktop (lg+)    : layout terbelah, ilustrasi di satu sisi dengan lengkungan organik.
  * - Tablet & mobile  : ilustrasi memenuhi layar, form berada di atas panel transparan.
  *   Login memakai lanskap terang (teks gelap), register memakai dedaunan gelap (teks putih).
+ * Tinggi halaman tidak dikunci ke layar: saat browser di-zoom atau layar pendek, halaman bisa di-scroll
+ * dan form tidak meluber menimpa logo. Latar desktop memakai `fixed` agar tetap diam saat di-scroll.
  */
 
 function Spinner() {
@@ -39,7 +41,7 @@ function GoogleButton({ className = "" }: { className?: string }) {
     return (
         <a
             href={route("auth.google")}
-            className={`w-full h-11 sm:h-12 rounded-full border text-sm sm:text-base font-medium flex items-center justify-center gap-2.5 shadow-sm transition-all duration-200 active:scale-[0.99] focus:outline-none focus:ring-2 ${className}`}
+            className={`w-full h-11 sm:h-12 short:h-11 rounded-full border text-sm sm:text-base font-medium flex items-center justify-center gap-2.5 shadow-sm transition-all duration-200 active:scale-[0.99] focus:outline-none focus:ring-2 ${className}`}
         >
             <GoogleIcon />
             <span>Continue with Google</span>
@@ -61,15 +63,15 @@ function OrDivider({ className = "" }: { className?: string }) {
 const registerLabel =
     "block text-xs sm:text-sm font-bold text-white lg:text-[#18231f] mb-1.5 ml-2";
 const registerInput =
-    "w-full h-11 sm:h-12 px-5 rounded-full border text-sm sm:text-base font-normal transition-all shadow-sm focus:outline-none focus:ring-2 " +
+    "w-full h-11 sm:h-12 short:h-11 px-5 rounded-full border text-sm sm:text-base font-normal transition-all shadow-sm focus:outline-none focus:ring-2 " +
     "bg-white/10 border-white/60 text-white placeholder-white/60 focus:ring-white/40 focus:border-white " +
     "sm:bg-white sm:border-white sm:text-[#18231f] " +
     "lg:border-[#7ba794] lg:focus:ring-[#3b9270]/40 lg:focus:border-[#2e7d5b]";
-const registerError = "mt-1 ml-3 text-[11px] font-semibold text-rose-200 lg:text-rose-700";
+const registerError = "mt-1 ml-3 text-xs font-semibold text-rose-200 lg:text-rose-700";
 
 // Kelas bersama untuk input login
 const loginInput =
-    "w-full h-12 sm:h-[50px] rounded-full border text-[#18231f] text-sm sm:text-base font-normal placeholder-[#4d6357] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3b9270]/40 focus:border-[#2e7d5b] " +
+    "w-full h-12 sm:h-[50px] short:h-11 rounded-full border text-[#18231f] text-sm sm:text-base font-normal placeholder-[#4d6357] transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3b9270]/40 focus:border-[#2e7d5b] " +
     "bg-white/70 border-white/80 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:placeholder-[#647f72]";
 // Tambahan saat input login bermasalah (ditaruh setelah loginInput agar menimpa warna border)
 const loginInputError = " !border-rose-500 ring-2 ring-rose-500/25";
@@ -168,7 +170,7 @@ export default function AuthLayoutUnified({
     const isLogin = mode === "login";
 
     return (
-        <div className="relative min-h-screen lg:h-screen w-full bg-[#f5f7f2] flex flex-col lg:flex-row overflow-x-hidden lg:overflow-hidden font-sans text-[#18231f]">
+        <div className="relative min-h-screen w-full bg-[#f5f7f2] flex flex-col lg:flex-row overflow-x-hidden font-sans text-[#18231f]">
             <Head title={isLogin ? "Welcome Back - AISTEL" : "Selamat Datang - AISTEL"} />
 
             {/* ========================================================
@@ -203,7 +205,7 @@ export default function AuthLayoutUnified({
                 ======================================================== */}
             {/* 1. LOGIN BACKGROUND LAYER: Landscape illustration on left */}
             <div
-                className={`hidden lg:block absolute inset-0 w-full h-full pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                className={`hidden lg:block fixed inset-0 w-full h-full pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     isLogin ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-[1.02]"
                 }`}
                 aria-hidden="true"
@@ -230,7 +232,7 @@ export default function AuthLayoutUnified({
 
             {/* 2. REGISTER BACKGROUND LAYER: Lush foliage on right */}
             <div
-                className={`hidden lg:block absolute inset-0 w-full h-full pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                className={`hidden lg:block fixed inset-0 w-full h-full pointer-events-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     !isLogin ? "opacity-100 z-10 scale-100" : "opacity-0 z-0 scale-[1.02]"
                 }`}
                 aria-hidden="true"
@@ -286,7 +288,7 @@ export default function AuthLayoutUnified({
             <div
                 className={`relative w-full ${
                     isLogin ? "lg:w-[44%] xl:w-[43%]" : "lg:w-[54%] xl:w-[55%]"
-                } flex-shrink-0 min-h-screen lg:h-screen flex items-center justify-center lg:justify-start px-5 sm:px-10 lg:pr-0 lg:pl-14 xl:pl-20 pt-24 pb-10 sm:py-28 lg:py-0 z-20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                } flex-shrink-0 min-h-screen flex items-center justify-center lg:justify-start px-5 sm:px-10 lg:pr-0 lg:pl-14 xl:pl-20 pt-24 pb-10 sm:py-28 lg:py-24 short:py-20 z-20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     !isLogin
                         ? "opacity-100 translate-y-0 scale-100 pointer-events-auto block"
                         : "lg:opacity-0 lg:translate-y-4 lg:scale-[0.98] lg:pointer-events-none hidden lg:block lg:invisible"
@@ -302,8 +304,8 @@ export default function AuthLayoutUnified({
                     )}
 
                     {/* Header */}
-                    <div className="text-center lg:text-left mb-6 sm:mb-8">
-                        <h1 className="text-3xl sm:text-5xl lg:text-[44px] font-black tracking-tight leading-tight text-white lg:text-[#18231f] drop-shadow-sm lg:drop-shadow-none">
+                    <div className="text-center lg:text-left mb-6 sm:mb-8 short:mb-5">
+                        <h1 className="text-3xl sm:text-5xl lg:text-[44px] short:text-4xl font-black tracking-tight leading-tight text-white lg:text-[#18231f] drop-shadow-sm lg:drop-shadow-none">
                             <span className="sm:hidden">Welcome to AISTEL</span>
                             <span className="hidden sm:inline">Selamat Datang!</span>
                         </h1>
@@ -318,12 +320,12 @@ export default function AuthLayoutUnified({
 
                     {/* Google */}
                     {/* Tablet & desktop: di atas form. Mobile: di bawah tombol Sign Up (lihat bawah). */}
-                    <div className="mb-5 space-y-4 hidden sm:block">
+                    <div className="mb-5 space-y-4 short:mb-4 short:space-y-3 hidden sm:block">
                         <GoogleButton className="bg-white border-white text-[#18231f] hover:bg-[#f1f8f4] focus:ring-white/40 lg:border-[#7ba794] lg:focus:ring-[#3b9270]/40" />
                         <OrDivider className="text-white/80 lg:text-[#38916d]" />
                     </div>
 
-                    <form onSubmit={submitRegister} className="space-y-4">
+                    <form onSubmit={submitRegister} className="space-y-4 short:space-y-3">
                         {/* Row 1: Name & Email Address */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                             <div>
@@ -433,7 +435,7 @@ export default function AuthLayoutUnified({
                             <button
                                 type="submit"
                                 disabled={registerForm.processing || !registerForm.data.terms}
-                                className="w-full h-11 sm:h-12 rounded-full border text-sm sm:text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-[#06241a]/80 border-[#06241a] text-white hover:bg-[#06241a] sm:bg-[#0d3a2a]/60 sm:border-[#3b9270]/60 sm:hover:bg-[#0d3a2a]/80 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:text-[#18231f] lg:hover:bg-[#b6d4c5]"
+                                className="w-full h-11 sm:h-12 short:h-11 rounded-full border text-sm sm:text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-[#06241a]/80 border-[#06241a] text-white hover:bg-[#06241a] sm:bg-[#0d3a2a]/60 sm:border-[#3b9270]/60 sm:hover:bg-[#0d3a2a]/80 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:text-[#18231f] lg:hover:bg-[#b6d4c5]"
                             >
                                 {registerForm.processing ? (
                                     <span className="flex items-center gap-2">
@@ -453,7 +455,7 @@ export default function AuthLayoutUnified({
                         </div>
 
                         {/* Footer link */}
-                        <div className="pt-5 text-center">
+                        <div className="pt-5 short:pt-3 text-center">
                             <p className="text-xs sm:text-sm text-white lg:text-[#18231f]">
                                 Already have an account?{" "}
                                 <button
@@ -478,7 +480,7 @@ export default function AuthLayoutUnified({
             <div
                 className={`relative w-full ${
                     isLogin ? "lg:w-[56%] xl:w-[57%]" : "lg:w-[46%] xl:w-[45%]"
-                } flex-shrink-0 min-h-screen lg:h-screen flex items-center justify-center px-5 sm:px-10 lg:px-8 xl:px-14 pt-24 pb-10 sm:py-28 lg:py-0 z-20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                } flex-shrink-0 min-h-screen flex items-center justify-center px-5 sm:px-10 lg:px-8 xl:px-14 pt-24 pb-10 sm:py-28 lg:py-16 short:py-12 z-20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     isLogin
                         ? "opacity-100 translate-y-0 scale-100 pointer-events-auto block"
                         : "lg:opacity-0 lg:translate-y-4 lg:scale-[0.98] lg:pointer-events-none hidden lg:block lg:invisible"
@@ -494,8 +496,8 @@ export default function AuthLayoutUnified({
                     )}
 
                     {/* Header */}
-                    <div className="text-center lg:text-left mb-6 sm:mb-8">
-                        <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-[#18231f]">
+                    <div className="text-center lg:text-left mb-6 sm:mb-8 short:mb-5">
+                        <h1 className="text-3xl sm:text-5xl short:text-4xl font-black tracking-tight leading-tight text-[#18231f]">
                             <span className="sm:hidden">
                                 Hello,
                                 <br />
@@ -512,7 +514,7 @@ export default function AuthLayoutUnified({
                         </p>
                     </div>
 
-                    <form onSubmit={submitLogin} className="space-y-4">
+                    <form onSubmit={submitLogin} className="space-y-4 short:space-y-3">
                         {loginErrors.login && lockSeconds > 0 && (
                             <div role="alert" className="flex items-start gap-3 rounded-2xl border border-rose-300 bg-rose-50/90 px-4 py-3 text-xs sm:text-sm text-rose-800 shadow-sm">
                                 <svg className="mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -644,7 +646,7 @@ export default function AuthLayoutUnified({
                             <button
                                 type="submit"
                                 disabled={loginForm.processing || lockSeconds > 0}
-                                className="w-full h-12 sm:h-[50px] rounded-full border-[1.5px] text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-[#14432f] border-[#14432f] text-white hover:bg-[#1c5a40] sm:bg-white sm:border-[#3b9270] sm:text-[#18231f] sm:hover:bg-[#f1f8f4]"
+                                className="w-full h-12 sm:h-[50px] short:h-11 rounded-full border-[1.5px] text-base font-bold tracking-wide active:scale-[0.99] disabled:opacity-60 transition-all duration-200 flex items-center justify-center shadow-sm hover:shadow bg-[#14432f] border-[#14432f] text-white hover:bg-[#1c5a40] sm:bg-white sm:border-[#3b9270] sm:text-[#18231f] sm:hover:bg-[#f1f8f4]"
                             >
                                 {loginForm.processing ? (
                                     <span className="flex items-center gap-2">
@@ -662,7 +664,7 @@ export default function AuthLayoutUnified({
                         <GoogleButton className="bg-[#0b3a28]/35 border-white/30 text-white backdrop-blur-sm hover:bg-[#0b3a28]/50 focus:ring-white/40 lg:bg-[#c5ddd1] lg:border-[#7ba794] lg:text-[#18231f] lg:backdrop-blur-none lg:hover:bg-[#b6d4c5] lg:focus:ring-[#3b9270]/40" />
 
                         {/* Footer link */}
-                        <div className="pt-4 sm:pt-6 text-center">
+                        <div className="pt-4 sm:pt-6 short:pt-3 text-center">
                             <p className="text-xs sm:text-sm text-[#18231f]">
                                 Not a member?{" "}
                                 <button
