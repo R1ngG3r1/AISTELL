@@ -112,9 +112,16 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
                                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-forest-900 text-leaf-400 transition group-hover:rotate-[-8deg]">
                                         <ServiceIcon name={service.name} />
                                     </span>
-                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-50 px-2.5 py-1 text-xs font-semibold text-forest-600">
-                                        <FontAwesomeIcon icon={faClipboardList} /> {service.orders_count ?? 0} pesanan
-                                    </span>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <span className="inline-flex items-center gap-1.5 rounded-full bg-forest-50 px-2.5 py-1 text-xs font-semibold text-forest-600">
+                                            <FontAwesomeIcon icon={faClipboardList} /> {service.orders_count ?? 0} pesanan
+                                        </span>
+                                        {Boolean(service.active_orders_count) && (
+                                            <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 ring-1 ring-amber-600/20">
+                                                {service.active_orders_count} aktif
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <h3 className="mt-5 text-lg font-bold">{service.name}</h3>
                                 <p className="mt-1 line-clamp-2 flex-1 text-sm text-forest-900/55">{service.description || '-'}</p>
@@ -126,8 +133,14 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
                                     </button>
                                     <button
                                         onClick={() => setDeleting(service)}
-                                        className="btn-ghost btn-sm flex-1 text-clay-600 hover:border-clay-500/40"
-                                        title={service.orders_count ? 'Layanan yang sudah dipesan tidak dapat dihapus' : undefined}
+                                        className={`btn-ghost btn-sm flex-1 text-clay-600 hover:border-clay-500/40 ${
+                                            (service.active_orders_count ?? 0) > 0 ? 'opacity-70' : ''
+                                        }`}
+                                        title={
+                                            (service.active_orders_count ?? 0) > 0
+                                                ? 'Layanan memiliki pesanan yang sedang berjalan dan tidak dapat dihapus'
+                                                : undefined
+                                        }
                                     >
                                         <FontAwesomeIcon icon={faTrashCan} /> Hapus
                                     </button>
@@ -213,17 +226,23 @@ export default function AdminServicesIndex({ services }: PageProps<{ services: S
 
             <ConfirmModal
                 show={!!deleting}
-                tone="danger"
-                icon={faTrashCan}
-                title={`Hapus "${deleting?.name}"?`}
+                tone={(deleting?.active_orders_count ?? 0) > 0 ? 'primary' : 'danger'}
+                icon={(deleting?.active_orders_count ?? 0) > 0 ? faClipboardList : faTrashCan}
+                title={
+                    (deleting?.active_orders_count ?? 0) > 0
+                        ? `Tidak dapat menghapus "${deleting?.name}"`
+                        : `Hapus "${deleting?.name}"?`
+                }
                 message={
-                    deleting?.orders_count
-                        ? 'Layanan ini sudah memiliki pesanan, sehingga sistem akan menolak penghapusan untuk menjaga riwayat pesanan.'
+                    (deleting?.active_orders_count ?? 0) > 0
+                        ? `Layanan ini masih memiliki ${deleting?.active_orders_count} pesanan yang sedang berjalan (menunggu atau diproses). Pesanan tersebut harus diselesaikan atau dibatalkan terlebih dahulu sebelum layanan dapat dihapus.`
+                        : (deleting?.orders_count ?? 0) > 0
+                        ? 'Layanan ini memiliki riwayat pesanan yang sudah selesai atau tidak aktif. Layanan akan dihapus dari katalog, namun riwayat pesanan pelanggan tetap aman dan tersimpan.'
                         : 'Layanan akan dihapus permanen dari katalog.'
                 }
-                confirmText="Hapus"
+                confirmText={(deleting?.active_orders_count ?? 0) > 0 ? 'Mengerti' : 'Hapus'}
                 processing={deleteProcessing}
-                onConfirm={destroy}
+                onConfirm={(deleting?.active_orders_count ?? 0) > 0 ? () => setDeleting(null) : destroy}
                 onClose={() => setDeleting(null)}
             />
         </AuthenticatedLayout>

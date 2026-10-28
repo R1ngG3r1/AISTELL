@@ -2,6 +2,7 @@
 
 namespace App\Modules\Service\Services;
 
+use App\Modules\Order\Enums\OrderStatus;
 use App\Modules\Service\Models\Service;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -37,12 +38,13 @@ class ServiceCatalog
     }
 
     /**
-     * Menghapus layanan. Mengembalikan false jika layanan sudah pernah dipesan,
-     * karena riwayat pesanan harus tetap utuh (foreign key restrictOnDelete).
+     * Menghapus layanan. Mengembalikan false jika layanan masih memiliki pesanan yang sedang
+     * berjalan (berstatus aktif: menunggu / diproses). Layanan boleh dihapus jika pesanan
+     * terkait sudah selesai, dibatalkan, ditolak, atau belum pernah dipesan sama sekali.
      */
     public function delete(Service $service): bool
     {
-        if ($service->orders()->exists()) {
+        if ($service->orders()->whereIn('status', OrderStatus::active())->exists()) {
             return false;
         }
 

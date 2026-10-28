@@ -23,8 +23,8 @@ class ServiceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Nama layanan unik (saat mengubah, abaikan layanan itu sendiri).
-            'name' => ['required', 'string', 'max:100', Rule::unique('services', 'name')->ignore($this->route('service'))],
+            // Nama layanan unik di antara layanan aktif (saat mengubah, abaikan layanan itu sendiri).
+            'name' => ['required', 'string', 'max:100', Rule::unique('services', 'name')->whereNull('deleted_at')->ignore($this->route('service'))],
             'description' => ['nullable', 'string', 'max:2000'],
             'price' => ['required', 'numeric', 'min:0', 'max:9999999999'],
             // Opsional: kosong = default 120 menit (create) / tidak berubah (update). Dipakai mendeteksi jadwal petugas bentrok.

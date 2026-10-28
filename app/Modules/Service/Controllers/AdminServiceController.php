@@ -3,6 +3,7 @@
 namespace App\Modules\Service\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Order\Enums\OrderStatus;
 use App\Modules\Service\Models\Service;
 use App\Modules\Service\Requests\ServiceRequest;
 use App\Modules\Service\Services\ServiceCatalog;
@@ -26,8 +27,14 @@ class AdminServiceController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/Services/Index', [
-            // withCount → setiap layanan punya field orders_count (jumlah pesanan).
-            'services' => Service::query()->withCount('orders')->orderBy('name')->get(),
+            // withCount → field orders_count (total) & active_orders_count (sedang berlangsung).
+            'services' => Service::query()
+                ->withCount('orders')
+                ->withCount([
+                    'orders as active_orders_count' => fn ($query) => $query->whereIn('status', OrderStatus::active()),
+                ])
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -52,7 +59,7 @@ class AdminServiceController extends Controller
     public function destroy(Service $service): RedirectResponse
     {
         if (! $this->catalog->delete($service)) {
-            return back()->with('error', 'Layanan tidak dapat dihapus karena sudah memiliki pesanan.');
+            return back()->with('error', 'Layanan tidak dapat dihapus karena masih memiliki pesanan yang sedang berjalan.');
         }
 
         return back()->with('success', 'Layanan berhasil dihapus.');

@@ -125,7 +125,7 @@ class ReportService
             ->selectRaw('orders.service_id as service_id, SUM(payments.amount) as total')
             ->groupBy('orders.service_id')->toBase()->pluck('total', 'service_id');
 
-        $names = Service::query()->whereIn('id', $orders->keys()->merge($revenue->keys())->unique())->pluck('name', 'id');
+        $names = Service::withTrashed()->whereIn('id', $orders->keys()->merge($revenue->keys())->unique())->pluck('name', 'id');
 
         $rows = $names->map(fn ($name, $id) => [
             'name' => $name,

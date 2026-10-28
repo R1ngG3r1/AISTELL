@@ -19,6 +19,7 @@ export interface Service {
     description: string | null;
     price: string; // decimal dari Laravel dikirim sebagai string, mis. "150000.00"
     orders_count?: number; // hanya ada di halaman admin
+    active_orders_count?: number; // jumlah pesanan aktif yang sedang berjalan
     duration_minutes?: number; // perkiraan lama pengerjaan, dipakai mendeteksi jadwal petugas bentrok
     reviews_avg_rating?: string | null; // rata-rata rating, null = belum ada ulasan
     reviews_count?: number;

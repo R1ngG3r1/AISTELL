@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Modules\Order\Enums\OrderStatus;
 use App\Modules\Order\Models\Order;
 use App\Modules\Service\Models\Service;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -76,15 +77,55 @@ it('nama layanan harus unik, kecuali saat mengubah layanan itu sendiri', functio
     expect($service->fresh()->price)->toBe('175000.00');
 });
 
-it('tidak menghapus layanan yang sudah pernah dipesan', function () {
+it('tidak menghapus layanan yang masih memiliki pesanan aktif', function (OrderStatus $status) {
     $admin = User::factory()->admin()->create();
-    $order = Order::factory()->create();
+    $order = Order::factory()->status($status)->create();
 
     $this->actingAs($admin)
         ->delete("/admin/services/{$order->service_id}")
         ->assertSessionHas('error');
 
     expect(Service::find($order->service_id))->not->toBeNull();
+})->with([OrderStatus::Menunggu, OrderStatus::Diproses]);
+
+it('dapat menghapus layanan jika pesanan terkait sudah tidak aktif', function (OrderStatus $status) {
+    $admin = User::factory()->admin()->create();
+    $order = Order::factory()->status($status)->create();
+    $serviceId = $order->service_id;
+    $serviceName = $order->service->name;
+
+    $this->actingAs($admin)
+        ->delete("/admin/services/{$serviceId}")
+        ->assertSessionHasNoErrors()
+        ->assertSessionHas('success')
+        ->assertRedirect();
+
+    // Layanan tidak lagi ditemukan dalam pencarian normal
+    expect(Service::find($serviceId))->toBeNull();
+
+    // Namun tetap tersimpan di database (soft delete) untuk menjaga integritas riwayat pesanan
+    expect(Service::withTrashed()->find($serviceId))->not->toBeNull();
+
+    // Pesanan lama tetap dapat mengakses detail nama layanannya
+    expect($order->fresh()->service->name)->toBe($serviceName);
+})->with([OrderStatus::Selesai, OrderStatus::Ditolak, OrderStatus::Dibatalkan]);
+
+it('halaman kelola layanan admin menyertakan active_orders_count', function () {
+    $admin = User::factory()->admin()->create();
+    $service = Service::factory()->create();
+
+    // Buat 1 pesanan aktif (menunggu) dan 1 pesanan selesai
+    Order::factory()->for($service)->status(OrderStatus::Menunggu)->create();
+    Order::factory()->for($service)->status(OrderStatus::Selesai)->create();
+
+    $this->actingAs($admin)
+        ->get('/admin/services')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Services/Index')
+            ->where('services.0.orders_count', 2)
+            ->where('services.0.active_orders_count', 1)
+        );
 });
 
 it('user biasa tidak dapat mengelola layanan', function () {

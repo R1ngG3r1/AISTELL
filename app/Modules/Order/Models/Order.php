@@ -77,10 +77,10 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** Relasi N:1 - setiap pesanan mengacu pada satu layanan. */
+    /** Relasi N:1 - setiap pesanan mengacu pada satu layanan (termasuk yang sudah dihapus). */
     public function service(): BelongsTo
     {
-        return $this->belongsTo(Service::class);
+        return $this->belongsTo(Service::class)->withTrashed();
     }
 
     /** Relasi 1:N - semua percobaan pembayaran (ganti metode, kedaluwarsa, …). */

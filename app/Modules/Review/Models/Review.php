@@ -34,7 +34,7 @@ class Review extends Model
 
     public function service(): BelongsTo
     {
-        return $this->belongsTo(Service::class);
+        return $this->belongsTo(Service::class)->withTrashed();
     }
 
     /** Nama pengulas disingkat ("Budi Santoso" → "Budi S.") agar identitas tetap terjaga di halaman publik. */

@@ -4,6 +4,7 @@ namespace App\Modules\Order\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 /**
@@ -22,7 +23,7 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'service_id' => ['required', 'integer', 'exists:services,id'],
+            'service_id' => ['required', 'integer', Rule::exists('services', 'id')->whereNull('deleted_at')],
             'contact_name' => ['required', 'string', 'max:100'],
             'contact_phone' => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s]{8,20}$/'],
             'location' => ['required', 'string', 'max:1000'],
