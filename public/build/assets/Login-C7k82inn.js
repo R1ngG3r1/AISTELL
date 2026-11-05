@@ -1,0 +1,1 @@
+import{j as o}from"./app-Ct1qA6TT.js";import{A as r}from"./AuthLayoutUnified-QMyyEX25.js";function u({status:t,canResetPassword:i=!0}){return o.jsx(r,{initialMode:"login",status:t,canResetPassword:i})}export{u as default};

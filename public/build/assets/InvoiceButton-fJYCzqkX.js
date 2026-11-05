@@ -1,0 +1,1 @@
+import{j as t}from"./app-Ct1qA6TT.js";import{F as e,y as i}from"./index-DoKYuz7z.js";function u({order:n,className:s=""}){var o;return((o=n.payment)==null?void 0:o.status)!=="lunas"?null:t.jsxs("a",{href:route("orders.invoice",n.id),download:!0,className:`btn-ghost w-full ${s}`,children:[t.jsx(e,{icon:i})," Unduh invoice (PDF)"]})}export{u as I};
